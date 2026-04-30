@@ -30,9 +30,9 @@ export const Hero = () => {
       {/* 1. Background Video Layer (z-0) */}
       <div ref={videoWrapperRef} className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         <VideoBackground
-          desktopSrc="/videos/hero/hero-desktop.mp4" 
-          mobileSrc="/videos/hero/hero-mobile.mp4"
-          posterSrc="/images/hero/hero-poster.jpg"
+          webmSrc="https://cdn.yoursite.com/hero.webm"
+          mp4Src="https://cdn.yoursite.com/hero.mp4"
+          posterSrc="https://cdn.yoursite.com/hero-poster.jpg"
         />
       </div>
 
