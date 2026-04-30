@@ -27,7 +27,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://cdn.yoursite.com" crossOrigin="anonymous" />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-[#0a0a0a]`}>
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-[#0a0a0a] overflow-x-hidden`}>
         {children}
       </body>
     </html>

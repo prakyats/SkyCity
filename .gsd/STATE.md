@@ -5,11 +5,11 @@
 
 ## Current Position
 - **Phase**: 7
-- **Task**: Final Production Safeguards (Wave 5) implemented.
+- **Task**: Full-Bleed Cinematic Restoration Complete.
 - **Status**: Complete
 
 ## Last Session Summary
-Applied final production safeguards to `ProjectIntro.tsx`, including background fallback safety, targeted GPU optimization, and ScrollTrigger integrity (`invalidateOnRefresh`).
+Restored true full-bleed cinematic behavior to the Hero section by removing all gradient blending hacks and artificial overlays. Hardened the transition to `ProjectIntro` with clean stacking and visual purity.
 
 ## Next Steps
 1. Execute Plan 7.2 to add the ProjectIntro section below the Hero.

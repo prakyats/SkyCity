@@ -3,13 +3,12 @@
 ## Objective
 Anchored the user post-hero with a clean, high-contrast editorial section.
 
-## Changes (Wave 5 — Final Production Safeguards)
-- **Gradient & Overlay Safety**: Added `#0A1A2F` background-color fallback to prevent banding on low-quality displays. Enforced `pointer-events: none` on the top edge overlay to ensure no interactive content is blocked.
-- **Performance Optimization**: Applied `will-change: transform` specifically to the right content block to optimize GPU acceleration while avoiding over-promotion of static elements.
-- **GSAP Scroll Integrity**: Added `invalidateOnRefresh: true` to all ScrollTrigger instances, ensuring trigger points are correctly recalculated on window resize or layout updates.
-- **Premium Font Rendering**: Applied global `WebkitFontSmoothing` and `MozOsxFontSmoothing` to ensure the serif typography remains crisp and professional across browsers.
-- **Hover Discipline**: Simplified highlight interactions to purely use `opacity` and `transition`, removing redundant motion to maintain a clean, stable aesthetic.
-- **Context Cleanup**: Verified `gsap.context()` usage and ensured `revert()` is called on component unmount to prevent memory leaks and duplicate animations.
+## Changes (Final Restoration — Full-Bleed Cinematic Flow)
+- **Removed Gradient Overlays**: Eliminated all artificial dark fades, top/bottom gradients, and pseudo-element overlays from `Hero`, `ProjectIntro`, and `VideoBackground`.
+- **Restored Full-Bleed Video**: Hardened `VideoBackground` to use `100%` width/height with `object-fit: cover` and exact `object-position: center 45%` for true cinematic framing.
+- **Clean Section Stacking**: Replaced the complex overlap hacks (`-mt-[100px]`) with a clean, stacked layout. The Hero is now a fixed `100vh` and `ProjectIntro` follows with standard `padding-top: 120px`.
+- **Hero Root Hardening**: Set Hero root to `100vw` and `100vh` with `overflow: hidden` to prevent any cropping or layout shifts from parent constraints.
+- **Visual Purity**: Restored pure `#FFFFFF` background for `ProjectIntro` with a clear `z-index: 5` to ensure it takes over cleanly as the user scrolls, allowing the building to remain the visual dominant without artificial pollution.
 
 ## Verification
 - Verified responsive grid behavior (stacks on mobile).

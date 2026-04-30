@@ -124,7 +124,7 @@ export const Hero = () => {
   return (
     <section 
       ref={sectionRef} 
-      className="relative w-[100vw] h-[100vh] overflow-hidden font-serif antialiased"
+      className="relative w-full h-[100vh] overflow-hidden font-serif antialiased"
       aria-label="Hero Section"
     >
       {/* TASK 1 & 2 — Video Layer (z-0) */}
