@@ -4,54 +4,71 @@ plan: 2
 wave: 1
 ---
 
-# Plan 6.2: Editorial Content Hierarchy & Composition Refinement
+# Plan 6.2: 3-Phase Cinematic Narrative & Content Refinement
 
 ## Objective
-Refine the Hero composition into a balanced editorial layout with correct visual weight distribution and vertical rhythm. This involves shifting from a mirrored layout to an asymmetrical but optically balanced structure where content layers are separated by hierarchy (Atmospheric Tone → Identity → Action).
+Transform the Hero section into a 3-phase cinematic narrative with strict content discipline. This involves staged reveals to control the viewer's attention flow: Branding (Phase 1) → Identity (Phase 2) → Detail/Action (Phase 3).
 
 ## Context
 - src/components/sections/Hero.tsx
-- src/lib/animations/heroAnimation.ts
+- src/components/ui/VideoBackground.tsx
 
 ## Tasks
 
 <task type="auto">
-  <name>Refactor Editorial Composition Layering</name>
+  <name>Implement Staged Narrative Timing</name>
   <files>
     - src/components/sections/Hero.tsx
   </files>
   <action>
-    - **Vertical Rhythm Implementation:**
-      - Set Headline baseline approximately at vertical center.
-      - **Micro Tag (Atmospheric Layer):** Implement "A New Landmark in South India" as a detached absolute element floating ABOVE the headline zone (centered or slightly left-biased, wide tracking, low opacity 0.6).
-      - **CTA (Action Layer):** Implement a single CTA anchored BELOW the left headline, but offset downward with significant spacing to feel like a separate layer.
-    - **Optical Weight Distribution (Asymmetry):**
-      - **Left Block (Heavy):** Heading "Sky City" (Right-aligned) + Anchored CTA below.
-      - **Right Block (Light):** Heading "Sea View" (Left-aligned) + Support Text "South India’s Tallest Sea View Residential Tower" (max-w-[280px], opacity 0.65, spaced breathing gap).
-    - **Branding Anchor:** Maintain "YAMUNA SKY CITY" at top-left with established 0.75 opacity/tracking.
-    - **Center Protection:** Ensure the building remains dominant and the 30% center zone is strictly clear.
+    - **Narrative Phases State:**
+      - `const [narrativePhase, setNarrativePhase] = useState(1);`
+    - **Staged Reveal Logic (triggered by playback):**
+      - **Phase 1 (0-6s):** Mount state. Only top-left branding visible.
+      - **Phase 2 (6s mark):** Set `narrativePhase = 2`. Reveal split headline: "Yamuna" (Left) | "Sky City" (Right).
+      - **Phase 3 (9s mark):** Set `narrativePhase = 3`. Reveal micro-tag, support text, and CTA.
+    - **Fail-Safe Fallback:** Maintain the 2000ms immediate reveal if video fails to play. On mobile, jump straight to Phase 3.
   </action>
-  <verify>Check visual balance on ultra-wide and standard displays. Confirm the asymmetrical weight feels stable and the vertical hierarchy (Top: Tone, Center: Identity, Bottom: Action) is clear.</verify>
+  <verify>Ensure `Hero.tsx` correctly transitions through all 3 phases based on the video playback handshake.</verify>
 </task>
 
 <task type="auto">
-  <name>Refine Scoped Entrance Animations</name>
+  <name>Refactor Editorial Composition with Phase-Aware Layering</name>
   <files>
     - src/components/sections/Hero.tsx
   </files>
   <action>
-    - Update the GSAP entrance logic in `Hero.tsx` to handle the detached layers:
-      - **Micro Tag:** Subtle fade in from `y: -20 -> 0`.
-      - **CTA:** Subtle fade in from `y: 20 -> 0`.
-      - Ensure these are scoped within the `showText` trigger.
+    - **Phase 1 Content:** Render only "YAMUNA SKY CITY" in the top-left branding layer.
+    - **Phase 2 Content:** Conditionally render the main split headings:
+      - Left Block: "Yamuna" (Right-aligned).
+      - Right Block: "Sky City" (Left-aligned, Italic).
+    - **Phase 3 Content:** Conditionally render the supporting details:
+      - Micro Tag: "A New Landmark in South India" (floating above).
+      - Support Text: "South India’s Tallest Sea View Residential Tower" (below Right Block).
+      - CTA: "Explore More" (below Left Block).
+    - **Optical Integrity:** Maintain the 30% center protection zone and clamp-based margins throughout all phases.
   </action>
-  <verify>Confirm all layers reveal with a cohesive, intentional timing.</verify>
+  <verify>Check visual balance across all phases. Confirm the building remains the visual anchor as text stages in.</verify>
+</task>
+
+<task type="auto">
+  <name>Synchronize Scoped Entrance Animations</name>
+  <files>
+    - src/components/sections/Hero.tsx
+  </files>
+  <action>
+    - Refactor GSAP logic to trigger animations based on `narrativePhase` transitions:
+      - **Phase 2 Entrance:** Fade in + `x` translation for main headings.
+      - **Phase 3 Entrance:** Fade in + `y` translation for Micro Tag, Support Text, and CTA.
+    - Ensure `gsap.context()` handles cleanup and prevents duplicate execution if phases re-trigger.
+  </action>
+  <verify>Confirm smooth, staggered reveals at the 6s and 9s marks.</verify>
 </task>
 
 ## Success Criteria
-- [ ] Visual hierarchy established: Top (Micro Tag) → Center (Identity) → Bottom (Action).
-- [ ] Asymmetrical weight distribution (Left heavy / Right light) feels optically balanced.
-- [ ] Micro tag is detached and atmospheric (centered or left-biased).
-- [ ] CTA is anchored below left block but offset for breathing space.
-- [ ] Center protection zone (30%) strictly preserved.
-- [ ] Redundant content (decorative logos, company blocks) removed.
+- [ ] 3-Phase narrative implemented (0-6s: Branding only, 6s: Headlines, 9s: Details).
+- [ ] Content strictly follows the new hierarchy (Yamuna | Sky City).
+- [ ] No more than 3 visible text groups per phase.
+- [ ] 30% center zone strictly clear across all stages.
+- [ ] GSAP reveals are smooth and tied to narrative phase state.
+- [ ] Mobile fallback forces Phase 3 immediately.
