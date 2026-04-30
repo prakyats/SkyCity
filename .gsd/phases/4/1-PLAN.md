@@ -4,10 +4,10 @@ plan: 1
 wave: 1
 ---
 
-# Plan 4.1: Cinematic Center-Focused Hero Redesign
+# Plan 4.1: Production-Grade Cinematic Hero
 
 ## Objective
-Transform the Hero section into a cinematic center-aligned composition where the video dominates the center, text is split across the left and right edges, and complex scroll-based GSAP animations orchestrate a luxury "brochure" experience.
+Transform the Hero into a production-grade visual narrative entry point. It must utilize a strict focal lock system, safe text zones, layered depth gradients, and heavy motion-damped GSAP scroll easing to feel like a high-end directed scene.
 
 ## Context
 - .gsd/SPEC.md
@@ -18,43 +18,47 @@ Transform the Hero section into a cinematic center-aligned composition where the
 ## Tasks
 
 <task type="auto">
-  <name>Redesign Layout and Video Structure</name>
+  <name>Implement Strict Layout, Safe Zones & Gradients</name>
   <files>
     - src/components/sections/Hero.tsx
     - src/components/ui/VideoBackground.tsx
   </files>
   <action>
-    - Update `VideoBackground.tsx` to ensure `object-fit: cover` and `object-position: center`, filling `100vw` and `100vh`.
-    - Update `Hero.tsx` structure to use a dual-sided gradient overlay: `background: linear-gradient(to right, #0A1A2F 80%, transparent 100%), linear-gradient(to left, #0A1A2F 30%, transparent 60%)` (or Tailwind equivalent, using a strong left fade and subtle right fade).
-    - Implement a Split Content Layer: a `div` with `absolute inset-0 flex justify-between items-center px-[6vw]`.
-    - Move Tagline, Heading, and CTA buttons to the Left Side container (`max-w-[420px]`).
-    - Add an empty or subtle placeholder container to the Right Side to balance the layout.
-    - WHAT TO AVOID: Do not leave the video cropped to 65%. It must be 100vw. Do not let text overlap the direct center.
+    - **Focal Lock System:** Ensure the video wrapper has `overflow: hidden`. Apply `transform-origin: center center` to the inner video. In `VideoBackground.tsx`, apply `object-position: center 45%` to prevent drift.
+    - **Safe Text Zones:** Structure a container with `flex justify-between items-center px-[6vw] w-full`.
+      - *Left Zone (0% - 35%):* `max-w-[420px]` with strong typography hierarchy.
+      - *Center Protected Zone (35% - 65%):* STRICTLY NO TEXT. Let the building breathe.
+      - *Right Zone (65% - 100%):* `max-w-[300px]`. Initially empty or containing subtle micro text/stats.
+    - **Layered Gradient Correction:** Replace flat gradients with a 3-layer system:
+      - Layer 1 (Base dark): `linear-gradient(to right, #0A1A2F 90%, transparent 100%)`
+      - Layer 2 (Center softness): `radial-gradient(circle at center, transparent 40%, rgba(10,26,47,0.3) 100%)`
+      - Layer 3 (Right balance): `linear-gradient(to left, rgba(10,26,47,0.2), transparent)`
+    - **Mobile Override:** Disable the split layout via Tailwind classes (`flex-col` on mobile). Stack the content, use a stronger flat gradient, and reduce max scale intensity for mobile limits.
   </action>
-  <verify>npm run lint && npm run build (or manual visual check if dev server is running)</verify>
-  <done>Video fills the screen, building is centered, text is split left/right, and gradient is dual-sided.</done>
+  <verify>Check dev server visual structure ensures no text bleeds into the center 30% gap.</verify>
+  <done>Text remains perfectly constrained to safe zones and the building is perfectly framed with depth gradients.</done>
 </task>
 
 <task type="auto">
-  <name>Implement Advanced GSAP Scroll Sequence</name>
+  <name>Implement Motion-Damped GSAP Easing Timeline</name>
   <files>
     - src/lib/animations/heroAnimation.ts
   </files>
   <action>
-    - Rewrite `initHeroAnimations` to implement the new sequence.
-    - **Load Animation:** Left side enters from `y: 60` to `0` with `opacity: 0` to `1` (staggered). Right side enters from `x: 60` to `0` with `opacity: 0` to `1`. Add a ~0.5s delay after video load.
-    - **Scroll Phase 1 (0% - 30%):** Video slowly zooms (`scale: 1.1` to `1.25`), text is visible.
-    - **Scroll Phase 2 (30% - 60%):** Video continues zoom, Left text moves slightly inward (parallax).
-    - **Scroll Phase 3 (60%+):** Hero content cleanly fades out.
-    - Ensure ScrollTrigger coordinates correctly map these scroll percentages (or pixel equivalents) using a unified timeline linked to scroll progress.
-    - WHAT TO AVOID: Do not control video playback with scroll, only CSS transforms/opacity.
+    - **Load Sequence:** Wait ~0.5s after load. Left text: `y: 40` → `0`, `scale: 0.98` → `1`, `opacity: 0` → `1` (stagger `0.12`). Right text: `x: 40` → `0`, `scale: 0.98` → `1`, `opacity: 0` → `1`.
+    - **Scroll Timeline (Easing-Based):** Apply motion damping with `scrub: 1.2` for heavy, expensive feel.
+      - *Phase 1 (0 → 25%):* Slow ease (`power2.out`), video `scale: 1.08` → `1.16`.
+      - *Phase 2 (25 → 55%):* Video `scale: 1.16` → `1.28`. Left text inward shift (`x: 0` → `20px`). Right text inward shift (`x: 0` → `-20px`).
+      - *Phase 3 (55 → 75%):* **HOLD MOMENT.** No motion. Creates premium pause.
+      - *Phase 4 (75 → 100%):* Fade out text, apply slight blur (`filter: blur(2px)`) to video to transition to next section.
+    - WHAT TO AVOID: Do not use linear mapping. It must feel like a directed scene.
   </action>
-  <verify>Check GSAP logic for syntax errors and correct timeline staging.</verify>
-  <done>GSAP timelines precisely map to the 3 scroll phases with the specified transforms and opacities.</done>
+  <verify>Test scroll manually to confirm motion damping, the Phase 3 hold moment, and exact scale transforms.</verify>
+  <done>GSAP handles the 4 distinct easing phases perfectly without jitter, confirming a heavy, cinematic feel.</done>
 </task>
 
 ## Success Criteria
-- [ ] Building remains perfectly centered at all times.
-- [ ] Text sits safely on the left and right, never overlapping the center.
-- [ ] Video slowly zooms in via `scale` transforms across scroll progress.
-- [ ] Scroll phases orchestrate entry, parallax inward movement, and final fade-out seamlessly.
+- [ ] Top floors of the building stay visually dominant and do not drift during zoom.
+- [ ] The center 30% of the screen is completely free of text at all times.
+- [ ] Layered depth gradients add contrast without looking like a flat overlay.
+- [ ] Scroll interaction features motion damping (`scrub: 1.2`) and an intentional hold moment.
