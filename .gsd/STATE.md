@@ -5,11 +5,11 @@
 
 ## Current Position
 - **Phase**: 7
-- **Task**: Full-Bleed Cinematic Restoration Complete.
+- **Task**: Key Highlights Editorial Upgrade (Wave 2) Complete.
 - **Status**: Complete
 
 ## Last Session Summary
-Restored true full-bleed cinematic behavior to the Hero section by removing all gradient blending hacks and artificial overlays. Hardened the transition to `ProjectIntro` with clean stacking and visual purity.
+Upgraded the `ProjectIntro` highlights into an editorial composition with dominant hierarchy, detached indices, and rhythmic GSAP reveals.
 
 ## Next Steps
 1. Execute Plan 7.2 to add the ProjectIntro section below the Hero.
