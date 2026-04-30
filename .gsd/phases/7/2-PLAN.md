@@ -1,13 +1,13 @@
 ---
 phase: 7
 plan: 2
-wave: 2
+wave: 3
 ---
 
-# Plan 7.2: Project Positioning Section (Refined Production Version)
+# Plan 7.2: Project Positioning Section (Depth-Aware & Rhythm-Controlled)
 
 ## Objective
-Anchor the user after the cinematic hero with a high-clarity, high-impact section that feels like a natural continuation—not a visual reset.
+Refine the `ProjectIntro` section into a visually continuous, depth-aware, and rhythm-controlled composition that flows naturally from the cinematic hero.
 
 ## Context
 - src/components/sections/ProjectIntro.tsx
@@ -16,60 +16,45 @@ Anchor the user after the cinematic hero with a high-clarity, high-impact sectio
 ## Tasks
 
 <task type="auto">
-  <name>Refine ProjectIntro Component (Transition & Layout)</name>
+  <name>Implement Depth-Aware Background Transition</name>
   <files>
     - [MODIFY] src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Apply overlap pull: `margin-top: -100px`.
-    - Add top gradient fade: `linear-gradient(to bottom, rgba(10,26,47,0.6), transparent)`.
-    - Set `padding-top: 180px`.
-    - Set grid gap to `100px`.
+    - Replace white background with a multi-step gradient: `#0A1A2F` (0-20%) -> `white` (60%).
+    - Ensure `-mt-[100px]` remains for overlap but feels seamless.
   </action>
-  <verify>Check visual overlap with Hero section.</verify>
+  <verify>Check for any "hard edge" line at the transition point.</verify>
 </task>
 
 <task type="auto">
-  <name>Update Typography & Highlights Structure</name>
+  <name>Refine Visual Rhythm & Structured Blocks</name>
   <files>
     - src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Use "Playfair Display" for headings.
-    - Implement the indexed highlight list (01, 02, etc.).
-    - Apply exact spacing (label -> heading: 16px, heading -> description: 24px).
+    - Shift the Right block down by `20px` for editorial asymmetry.
+    - Wrap highlights in containers with `padding: 16px 0` and `1px solid rgba(0,0,0,0.08)`.
+    - Apply typography polish (tracking -0.005em, opacity 0.7).
   </action>
-  <verify>Verify indices and font styles.</verify>
+  <verify>Verify asymmetry and list styling.</verify>
 </task>
 
 <task type="auto">
-  <name>Tune GSAP Scroll Orchestration</name>
+  <name>Tune GSAP Directional Reveal</name>
   <files>
     - src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Set trigger start to "top 80%" with `once: true`.
-    - Add 0.1s stagger to highlight items.
-    - Adjust y-offset (Left: 50, Right: 30) and duration (0.9s).
+    - Add `delay: 0.2` (breathing room) to the main trigger.
+    - Stagger highlight items by `0.12s`.
+    - Ensure Left block starts first, followed by Right block.
   </action>
-  <verify>Scroll down to test smooth staggered entrance.</verify>
-</task>
-
-<task type="auto">
-  <name>Mobile Optimization</name>
-  <files>
-    - src/components/sections/ProjectIntro.tsx
-  </files>
-  <action>
-    - Force single column with 48px gap.
-    - Center-align all text and elements.
-    - Reduce heading scale.
-  </action>
-  <verify>Verify mobile layout in responsive view.</verify>
+  <verify>Confirm left-to-right directional flow on reveal.</verify>
 </task>
 
 ## Success Criteria
-- [ ] Seamless transition from hero (no hard break).
-- [ ] Strong visual hierarchy with structured highlights.
-- [ ] Precise GSAP staggered reveals.
-- [ ] Mobile-centric alignment and scaling.
+- [ ] Visual continuity from hero (no shock break).
+- [ ] Editorial asymmetry established via vertical offsets.
+- [ ] Structured blocks for highlights instead of plain list.
+- [ ] Rhythm-controlled motion with directional flow.
