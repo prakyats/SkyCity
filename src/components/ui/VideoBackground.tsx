@@ -7,6 +7,8 @@ interface VideoBackgroundProps {
   mp4Src: string;
   posterSrc: string;
   className?: string;
+  onReady?: () => void;
+  onPlay?: () => void;
 }
 
 export const VideoBackground = ({
@@ -14,6 +16,8 @@ export const VideoBackground = ({
   mp4Src,
   posterSrc,
   className = '',
+  onReady,
+  onPlay,
 }: VideoBackgroundProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -46,6 +50,7 @@ export const VideoBackground = ({
   }, [isLoaded]);
 
   const handleLoadedData = () => {
+    onReady?.();
     // 100ms micro-delay for perceived smoothness before fading
     setTimeout(() => {
       setFadeVideo(true);
@@ -73,6 +78,7 @@ export const VideoBackground = ({
           preload="metadata"
           disablePictureInPicture
           onLoadedData={handleLoadedData}
+          onPlay={() => onPlay?.()}
           className={`absolute inset-0 w-full h-full object-cover object-[center_45%] origin-center transform-gpu will-change-transform transition-opacity duration-600 ease-in-out ${fadeVideo ? 'opacity-100' : 'opacity-0'}`}
           aria-hidden="true"
         >
