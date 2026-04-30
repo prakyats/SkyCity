@@ -14,12 +14,12 @@ interface SmoothScrollProviderProps {
 export default function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => 1 - Math.pow(1 - t, 3),
+      lerp: 0.08,
+      easing: (t) => 1 - Math.pow(1 - t, 4), // power4.out
       smoothWheel: true,
-      // @ts-ignore - Some versions of Lenis use smoothTouch, others touchMultiplier
+      // @ts-ignore
       smoothTouch: false,
-      touchMultiplier: 2,
+      wheelMultiplier: 0.9,
     });
 
     function raf(time: number) {
