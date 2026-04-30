@@ -35,3 +35,8 @@
 **Status**: ✅ Complete
 **Objective**: Implement CDN hosting, optimized encoding, and poster-first deferred loading strategy for the Hero video to guarantee instant LCP and zero layout shift.
 **Requirements**: REQ-05
+
+### Phase 6: Cinematic Intro Scene Transformation
+**Status**: ⬜ Not Started
+**Objective**: Transform the Hero into a cinematic intro scene with split typography, delayed reveal (6s), and editorial framing.
+**Requirements**: REQ-06
