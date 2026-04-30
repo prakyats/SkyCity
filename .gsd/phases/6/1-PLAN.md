@@ -4,10 +4,10 @@ plan: 1
 wave: 1
 ---
 
-# Plan 6.1: Cinematic Intro Scene Transformation (Production-Grade)
+# Plan 6.1: Cinematic Intro Scene Transformation (Production-Locked)
 
 ## Objective
-Transform the Hero section into a production-safe cinematic intro scene. This involves implementing fail-safe timing for narrative reveals, establishing strict architectural layout constraints to protect the central subject (the building), and using a deterministic layering system to ensure visual stability across all viewports.
+Transform the Hero section into a production-locked cinematic intro scene. This involves implementing a deterministic playback sync system to handle narrative reveals without race conditions, establishing optical layout constraints to prevent visual drift on wide displays, and using a multi-layered overlay system for cinematic depth.
 
 ## Context
 - src/components/sections/Hero.tsx
@@ -17,61 +17,59 @@ Transform the Hero section into a production-safe cinematic intro scene. This in
 ## Tasks
 
 <task type="auto">
-  <name>Implement Bulletproof Playback Signal</name>
+  <name>Implement Deterministic Playback Sync</name>
   <files>
     - src/components/ui/VideoBackground.tsx
   </files>
   <action>
-    - Update `VideoBackgroundProps` to include `onReady?: () => void` and `onPlay?: () => void`.
-    - Attach `onLoadedData` (Ready) and `onPlay` listeners to the `<video>` element.
-    - Ensure both signals are bubbled up to the parent `Hero` component.
+    - Update `VideoBackgroundProps` to expose `onReady?: () => void` and `onPlay?: () => void`.
+    - `onReady`: Fires on `onLoadedData`.
+    - `onPlay`: Fires on `onPlay`.
   </action>
-  <verify>Ensure `Hero.tsx` receives both the buffer-ready and playback-started signals.</verify>
+  <verify>Confirm parent component receives separate signals for buffer readiness and playback start.</verify>
 </task>
 
 <task type="auto">
-  <name>Implement Fail-Safe Narrative Reveal & Layering</name>
+  <name>Implement Guarded Narrative Reveal & Optical Composition</name>
   <files>
     - src/components/sections/Hero.tsx
   </files>
   <action>
-    - **Fail-Safe Narrative Logic:**
-      - Combine `ready` and `playing` signals to start a 6000ms timer.
-      - Use `showText` boolean and `hasTriggered` ref to ensure a single-fire reveal.
-      - Add a 2000ms fallback: if playback doesn't signal within 2s of mount, force `showText = true` to guarantee content visibility.
-    - **Strict Layering System:**
-      - z-0: Video Layer.
-      - z-10: Directional Falloff Overlay (90deg linear gradient: `rgba(10,26,47,0.55) 0%`, `rgba(10,26,47,0.35) 25%`, `rgba(10,26,47,0.15) 45%`, `transparent 65%`).
-      - z-20: Split Text Layers.
-      - z-30: Logo/Navigation Layer.
-    - **Architectural Layout Constraints:**
-      - Wrap split blocks in a `flex justify-between w-full` container.
-      - Enforce `max-w-[420px]` AND `w-[min(420px,35vw)]` on each block to strictly protect the center 30% of the screen.
-    - **Mobile Fallback:** Disable delay entirely (immediate reveal), stack centrally, and reduce font scale significantly.
+    - **Guarded Timing System:**
+      - Track `isReady` and `isPlaying` states.
+      - Start 6000ms timer ONLY when `isPlaying` is true AND `isReady` is true.
+      - **Non-Destructive Fallback:** Start a 2000ms timer on mount. Cancel it immediately if `onPlay` fires. If it completes without playback, trigger `showText = true` (ensures content accessibility on slow networks).
+    - **Optical Center Protection:**
+      - Wrap blocks in `flex justify-between w-full`.
+      - **Hard Constraints:** `max-w-[420px]`, `w-[min(420px,35vw)]`.
+      - **Visual Anchors:** Apply `ml-[clamp(24px,6vw,80px)]` to the left block and `mr-[clamp(24px,6vw,80px)]` to the right block to prevent drift on ultrawide screens.
+    - **Cinematic Overlay Depth:**
+      - **Layer 1 (z-10):** Directional falloff gradient (90deg).
+      - **Layer 2 (Pseudo):** Radial vignette (`circle at 50% 40%`, `transparent 60%`, `rgba(0,0,0,0.25) 100%`) to lock focus on the tower.
+    - **Strict Layering System:** Enforce z-index hierarchy (z-0: Video, z-10: Overlay, z-20: Text, z-30: Logos).
+    - **Mobile Fallback:** Immediate reveal, stacked center, reduced font scaling, no GSAP.
   </action>
-  <verify>Check visual layering and layout stability. Confirm the center space never collapses and the reveal is deterministic.</verify>
+  <verify>Check composition on ultrawide viewports. Confirm reveal timing is deterministic and respects playback state.</verify>
 </task>
 
 <task type="auto">
-  <name>Implement Scoped Narrative GSAP Animation</name>
+  <name>Locked GSAP Narrative Execution</name>
   <files>
     - src/components/sections/Hero.tsx
   </files>
   <action>
-    - Refactor the entrance animation using `gsap.context()` for scoped cleanup.
-    - Trigger animation inside a `useEffect` tied strictly to `showText`.
-    - **Left Block:** `opacity: 0 -> 1`, `x: -40 -> 0`.
-    - **Right Block:** `opacity: 0 -> 1`, `x: 40 -> 0`.
-    - **Config:** `duration: 0.8`, `ease: power3.out`.
-    - Ensure all previous timelines are cleared via `context.revert()`.
+    - Use `hasAnimated` ref to prevent duplicate triggers.
+    - Initialize entrance inside `useEffect` tied to `showText`.
+    - Scope via `gsap.context()` and cleanup with `context.revert()`.
+    - **Animation:** Left (`x: -40 -> 0`), Right (`x: 40 -> 0`), `opacity: 0 -> 1`, `duration: 0.8`, `ease: power3.out`.
   </action>
-  <verify>Confirm silky smooth entrance exactly at the 6-second mark (or 2-second fallback).</verify>
+  <verify>Ensure absolutely no duplicate animations or memory leaks occur during hydration or re-renders.</verify>
 </task>
 
 ## Success Criteria
-- [ ] Video occupies 100% viewport with `will-change: transform` and `object-position: center 45%`.
-- [ ] Narrative timing is bulletproof (Ready + Play signal + 6s timer + 2s fallback).
-- [ ] Layer hierarchy (z-0 to z-30) strictly followed.
-- [ ] Center protection zone (30%) enforced via `min(420px, 35vw)` constraints.
-- [ ] Directional cinematic overlay prevents flat UI-block appearance.
-- [ ] Mobile experience is immediate, stacked, and static.
+- [ ] Narrative timing is synchronized to playback state (isPlaying + isReady).
+- [ ] Fallback timer (2s) is non-destructive (cancelled on playback).
+- [ ] Optical balance preserved via clamp-based margins and hard width constraints.
+- [ ] Cinematic depth achieved via dual-layer (Gradient + Vignette) overlay system.
+- [ ] GSAP execution is strictly locked via refs and context.
+- [ ] Mobile experience is immediate and static.
