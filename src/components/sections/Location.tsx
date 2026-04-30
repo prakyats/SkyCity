@@ -101,7 +101,7 @@ export const Location = () => {
 
             <blockquote className="border-l-2 border-white/20 pl-8 italic">
               <p className="text-[16px] leading-relaxed text-white/60 font-serif">
-                "Yamuna Sky City sits at the heart of New Mangalore — 300 metres from the Arabian Sea, perfectly positioned between serenity and connectivity."
+                &quot;Yamuna Sky City sits at the heart of New Mangalore — 300 metres from the Arabian Sea, perfectly positioned between serenity and connectivity.&quot;
               </p>
             </blockquote>
           </div>

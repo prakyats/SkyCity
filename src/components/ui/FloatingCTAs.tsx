@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import gsap from 'gsap';
 
 export const FloatingCTAs = () => {
   const [isVisible, setIsVisible] = useState(false);
