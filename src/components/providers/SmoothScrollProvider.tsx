@@ -17,7 +17,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
       lerp: 0.08,
       easing: (t) => 1 - Math.pow(1 - t, 4), // power4.out
       smoothWheel: true,
-      // @ts-ignore
+      // @ts-expect-error - Some versions of Lenis use smoothTouch, others touchMultiplier
       smoothTouch: false,
       wheelMultiplier: 0.9,
     });
