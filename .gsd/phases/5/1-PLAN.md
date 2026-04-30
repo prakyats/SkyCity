@@ -7,7 +7,7 @@ wave: 1
 # Plan 5.1: Production-Grade Video Delivery Pipeline
 
 ## Objective
-Transform the Hero video system into a production-ready CDN pipeline. Compress the local 175MB video into optimized WebM/MP4 formats, extract and highly optimize a poster image, and refactor the component architecture for intent-based loading (via `requestIdleCallback`), eliminating arbitrary timing hacks and ensuring a seamless, premium crossfade transition.
+Transform the Hero video system into a production-ready CDN pipeline. Compress the local 175MB video into optimized WebM/MP4 formats, extract a highly optimized poster, and refactor the component architecture with a bulletproof hybrid intent-loading strategy and buffer-safe crossfades to eliminate all unpredictability.
 
 ## Context
 - .gsd/SPEC.md
@@ -44,27 +44,29 @@ Transform the Hero video system into a production-ready CDN pipeline. Compress t
 </task>
 
 <task type="auto">
-  <name>Intent-Based Loading & Crossfade Architecture</name>
+  <name>Hybrid Intent-Based Loading & Buffer-Safe Crossfade</name>
   <files>
     - src/components/ui/VideoBackground.tsx
   </files>
   <action>
-    - **Remove Timing Hacks:** Replace the fixed 500ms `setTimeout` with `requestIdleCallback` (with a `setTimeout` fallback for Safari) to trigger the `isLoaded` state only when the main thread is idle.
-    - **Video Attributes:** Ensure `<video>` has `muted`, `playsInline`, `loop`, `preload="metadata"`, and `disablePictureInPicture`.
-    - **Seamless Crossfade:**
-      - Render both `<img>` (poster) and `<video>` concurrently once `isLoaded` fires.
-      - Add an `onCanPlay` event listener to the video to toggle a `canPlay` state.
+    - **Hybrid Loading Strategy:** Implement a dual-trigger for the `isLoaded` state.
+      - Try `requestIdleCallback` to load when idle.
+      - Run a parallel `setTimeout(..., 1200)` to force load after 1200ms if idle never fires (ensures reliability across strained devices/browsers).
+    - **Video Attributes:** Enforce `<video>` has `muted`, `playsInline`, `loop`, `preload="metadata"`, and `disablePictureInPicture`.
+    - **Buffer-Safe Crossfade:**
       - Default video to `opacity-0` and poster to `opacity-100`.
-      - When `canPlay` is true, transition video to `opacity-100` and poster to `opacity-0` over `600ms` (e.g., `transition-opacity duration-600 ease-in-out`).
-    - **Performance Guard:** Apply `will-change: opacity, transform` to both elements. Ensure no unnecessary state updates trigger re-renders of the video element.
+      - Listen to `onLoadedData` (or `onCanPlayThrough`) instead of `onCanPlay` to ensure sufficient buffer exists before playback.
+      - Upon the event firing, wait an additional `~100ms` via `setTimeout` before executing the crossfade.
+      - Transition video to `opacity-100` and poster to `opacity-0` over `600ms`.
+    - **Performance Guard:** Apply `will-change: opacity, transform` to both elements. Ensure no unnecessary state updates trigger re-renders.
   </action>
-  <verify>Check dev server. The poster should load instantly. The video should trigger download only when the browser is idle, and crossfade smoothly without any flash or layout shift.</verify>
+  <verify>Check dev server on various network throttles. Video must strictly load either on idle or hard 1200ms limit. Crossfade must only occur after buffer clears, feeling silky smooth without dropped frames.</verify>
 </task>
 
 ## Success Criteria
 - [ ] Poster compressed to ≤ 250KB and served via CDN.
-- [ ] Arbitrary `setTimeout` replaced with `requestIdleCallback`.
+- [ ] Dual-trigger loading logic deployed (`requestIdleCallback` + 1200ms fallback).
 - [ ] `<link rel="preconnect">` added to document head.
-- [ ] Video features `disablePictureInPicture` and `preload="metadata"`.
+- [ ] Ready signal uses `onLoadedData` / `onCanPlayThrough` for buffer safety.
+- [ ] `100ms` perceived smoothness delay applied to fade logic.
 - [ ] Smooth `opacity` crossfade implemented with no flicker.
-- [ ] `will-change: opacity, transform` applied.
