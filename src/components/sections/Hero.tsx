@@ -165,23 +165,21 @@ export const Hero = () => {
           {/* TASK 8 & 12 — Left Block (Primary) */}
           <div 
             ref={leftContentRef} 
-            className={`flex flex-col items-center md:items-end w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] text-center md:text-right transition-opacity duration-300 ${narrativePhase >= 2 ? 'opacity-100' : 'opacity-0'}`}
+            className={`flex flex-col items-center md:items-end w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] text-center md:text-right transition-opacity duration-700 ${narrativePhase >= 2 ? 'opacity-100' : 'opacity-0'}`}
           >
              <h1 
                className="text-white leading-[0.95] tracking-tight font-semibold"
                style={{ fontSize: 'clamp(42px, 9vw, 140px)' }}
              >
-               Sky City
+               Yamuna
              </h1>
 
-             {/* TASK 12 — CTA Button (Phase 3) */}
-             {narrativePhase >= 3 && (
-               <div className="phase-3-cta mt-[clamp(24px,8vw,60px)]">
-                 <button className="pointer-events-auto border border-white/30 hover:border-white/60 px-8 md:px-10 py-3.5 md:py-4 text-white/80 text-[14px] tracking-[0.2em] uppercase rounded-full transition-all backdrop-blur-sm">
-                   Explore More
-                 </button>
-               </div>
-             )}
+             {/* TASK 12 — CTA Button (Phase 3) - Space Reserved */}
+             <div className={`phase-3-cta mt-[clamp(32px,10vw,80px)] transition-opacity duration-500 ${narrativePhase >= 3 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+               <button className="pointer-events-auto border border-white/30 hover:border-white/60 px-10 py-3.5 md:py-4 text-white/80 text-[12px] md:text-[14px] tracking-[0.2em] uppercase rounded-full transition-all backdrop-blur-sm shadow-2xl">
+                 Explore More
+               </button>
+             </div>
           </div>
 
           {/* TASK 7 — Center Protection Zone (Implicit in md:justify-between) */}
@@ -189,41 +187,37 @@ export const Hero = () => {
           {/* TASK 9 & 11 — Right Block (Secondary) */}
           <div 
             ref={rightContentRef} 
-            className={`flex flex-col items-center md:items-start w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] text-center md:text-left transition-opacity duration-300 ${narrativePhase >= 2 ? 'opacity-100' : 'opacity-0'}`}
+            className={`flex flex-col items-center md:items-start w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] text-center md:text-left transition-opacity duration-700 ${narrativePhase >= 2 ? 'opacity-100' : 'opacity-0'}`}
           >
              <h1 
                className="text-white leading-[0.95] tracking-tight font-normal italic"
                style={{ fontSize: 'clamp(42px, 9vw, 140px)' }}
              >
-               Sea View
+               Sky City
              </h1>
 
-             {/* TASK 11 — Support Text (Phase 3) */}
-             {narrativePhase >= 3 && (
-               <p className="phase-3-support text-white/65 font-light tracking-wide text-sm md:text-base max-w-[280px] mt-6 leading-relaxed">
-                 South India’s Tallest Sea View Residential Tower
-               </p>
-             )}
+             {/* TASK 11 — Support Text (Phase 3) - Space Reserved */}
+             <p className={`phase-3-support text-white/65 font-light tracking-wide text-sm md:text-base max-w-[280px] mt-10 leading-relaxed transition-opacity duration-500 ${narrativePhase >= 3 ? 'opacity-100' : 'opacity-0'}`}>
+               South India’s Tallest Sea View Residential Tower
+             </p>
           </div>
       </div>
 
       {/* TASK 10 — Micro Tag (Phase 3) - Detached */}
-      {narrativePhase >= 3 && (
-        <div 
-          className="phase-3-tag absolute z-20 pointer-events-none hidden md:block"
-          style={{
-            top: '35%',
-            left: 'clamp(24px, 6vw, 80px)'
-          }}
-        >
-           <span className="text-white/60 font-light tracking-[0.18em] uppercase text-[12px] md:text-[14px]">
-             A New Landmark in South India
-           </span>
-        </div>
-      )}
+      <div 
+        className={`phase-3-tag absolute z-20 pointer-events-none hidden md:block transition-opacity duration-500 ${narrativePhase >= 3 ? 'opacity-100' : 'opacity-0'}`}
+        style={{
+          top: '30%',
+          left: 'clamp(24px, 6vw, 80px)'
+        }}
+      >
+         <span className="text-white/60 font-light tracking-[0.18em] uppercase text-[12px] md:text-[14px]">
+           A New Landmark in South India
+         </span>
+      </div>
 
-      {/* RERA info anchor */}
-      <div className="absolute bottom-6 left-6 md:left-12 lg:left-20 z-20 opacity-30">
+      {/* RERA info anchor - Space Reserved */}
+      <div className={`absolute bottom-10 left-6 md:left-12 lg:left-20 z-20 opacity-0 transition-opacity duration-500 ${narrativePhase >= 3 ? 'opacity-30' : 'opacity-0 pointer-events-none'}`}>
         <p className="text-white text-[10px] tracking-widest uppercase font-light">
           RERA NO. UPRERAPRJ123456
         </p>

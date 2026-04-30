@@ -31,7 +31,6 @@ export const VideoBackground = ({
     const loadVideo = () => setIsLoaded(true);
 
     if ('requestIdleCallback' in window) {
-      // @ts-expect-error: requestIdleCallback is not fully typed in all environments
       window.requestIdleCallback(loadVideo);
       // Fallback if the main thread is slammed and never idles
       timeoutId = setTimeout(loadVideo, 1200);
