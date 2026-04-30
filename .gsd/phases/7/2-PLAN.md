@@ -1,13 +1,13 @@
 ---
 phase: 7
 plan: 2
-wave: 3
+wave: 4
 ---
 
-# Plan 7.2: Project Positioning Section (Depth-Aware & Rhythm-Controlled)
+# Plan 7.2: Project Positioning Section (Deterministic Production Version)
 
 ## Objective
-Refine the `ProjectIntro` section into a visually continuous, depth-aware, and rhythm-controlled composition that flows naturally from the cinematic hero.
+Anchor the user after the cinematic hero with a fully deterministic, visually consistent, and device-safe implementation.
 
 ## Context
 - src/components/sections/ProjectIntro.tsx
@@ -16,45 +16,47 @@ Refine the `ProjectIntro` section into a visually continuous, depth-aware, and r
 ## Tasks
 
 <task type="auto">
-  <name>Implement Depth-Aware Background Transition</name>
+  <name>Hardened Background & Edge Blending</name>
   <files>
     - [MODIFY] src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Replace white background with a multi-step gradient: `#0A1A2F` (0-20%) -> `white` (60%).
-    - Ensure `-mt-[100px]` remains for overlap but feels seamless.
+    - Implement exact multi-step gradient for zero-banding transition.
+    - Add absolute pseudo-element overlay (120px) at the top for perfect seam hiding.
+    - Set `margin-top: -100px` and `padding-top: 180px`.
   </action>
-  <verify>Check for any "hard edge" line at the transition point.</verify>
+  <verify>Check for visible seams or banding on high-brightness screens.</verify>
 </task>
 
 <task type="auto">
-  <name>Refine Visual Rhythm & Structured Blocks</name>
+  <name>Responsive Asymmetry & Highlight Refinement</name>
   <files>
     - src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Shift the Right block down by `20px` for editorial asymmetry.
-    - Wrap highlights in containers with `padding: 16px 0` and `1px solid rgba(0,0,0,0.08)`.
-    - Apply typography polish (tracking -0.005em, opacity 0.7).
+    - Replace fixed offset with `translateY(clamp(12px, 2vw, 28px))` for the right block.
+    - Refine highlight items with `18px` padding and hover interactions.
+    - Apply typography micro-fixes (font-smoothing, -0.005em tracking).
   </action>
-  <verify>Verify asymmetry and list styling.</verify>
+  <verify>Test responsive scaling of the vertical offset.</verify>
 </task>
 
 <task type="auto">
-  <name>Tune GSAP Directional Reveal</name>
+  <name>Deterministic GSAP Orchestration</name>
   <files>
     - src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Add `delay: 0.2` (breathing room) to the main trigger.
-    - Stagger highlight items by `0.12s`.
-    - Ensure Left block starts first, followed by Right block.
+    - Remove global delay from trigger.
+    - Set Right block delay: 0.2s.
+    - Set Highlights delay: 0.35s with 0.12s stagger.
+    - Use `power3.out` duration 0.9s.
   </action>
-  <verify>Confirm left-to-right directional flow on reveal.</verify>
+  <verify>Ensure left-to-right reveal flow is perfectly timed.</verify>
 </task>
 
 ## Success Criteria
-- [ ] Visual continuity from hero (no shock break).
-- [ ] Editorial asymmetry established via vertical offsets.
-- [ ] Structured blocks for highlights instead of plain list.
-- [ ] Rhythm-controlled motion with directional flow.
+- [ ] Zero banding or visible seams in the hero-to-intro transition.
+- [ ] Responsive vertical asymmetry maintained across breakpoints.
+- [ ] Interactive highlights with smooth hover transitions.
+- [ ] Precise directional motion flow (Left -> Right -> Details).

@@ -3,13 +3,13 @@
 ## Objective
 Anchored the user post-hero with a clean, high-contrast editorial section.
 
-## Changes (Wave 3 — Depth & Rhythm Refinement)
-- **Depth-Aware Background**: Replaced the white background with a multi-step gradient (`#0A1A2F` -> `White`) to perfectly bridge the cinematic hero color into the overview section.
-- **Directional GSAP Rhythm**: Orchestrated a timeline where the Left block reveals first after a 0.2s breathing delay, followed by the Right block, creating a natural reading flow.
-- **Editorial Asymmetry**: Shifted the Right block down by an additional 20px (`mt-[68px]`) to break rigid symmetry and provide a professional editorial rhythm.
-- **Structured Highlights**: Wrapped highlight items in structured blocks with `py-4`, `border-b`, and a subtle `hover:translate-x-1` micro-interaction.
-- **Typography Polish**: Refined main heading tracking to `-0.005em` and adjusted descriptions to `opacity: 0.7` for better visual weight.
-- **Micro-Detailing**: Adjusted "PROJECT OVERVIEW" label tracking to `0.22em` and opacity to `0.45` for a high-end touch.
+## Changes (Wave 4 — Deterministic Production Sync)
+- **Zero-Banding Gradient**: Implemented a mathematically precise multi-step gradient (`#0A1A2F` -> `rgba(10,26,47,0.85)` -> `rgba(255,255,255,0.6)` -> `White`) to ensure a flawless transition from the hero video with zero visual banding.
+- **Edge Blend Safety**: Added an absolute `120px` pseudo-element overlay at the top to hide any potential gradient seams between the Hero and the Intro section.
+- **Responsive Vertical Rhythm**: Replaced fixed offsets with `translateY(clamp(12px, 2vw, 28px))` for the right highlight block, ensuring visual asymmetry scales correctly across all device sizes.
+- **Hardened GSAP Orchestration**: Orchestrated a deterministic reveal flow: Left Block (immediate), Right Block (0.2s delay), and Highlights (0.35s delay + 0.12s stagger).
+- **Interactive Highlights**: Upgraded list items with `18px` padding, smooth opacity transitions, and a hidden-until-hover `scale-X` underline animation.
+- **Production Polish**: Enabled `antialiased` smoothing and refined typography tracking to `-0.005em` for the serif headers.
 
 ## Verification
 - Verified responsive grid behavior (stacks on mobile).

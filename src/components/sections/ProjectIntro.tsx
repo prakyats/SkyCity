@@ -14,50 +14,58 @@ export const ProjectIntro = () => {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // Main Reveal Sequence with Breathing Delay (0.2s)
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none none',
-          once: true,
-        }
-      });
-
-      // Left Block Reveal (Directional First)
-      tl.fromTo(leftContentRef.current,
+      // 1. Left Block Reveal (Starts immediately)
+      gsap.fromTo(leftContentRef.current,
         { opacity: 0, y: 50 },
         {
           opacity: 1,
           y: 0,
           duration: 0.9,
-          delay: 0.2, // breathing room after hero
           ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none none',
+            once: true,
+          }
         }
       );
 
-      // Right Block & Staggered Highlights (Directional Second)
-      tl.fromTo(rightContentRef.current,
+      // 2. Right Block Reveal (0.2s Delay)
+      gsap.fromTo(rightContentRef.current,
         { opacity: 0, y: 30 },
         {
           opacity: 1,
           y: 0,
           duration: 0.9,
+          delay: 0.2,
           ease: 'power3.out',
-        },
-        "-=0.7"
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none none',
+            once: true,
+          }
+        }
       );
 
-      tl.fromTo(highlightItemsRef.current,
+      // 3. Highlight Items (0.35s Delay + 0.12s Stagger)
+      gsap.fromTo(highlightItemsRef.current,
         { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
+          duration: 0.7,
+          delay: 0.35,
           stagger: 0.12,
           ease: 'power2.out',
-        },
-        "-=0.6"
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none none',
+            once: true,
+          }
+        }
       );
     }, sectionRef);
 
@@ -74,15 +82,25 @@ export const ProjectIntro = () => {
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full z-20 -mt-[100px] overflow-hidden"
+      className="relative w-full z-20 -mt-[100px] overflow-hidden antialiased"
       style={{
-        background: 'linear-gradient(to bottom, #0A1A2F 0%, #0A1A2F 20%, #FFFFFF 60%)',
+        background: 'linear-gradient(to bottom, #0A1A2F 0%, #0A1A2F 18%, rgba(10, 26, 47, 0.85) 28%, rgba(255, 255, 255, 0.6) 48%, #FFFFFF 65%)',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '100% 100%',
         paddingTop: '180px',
         paddingBottom: '140px',
       }}
       id="overview"
     >
-      <div className="max-w-[1200px] mx-auto px-[clamp(24px,6vw,80px)]">
+      {/* EDGE BLEND SAFETY: Pseudo-element overlay */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[120px] pointer-events-none z-10"
+        style={{
+          background: 'linear-gradient(to bottom, #0A1A2F, transparent)'
+        }}
+      />
+
+      <div className="max-w-[1200px] mx-auto px-[clamp(24px,6vw,80px)] relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 md:gap-[100px] items-start">
           
           {/* Left Block: Primary Narrative */}
@@ -90,7 +108,7 @@ export const ProjectIntro = () => {
             ref={leftContentRef} 
             className="flex flex-col items-center md:items-start text-center md:text-left"
           >
-            <span className="text-[12px] tracking-[0.22em] uppercase text-black/45 mb-4">
+            <span className="text-[12px] tracking-[0.22em] uppercase text-black/45 mb-4 block">
               Project Overview
             </span>
             <h2 
@@ -104,24 +122,31 @@ export const ProjectIntro = () => {
             </p>
           </div>
 
-          {/* Right Block: Highlights Structure (Asymmetric Offset) */}
+          {/* Right Block: Highlights Structure (Deterministic Responsive Offset) */}
           <div 
             ref={rightContentRef} 
-            className="flex flex-col items-center md:items-start md:mt-[68px]" // 20px additional offset from previous mt-12
+            className="flex flex-col items-center md:items-start w-full"
+            style={{ 
+              transform: 'translateY(clamp(12px, 2vw, 28px))' 
+            }}
           >
             <ul className="flex flex-col w-full max-w-[320px] md:max-w-none">
               {highlights.map((highlight, index) => (
                 <li 
                   key={index}
                   ref={el => { highlightItemsRef.current[index] = el; }}
-                  className="flex flex-col items-center md:items-start py-4 border-b border-black/10 last:border-0 hover:opacity-80 transition-opacity cursor-default group"
+                  className="flex flex-col items-center md:items-start py-[18px] border-b border-black/10 last:border-0 hover:opacity-80 transition-all duration-300 cursor-default group"
                 >
                   <span className="text-[11px] opacity-40 tracking-[0.15em] mb-2 font-medium">
                     0{index + 1}
                   </span>
-                  <span className="text-[18px] md:text-[20px] font-medium leading-[1.4] text-[#0a0a0a] group-hover:translate-x-1 transition-transform duration-300">
-                    {highlight}
-                  </span>
+                  <div className="relative overflow-hidden w-full text-center md:text-left">
+                    <span className="text-[18px] md:text-[20px] font-medium leading-[1.4] text-[#0a0a0a] group-hover:text-black transition-colors block">
+                      {highlight}
+                    </span>
+                    {/* Optional Underline Expansion */}
+                    <div className="absolute bottom-0 left-0 w-full h-[1px] bg-black/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left hidden md:block" />
+                  </div>
                 </li>
               ))}
             </ul>
