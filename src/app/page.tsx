@@ -1,13 +1,12 @@
 import { Hero } from "@/components/sections/Hero";
+import { ProjectIntro } from "@/components/sections/ProjectIntro";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white">
       <Hero />
-      {/* Spacer to demonstrate scroll parallax */}
-      <div className="h-[150vh] bg-white flex items-center justify-center">
-        <p className="text-gray-500 font-medium">Scroll down to see the hero parallax effect</p>
-      </div>
+      <ProjectIntro />
+      {/* Additional sections will go here */}
     </main>
   );
 }
