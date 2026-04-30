@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 };
 
 import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
+import { Footer } from '@/components/layout/Footer';
+import { FloatingCTAs } from '@/components/ui/FloatingCTAs';
 
 export default function RootLayout({
   children,
@@ -32,6 +34,8 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-[#0a0a0a] overflow-x-hidden`}>
         <SmoothScrollProvider>
           {children}
+          <Footer />
+          <FloatingCTAs />
         </SmoothScrollProvider>
       </body>
     </html>

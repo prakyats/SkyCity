@@ -40,3 +40,23 @@
 **Status**: ✅ Complete
 **Objective**: Transform the Hero into a cinematic intro scene with split typography, delayed reveal (6s), and editorial framing.
 **Requirements**: REQ-06
+
+### Phase 7: Project Narrative & Visuals
+**Status**: 🚧 In Progress
+**Objective**: Build the core narrative sections including editorial highlights, visual showcases, and connectivity diagrams.
+**Requirements**: REQ-07
+
+### Phase 8: Amenities & Lifestyle
+**Status**: ⏳ Pending
+**Objective**: Implement the amenities grid and interactive floor plan selector.
+**Requirements**: REQ-08
+
+### Phase 9: Technical & Location
+**Status**: ⏳ Pending
+**Objective**: Build the location overview, map integration, project partners expertise, and site progress timeline.
+**Requirements**: REQ-09
+
+### Phase 10: Engagement & Finalization
+**Status**: ⏳ Pending
+**Objective**: Implement the contact system, comprehensive footer, and final smooth scroll performance tuning.
+**Requirements**: REQ-10

@@ -211,7 +211,7 @@ export const Hero = () => {
       {/* RERA info anchor - Space Reserved */}
       <div className={`absolute bottom-10 left-6 md:left-12 lg:left-20 z-20 opacity-0 transition-opacity duration-500 ${narrativePhase >= 3 ? 'opacity-30' : 'opacity-0 pointer-events-none'}`}>
         <p className="text-white text-[10px] tracking-widest uppercase font-light">
-          RERA NO. UPRERAPRJ123456
+          RERA NO.  PRM/KA/RERA/1257/334/PR/171023/006331
         </p>
       </div>
 
