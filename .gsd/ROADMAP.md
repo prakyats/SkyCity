@@ -1,7 +1,7 @@
 # ROADMAP.md
 
-> **Current Phase**: All Phases Complete
-> **Milestone**: v1.0
+> **Current Phase**: Milestone v1.0 Complete (Archived)
+> **Milestone**: v1.1 - Portfolio Expansion (Next)
 
 ## Must-Haves (from SPEC)
 - [x] Next.js 14 Setup
