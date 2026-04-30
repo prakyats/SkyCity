@@ -7,7 +7,7 @@ wave: 1
 # Plan 4.1: Production-Grade Cinematic Hero
 
 ## Objective
-Transform the Hero into a production-grade visual narrative entry point. It must utilize a strict focal lock system, safe text zones, layered depth gradients, and heavy motion-damped GSAP scroll easing to feel like a high-end directed scene.
+Transform the Hero into a production-grade visual narrative entry point. It must utilize a strict focal lock system, adaptive safe text zones, optical zoom mechanics, and heavy motion-damped GSAP scroll easing to feel like a high-end directed scene. Luxury is restraint and control.
 
 ## Context
 - .gsd/SPEC.md
@@ -18,47 +18,46 @@ Transform the Hero into a production-grade visual narrative entry point. It must
 ## Tasks
 
 <task type="auto">
-  <name>Implement Strict Layout, Safe Zones & Gradients</name>
+  <name>Implement Adaptive Layout & Optical Framing</name>
   <files>
     - src/components/sections/Hero.tsx
     - src/components/ui/VideoBackground.tsx
   </files>
   <action>
-    - **Focal Lock System:** Ensure the video wrapper has `overflow: hidden`. Apply `transform-origin: center center` to the inner video. In `VideoBackground.tsx`, apply `object-position: center 45%` to prevent drift.
-    - **Safe Text Zones:** Structure a container with `flex justify-between items-center px-[6vw] w-full`.
-      - *Left Zone (0% - 35%):* `max-w-[420px]` with strong typography hierarchy.
-      - *Center Protected Zone (35% - 65%):* STRICTLY NO TEXT. Let the building breathe.
-      - *Right Zone (65% - 100%):* `max-w-[300px]`. Initially empty or containing subtle micro text/stats.
-    - **Layered Gradient Correction:** Replace flat gradients with a 3-layer system:
-      - Layer 1 (Base dark): `linear-gradient(to right, #0A1A2F 90%, transparent 100%)`
-      - Layer 2 (Center softness): `radial-gradient(circle at center, transparent 40%, rgba(10,26,47,0.3) 100%)`
-      - Layer 3 (Right balance): `linear-gradient(to left, rgba(10,26,47,0.2), transparent)`
-    - **Mobile Override:** Disable the split layout via Tailwind classes (`flex-col` on mobile). Stack the content, use a stronger flat gradient, and reduce max scale intensity for mobile limits.
+    - **Focal Lock System:** Ensure the video wrapper has `overflow: hidden`. Apply `transform-origin: center center` to the inner video layer. In `VideoBackground.tsx`, apply `object-position: center 45%` to prevent top-floor drift. Add `will-change: transform` to the video element for performance.
+    - **Adaptive Safe Zones:** Remove rigid percentage zones. Implement a natural layout constraint:
+      - *Left Container:* `max-w-[420px]` with `ml-[clamp(24px,6vw,80px)]` to adapt naturally.
+      - *Right Container:* REMOVE completely for now. Let the building dominate.
+      - *Center:* Remains naturally clear due to the left-side constraint.
+    - **Gradient System:** Simplify to a single, clean linear gradient to prevent muddy overlays:
+      - `background: linear-gradient(to right, #0A1A2F 15%, rgba(10,26,47,0.6) 55%, transparent 85%)` (or Tailwind equivalent mapping to ascending stops). Add an optional subtle vignette via a pseudo-element if contrast needs a final touch.
+    - **Mobile Override:** Stack content (`flex-col`), use a stronger flat gradient, and limit zoom scale intensity.
   </action>
-  <verify>Check dev server visual structure ensures no text bleeds into the center 30% gap.</verify>
-  <done>Text remains perfectly constrained to safe zones and the building is perfectly framed with depth gradients.</done>
+  <verify>Check dev server visual structure. Resize viewport to ensure `clamp` adapts elegantly without text encroaching on the building.</verify>
+  <done>Layout feels visually balanced with adaptive margins. The simplified gradient provides clean contrast without feeling over-layered.</done>
 </task>
 
 <task type="auto">
-  <name>Implement Motion-Damped GSAP Easing Timeline</name>
+  <name>Implement Optical GSAP Camera Move & Timing</name>
   <files>
     - src/lib/animations/heroAnimation.ts
   </files>
   <action>
-    - **Load Sequence:** Wait ~0.5s after load. Left text: `y: 40` → `0`, `scale: 0.98` → `1`, `opacity: 0` → `1` (stagger `0.12`). Right text: `x: 40` → `0`, `scale: 0.98` → `1`, `opacity: 0` → `1`.
-    - **Scroll Timeline (Easing-Based):** Apply motion damping with `scrub: 1.2` for heavy, expensive feel.
-      - *Phase 1 (0 → 25%):* Slow ease (`power2.out`), video `scale: 1.08` → `1.16`.
-      - *Phase 2 (25 → 55%):* Video `scale: 1.16` → `1.28`. Left text inward shift (`x: 0` → `20px`). Right text inward shift (`x: 0` → `-20px`).
-      - *Phase 3 (55 → 75%):* **HOLD MOMENT.** No motion. Creates premium pause.
-      - *Phase 4 (75 → 100%):* Fade out text, apply slight blur (`filter: blur(2px)`) to video to transition to next section.
-    - WHAT TO AVOID: Do not use linear mapping. It must feel like a directed scene.
+    - **Load Sequence:** Respect visual hierarchy. Wait `0.8s` after video starts before text enters. Left text: `y: 40` → `0`, `scale: 0.98` → `1`, `opacity: 0` → `1` (stagger `0.12`).
+    - **Optical Scroll Timeline:** Apply motion damping with `scrub: 1.2` for heavy, expensive feel. Limit GSAP updates where possible.
+      - *Phase 1 (0 → 25%):* Slow ease (`power2.out`), video `scale: 1.05` → `1.12` and `y: 0` → `-15px`.
+      - *Phase 2 (25 → 55%):* Video `scale: 1.12` → `1.18` and `y: -15px` → `-40px`. Left text inward shift (`x: 0` → `20px`).
+      - *Phase 3 (55 → 75%):* **Micro-Motion Hold Phase.** Stretch duration, `scale: 1.18` → `1.20`. Scene stays alive without major shifts.
+      - *Phase 4 (75 → 100%):* Fade out text cleanly, apply slight blur (`filter: blur(2px)`) to video to transition to next section.
+    - WHAT TO AVOID: Do not use large scale values (no `1.28`). Keep the zoom optical and sharp.
   </action>
-  <verify>Test scroll manually to confirm motion damping, the Phase 3 hold moment, and exact scale transforms.</verify>
-  <done>GSAP handles the 4 distinct easing phases perfectly without jitter, confirming a heavy, cinematic feel.</done>
+  <verify>Test scroll manually to confirm the optical push-in (`y: -40px` translation), the micro-motion hold, and exact timing delays.</verify>
+  <done>GSAP sequence feels like a real camera push-in. Text enters late enough to let the building register first. Motion is perfectly damped and never feels frozen.</done>
 </task>
 
 ## Success Criteria
-- [ ] Top floors of the building stay visually dominant and do not drift during zoom.
-- [ ] The center 30% of the screen is completely free of text at all times.
-- [ ] Layered depth gradients add contrast without looking like a flat overlay.
-- [ ] Scroll interaction features motion damping (`scrub: 1.2`) and an intentional hold moment.
+- [ ] Adaptive layout uses `clamp` constraints, leaving the right side empty for absolute focus.
+- [ ] Optical camera move mimics a real push-in (`scale: 1.05 → 1.18` coupled with upward translation).
+- [ ] Text entrance is delayed by 0.8s to establish visual hierarchy.
+- [ ] Performance is guarded with `will-change: transform`.
+- [ ] Phase 3 employs micro-motion to prevent the scene from feeling dead or artificial.
