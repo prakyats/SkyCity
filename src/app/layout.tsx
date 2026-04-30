@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Where every day feels like a holiday. Explore luxury sea view homes at Sky City.",
 };
 
+import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +30,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://cdn.yoursite.com" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-[#0a0a0a] overflow-x-hidden`}>
-        {children}
+        <SmoothScrollProvider>
+          {children}
+        </SmoothScrollProvider>
       </body>
     </html>
   );
