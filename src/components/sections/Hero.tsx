@@ -11,10 +11,10 @@ export const Hero = () => {
   const leftContentRef = useRef<HTMLDivElement>(null);
   const rightContentRef = useRef<HTMLDivElement>(null);
   
-  // Narrative State
+  // Narrative State (Locked to Plan 6.3)
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [narrativePhase, setNarrativePhase] = useState(1); // 1: Branding, 2: Identity, 3: Action
+  const [narrativePhase, setNarrativePhase] = useState(1); // 1: Branding, 2: Headline, 3: Details
   
   // Guard Refs
   const hasTriggered = useRef(false);
@@ -22,21 +22,18 @@ export const Hero = () => {
   const hasAnimatedPhase3 = useRef(false);
   const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 1. Fallback Logic: Guarantee text visibility even if video fails
+  // 1. Fallback Logic: Guarantee visibility on failure/mobile
   useEffect(() => {
-    // Immediate reveal on mobile
     if (window.innerWidth < 768) {
       setNarrativePhase(3);
       hasTriggered.current = true;
       return;
     }
 
-    // Start 2s fallback timer on mount
     fallbackTimerRef.current = setTimeout(() => {
       if (!hasTriggered.current) {
         setNarrativePhase(3);
         hasTriggered.current = true;
-        console.log('Hero: Fallback triggered');
       }
     }, 2000);
 
@@ -45,18 +42,17 @@ export const Hero = () => {
     };
   }, []);
 
-  // 2. Narrative Timing: Wait for isReady AND isPlaying
+  // 2. Exact Content Timeline (0s -> 6s -> 9s)
   useEffect(() => {
     if (isReady && isPlaying && !hasTriggered.current) {
-      // Clear fallback timer as video is success
       if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
 
-      // Phase 2 at 6s mark
+      // Phase 2 at 6000ms
       const t2 = setTimeout(() => {
         setNarrativePhase(2);
       }, 6000);
 
-      // Phase 3 at 9s mark
+      // Phase 3 at 9000ms (3s after Phase 2)
       const t3 = setTimeout(() => {
         setNarrativePhase(3);
         hasTriggered.current = true;
@@ -69,30 +65,44 @@ export const Hero = () => {
     }
   }, [isReady, isPlaying]);
 
-  // 3. GSAP Narrative Entrance (Phase-Aware)
+  // 3. GSAP Scoped Transitions
   useEffect(() => {
     const ctx = gsap.context(() => {
       if (narrativePhase === 2 && !hasAnimatedPhase2.current) {
-        // Identity Reveal (Phase 2)
+        // Identity Reveal
         gsap.fromTo(leftContentRef.current, 
           { opacity: 0, x: -40 },
-          { opacity: 1, x: 0, duration: 1.2, ease: 'power3.out' }
+          { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }
         );
         gsap.fromTo(rightContentRef.current,
           { opacity: 0, x: 40 },
-          { opacity: 1, x: 0, duration: 1.2, ease: 'power3.out' }
+          { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }
         );
         hasAnimatedPhase2.current = true;
       }
 
       if (narrativePhase === 3 && !hasAnimatedPhase3.current) {
         // Details & Action Reveal (Phase 3)
-        // Note: Micro-tag and CTA refs will be added in UI refactor
-        const details = document.querySelectorAll('.phase-3-content');
-        gsap.fromTo(details,
+        const tag = document.querySelector('.phase-3-tag');
+        const cta = document.querySelector('.phase-3-cta');
+        const support = document.querySelector('.phase-3-support');
+
+        const tl = gsap.timeline();
+
+        // Tag + CTA: y: 20 -> 0
+        tl.fromTo([tag, cta],
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 1.0, stagger: 0.2, ease: 'power2.out' }
+          { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: 'power2.out' },
+          0
         );
+
+        // Support: y: 10 -> 0
+        tl.fromTo(support,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' },
+          0.15
+        );
+
         hasAnimatedPhase3.current = true;
       }
     });
@@ -114,10 +124,10 @@ export const Hero = () => {
   return (
     <section 
       ref={sectionRef} 
-      className="relative w-full h-screen overflow-hidden bg-[#0a0a0a]"
+      className="relative w-full h-screen overflow-hidden bg-[#0a0a0a] font-serif antialiased"
       aria-label="Hero Section"
     >
-      {/* 1. Video Layer (z-0) */}
+      {/* TASK 1 & 2 — Video Layer (z-0) */}
       <div ref={videoWrapperRef} className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         <VideoBackground
           webmSrc="https://res.cloudinary.com/drzbbbncs/video/upload/v1777554895/hero_b0imcd.webm"
@@ -128,73 +138,96 @@ export const Hero = () => {
         />
       </div>
 
-      {/* 2. Cinematic Overlay (z-10) */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A1A2F]/55 via-[#0A1A2F]/35 to-transparent mix-blend-multiply" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_60%,rgba(0,0,0,0.25)_100%)]" />
+      {/* TASK 3 — Gradient Overlay (z-10) */}
+      <div 
+        className="absolute inset-0 z-10 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to right, rgba(10,26,47,0.35) 0%, rgba(10,26,47,0.2) 35%, rgba(10,26,47,0.05) 55%, transparent 70%)'
+        }}
+      />
+
+      {/* TASK 4 — Brand Anchor (z-30) - Persistent */}
+      <div 
+        className="absolute z-30 pointer-events-none"
+        style={{
+          top: 'clamp(20px, 3vw, 40px)',
+          left: 'clamp(20px, 4vw, 80px)'
+        }}
+      >
+        <div className="text-white text-[12px] md:text-[14px] tracking-[0.2em] uppercase opacity-70">
+          YAMUNA SKY CITY
+        </div>
       </div>
 
-      {/* 3. Branding Layer (z-30) - Phase 1+ */}
-      <div className="absolute top-0 inset-x-0 z-30 p-[clamp(16px,3vw,40px)] flex justify-between items-start pointer-events-none">
-        <div className="text-white font-serif tracking-[0.2em] text-xs md:text-lg opacity-75">YAMUNA SKY CITY</div>
-      </div>
-
-      {/* 4. Content Layer (z-20) */}
-      <div className="absolute inset-0 z-20 flex flex-col md:flex-row items-center justify-center md:justify-between px-6 md:px-[6vw] w-full h-full pointer-events-none gap-8 md:gap-0">
+      {/* TASK 7 — Split Composition Container (z-20) */}
+      <div className="absolute inset-0 z-20 flex flex-col md:flex-row items-center justify-center md:justify-between px-[clamp(24px,6vw,80px)] w-full h-full pointer-events-none gap-8 md:gap-0">
           
-          {/* Phase 2: Main Headings Reveal */}
-          {narrativePhase >= 2 && (
-            <>
-              {/* Left Block: Identity Part 1 */}
-              <div ref={leftContentRef} className="flex flex-col items-center md:items-end w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] md:ml-[clamp(24px,6vw,80px)] text-center md:text-right">
-                 {/* Phase 3: Micro Tag */}
-                 {narrativePhase >= 3 && (
-                   <span className="phase-3-content text-white/60 font-light tracking-[0.4em] uppercase text-[9px] md:text-[10px] mb-4">
-                     A New Landmark in South India
-                   </span>
-                 )}
-                 
-                 <h1 className="text-white text-4xl md:text-6xl lg:text-[5.5rem] font-serif leading-[1.1] tracking-tight">
-                   Yamuna
-                 </h1>
+          {/* TASK 8 & 12 — Left Block (Primary) */}
+          <div 
+            ref={leftContentRef} 
+            className={`flex flex-col items-center md:items-end w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] text-center md:text-right transition-opacity duration-300 ${narrativePhase >= 2 ? 'opacity-100' : 'opacity-0'}`}
+          >
+             <h1 
+               className="text-white leading-[0.95] tracking-tight font-semibold"
+               style={{ fontSize: 'clamp(42px, 9vw, 140px)' }}
+             >
+               Sky City
+             </h1>
 
-                 {/* Phase 3: CTA */}
-                 {narrativePhase >= 3 && (
-                   <div className="phase-3-content mt-12">
-                     <button className="pointer-events-auto border border-white/20 hover:border-white/60 px-10 py-3 text-white/80 text-[10px] tracking-[0.2em] uppercase transition-all backdrop-blur-sm">
-                       Explore More
-                     </button>
-                   </div>
-                 )}
-              </div>
+             {/* TASK 12 — CTA Button (Phase 3) */}
+             {narrativePhase >= 3 && (
+               <div className="phase-3-cta mt-[clamp(24px,8vw,60px)]">
+                 <button className="pointer-events-auto border border-white/30 hover:border-white/60 px-8 md:px-10 py-3.5 md:py-4 text-white/80 text-[14px] tracking-[0.2em] uppercase rounded-full transition-all backdrop-blur-sm">
+                   Explore More
+                 </button>
+               </div>
+             )}
+          </div>
 
-              {/* Center Protection Zone (Implicit in md:justify-between) */}
+          {/* TASK 7 — Center Protection Zone (Implicit in md:justify-between) */}
 
-              {/* Right Block: Identity Part 2 */}
-              <div ref={rightContentRef} className="flex flex-col items-center md:items-start w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] md:mr-[clamp(24px,6vw,80px)] text-center md:text-left">
-                 <h1 className="text-white text-4xl md:text-6xl lg:text-[5.5rem] font-serif leading-[1.1] italic tracking-tight">
-                   Sky City
-                 </h1>
+          {/* TASK 9 & 11 — Right Block (Secondary) */}
+          <div 
+            ref={rightContentRef} 
+            className={`flex flex-col items-center md:items-start w-full max-w-[320px] md:max-w-[420px] md:w-[min(420px,35vw)] text-center md:text-left transition-opacity duration-300 ${narrativePhase >= 2 ? 'opacity-100' : 'opacity-0'}`}
+          >
+             <h1 
+               className="text-white leading-[0.95] tracking-tight font-normal italic"
+               style={{ fontSize: 'clamp(42px, 9vw, 140px)' }}
+             >
+               Sea View
+             </h1>
 
-                 {/* Phase 3: Support Text */}
-                 {narrativePhase >= 3 && (
-                   <p className="phase-3-content text-white/50 font-light tracking-wide text-sm md:text-base max-w-[280px] mt-8 leading-relaxed">
-                     South India’s Tallest Sea View Residential Tower
-                   </p>
-                 )}
-              </div>
-            </>
-          )}
+             {/* TASK 11 — Support Text (Phase 3) */}
+             {narrativePhase >= 3 && (
+               <p className="phase-3-support text-white/65 font-light tracking-wide text-sm md:text-base max-w-[280px] mt-6 leading-relaxed">
+                 South India’s Tallest Sea View Residential Tower
+               </p>
+             )}
+          </div>
       </div>
 
-      {/* RERA info anchor - Phase 3+ */}
+      {/* TASK 10 — Micro Tag (Phase 3) - Detached */}
       {narrativePhase >= 3 && (
-        <div className="phase-3-content absolute bottom-6 left-6 md:left-12 lg:left-20 z-20 opacity-30">
-          <p className="text-white text-[10px] tracking-widest uppercase font-light">
-            RERA NO. UPRERAPRJ123456
-          </p>
+        <div 
+          className="phase-3-tag absolute z-20 pointer-events-none hidden md:block"
+          style={{
+            top: '35%',
+            left: 'clamp(24px, 6vw, 80px)'
+          }}
+        >
+           <span className="text-white/60 font-light tracking-[0.18em] uppercase text-[12px] md:text-[14px]">
+             A New Landmark in South India
+           </span>
         </div>
       )}
+
+      {/* RERA info anchor */}
+      <div className="absolute bottom-6 left-6 md:left-12 lg:left-20 z-20 opacity-30">
+        <p className="text-white text-[10px] tracking-widest uppercase font-light">
+          RERA NO. UPRERAPRJ123456
+        </p>
+      </div>
 
     </section>
   );
