@@ -14,7 +14,7 @@ export const ProjectIntro = () => {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // 1. Left Block Reveal (Starts immediately)
+      // 1. Left Block Reveal
       gsap.fromTo(leftContentRef.current,
         { opacity: 0, y: 50 },
         {
@@ -27,11 +27,12 @@ export const ProjectIntro = () => {
             start: 'top 80%',
             toggleActions: 'play none none none',
             once: true,
+            invalidateOnRefresh: true,
           }
         }
       );
 
-      // 2. Right Block Reveal (0.2s Delay)
+      // 2. Right Block Reveal
       gsap.fromTo(rightContentRef.current,
         { opacity: 0, y: 30 },
         {
@@ -45,11 +46,12 @@ export const ProjectIntro = () => {
             start: 'top 80%',
             toggleActions: 'play none none none',
             once: true,
+            invalidateOnRefresh: true,
           }
         }
       );
 
-      // 3. Highlight Items (0.35s Delay + 0.12s Stagger)
+      // 3. Highlight Items
       gsap.fromTo(highlightItemsRef.current,
         { opacity: 0, y: 20 },
         {
@@ -64,6 +66,7 @@ export const ProjectIntro = () => {
             start: 'top 80%',
             toggleActions: 'play none none none',
             once: true,
+            invalidateOnRefresh: true,
           }
         }
       );
@@ -82,8 +85,9 @@ export const ProjectIntro = () => {
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full z-20 -mt-[100px] overflow-hidden antialiased"
+      className="relative w-full z-20 -mt-[100px] overflow-hidden antialiased subpixel-antialiased"
       style={{
+        backgroundColor: '#0A1A2F', // Hard fallback
         background: 'linear-gradient(to bottom, #0A1A2F 0%, #0A1A2F 18%, rgba(10, 26, 47, 0.85) 28%, rgba(255, 255, 255, 0.6) 48%, #FFFFFF 65%)',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 100%',
@@ -92,7 +96,7 @@ export const ProjectIntro = () => {
       }}
       id="overview"
     >
-      {/* EDGE BLEND SAFETY: Pseudo-element overlay */}
+      {/* EDGE BLEND SAFETY: Pointer-events: none is mandatory */}
       <div 
         className="absolute top-0 left-0 w-full h-[120px] pointer-events-none z-10"
         style={{
@@ -108,12 +112,16 @@ export const ProjectIntro = () => {
             ref={leftContentRef} 
             className="flex flex-col items-center md:items-start text-center md:text-left"
           >
-            <span className="text-[12px] tracking-[0.22em] uppercase text-black/45 mb-4 block">
+            <span className="text-[12px] tracking-[0.22em] uppercase text-black/45 mb-4 block select-none">
               Project Overview
             </span>
             <h2 
               className="text-[clamp(28px,4.5vw,64px)] font-serif font-medium leading-[1.15] text-[#0a0a0a] mb-8"
-              style={{ letterSpacing: '-0.005em' }}
+              style={{ 
+                letterSpacing: '-0.005em',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
+              }}
             >
               Yamuna Sky City — South India’s Tallest Sea View Residential Tower
             </h2>
@@ -122,10 +130,10 @@ export const ProjectIntro = () => {
             </p>
           </div>
 
-          {/* Right Block: Highlights Structure (Deterministic Responsive Offset) */}
+          {/* Right Block: Highlights Structure (Optimized with will-change) */}
           <div 
             ref={rightContentRef} 
-            className="flex flex-col items-center md:items-start w-full"
+            className="flex flex-col items-center md:items-start w-full will-change-transform"
             style={{ 
               transform: 'translateY(clamp(12px, 2vw, 28px))' 
             }}
@@ -135,17 +143,15 @@ export const ProjectIntro = () => {
                 <li 
                   key={index}
                   ref={el => { highlightItemsRef.current[index] = el; }}
-                  className="flex flex-col items-center md:items-start py-[18px] border-b border-black/10 last:border-0 hover:opacity-80 transition-all duration-300 cursor-default group"
+                  className="flex flex-col items-center md:items-start py-[18px] border-b border-black/10 last:border-0 hover:opacity-75 transition-opacity duration-300 cursor-default"
                 >
                   <span className="text-[11px] opacity-40 tracking-[0.15em] mb-2 font-medium">
                     0{index + 1}
                   </span>
-                  <div className="relative overflow-hidden w-full text-center md:text-left">
-                    <span className="text-[18px] md:text-[20px] font-medium leading-[1.4] text-[#0a0a0a] group-hover:text-black transition-colors block">
+                  <div className="relative w-full text-center md:text-left">
+                    <span className="text-[18px] md:text-[20px] font-medium leading-[1.4] text-[#0a0a0a]">
                       {highlight}
                     </span>
-                    {/* Optional Underline Expansion */}
-                    <div className="absolute bottom-0 left-0 w-full h-[1px] bg-black/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left hidden md:block" />
                   </div>
                 </li>
               ))}

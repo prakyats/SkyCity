@@ -3,13 +3,13 @@
 ## Objective
 Anchored the user post-hero with a clean, high-contrast editorial section.
 
-## Changes (Wave 4 — Deterministic Production Sync)
-- **Zero-Banding Gradient**: Implemented a mathematically precise multi-step gradient (`#0A1A2F` -> `rgba(10,26,47,0.85)` -> `rgba(255,255,255,0.6)` -> `White`) to ensure a flawless transition from the hero video with zero visual banding.
-- **Edge Blend Safety**: Added an absolute `120px` pseudo-element overlay at the top to hide any potential gradient seams between the Hero and the Intro section.
-- **Responsive Vertical Rhythm**: Replaced fixed offsets with `translateY(clamp(12px, 2vw, 28px))` for the right highlight block, ensuring visual asymmetry scales correctly across all device sizes.
-- **Hardened GSAP Orchestration**: Orchestrated a deterministic reveal flow: Left Block (immediate), Right Block (0.2s delay), and Highlights (0.35s delay + 0.12s stagger).
-- **Interactive Highlights**: Upgraded list items with `18px` padding, smooth opacity transitions, and a hidden-until-hover `scale-X` underline animation.
-- **Production Polish**: Enabled `antialiased` smoothing and refined typography tracking to `-0.005em` for the serif headers.
+## Changes (Wave 5 — Final Production Safeguards)
+- **Gradient & Overlay Safety**: Added `#0A1A2F` background-color fallback to prevent banding on low-quality displays. Enforced `pointer-events: none` on the top edge overlay to ensure no interactive content is blocked.
+- **Performance Optimization**: Applied `will-change: transform` specifically to the right content block to optimize GPU acceleration while avoiding over-promotion of static elements.
+- **GSAP Scroll Integrity**: Added `invalidateOnRefresh: true` to all ScrollTrigger instances, ensuring trigger points are correctly recalculated on window resize or layout updates.
+- **Premium Font Rendering**: Applied global `WebkitFontSmoothing` and `MozOsxFontSmoothing` to ensure the serif typography remains crisp and professional across browsers.
+- **Hover Discipline**: Simplified highlight interactions to purely use `opacity` and `transition`, removing redundant motion to maintain a clean, stable aesthetic.
+- **Context Cleanup**: Verified `gsap.context()` usage and ensured `revert()` is called on component unmount to prevent memory leaks and duplicate animations.
 
 ## Verification
 - Verified responsive grid behavior (stacks on mobile).

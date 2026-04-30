@@ -1,13 +1,13 @@
 ---
 phase: 7
 plan: 2
-wave: 4
+wave: 5
 ---
 
-# Plan 7.2: Project Positioning Section (Deterministic Production Version)
+# Plan 7.2: Project Positioning Section (Final Production Safeguards)
 
 ## Objective
-Anchor the user after the cinematic hero with a fully deterministic, visually consistent, and device-safe implementation.
+Add final production safeguards to ensure visual consistency, performance stability, and rendering precision across all environments.
 
 ## Context
 - src/components/sections/ProjectIntro.tsx
@@ -16,47 +16,46 @@ Anchor the user after the cinematic hero with a fully deterministic, visually co
 ## Tasks
 
 <task type="auto">
-  <name>Hardened Background & Edge Blending</name>
+  <name>Harden Gradient & Overlay Safety</name>
   <files>
     - [MODIFY] src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Implement exact multi-step gradient for zero-banding transition.
-    - Add absolute pseudo-element overlay (120px) at the top for perfect seam hiding.
-    - Set `margin-top: -100px` and `padding-top: 180px`.
+    - Add `#0A1A2F` background-color fallback.
+    - Set `pointer-events: none` on the top edge blend overlay.
+    - Ensure overlay `z-index` is correctly managed.
   </action>
-  <verify>Check for visible seams or banding on high-brightness screens.</verify>
+  <verify>Check that links/buttons below the overlay are still clickable.</verify>
 </task>
 
 <task type="auto">
-  <name>Responsive Asymmetry & Highlight Refinement</name>
+  <name>Performance & Rendering Optimization</name>
   <files>
     - src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Replace fixed offset with `translateY(clamp(12px, 2vw, 28px))` for the right block.
-    - Refine highlight items with `18px` padding and hover interactions.
-    - Apply typography micro-fixes (font-smoothing, -0.005em tracking).
+    - Apply `will-change: transform` specifically to the right content block.
+    - Implement global font-smoothing for serif elements.
+    - Refine hover states to use only opacity and border (no motion).
   </action>
-  <verify>Test responsive scaling of the vertical offset.</verify>
+  <verify>Confirm smooth scrolling and crisp text rendering.</verify>
 </task>
 
 <task type="auto">
-  <name>Deterministic GSAP Orchestration</name>
+  <name>GSAP & Scroll Integrity</name>
   <files>
     - src/components/sections/ProjectIntro.tsx
   </files>
   <action>
-    - Remove global delay from trigger.
-    - Set Right block delay: 0.2s.
-    - Set Highlights delay: 0.35s with 0.12s stagger.
-    - Use `power3.out` duration 0.9s.
+    - Add `invalidateOnRefresh: true` to all ScrollTriggers.
+    - Verify `gsap.context()` cleanup on unmount.
   </action>
-  <verify>Ensure left-to-right reveal flow is perfectly timed.</verify>
+  <verify>Resize window and verify trigger points recalculate correctly.</verify>
 </task>
 
 ## Success Criteria
-- [ ] Zero banding or visible seams in the hero-to-intro transition.
-- [ ] Responsive vertical asymmetry maintained across breakpoints.
-- [ ] Interactive highlights with smooth hover transitions.
-- [ ] Precise directional motion flow (Left -> Right -> Details).
+- [ ] No visual banding on high-brightness displays.
+- [ ] Interactive elements are not blocked by overlays.
+- [ ] Scroll performance is optimized via targeted `will-change`.
+- [ ] Typography is smoothed and crisp.
+- [ ] Scroll triggers are consistent after layout refreshes.
