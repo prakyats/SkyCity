@@ -57,13 +57,13 @@ export const VideoBackground = ({
   };
 
   return (
-    <div className={`absolute inset-0 w-full h-full overflow-hidden bg-[#0A1A2F] ${className}`}>
+    <div className={`absolute inset-0 w-full h-full overflow-hidden ${className}`}>
       {/* 1. Poster Image (Loads instantly, blocks layout shift) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={posterSrc}
         alt=""
-        className={`absolute inset-0 w-full h-full object-cover object-[center_45%] transform-gpu will-change-transform transition-opacity duration-600 ease-in-out ${fadeVideo ? 'opacity-0' : 'opacity-100'}`}
+        className={`absolute top-0 left-0 w-full h-full object-cover object-[center_45%] transform-gpu will-change-transform transition-opacity duration-600 ease-in-out ${fadeVideo ? 'opacity-0' : 'opacity-100'}`}
         aria-hidden="true"
       />
 
@@ -78,7 +78,7 @@ export const VideoBackground = ({
           disablePictureInPicture
           onLoadedData={handleLoadedData}
           onPlay={() => onPlay?.()}
-          className={`absolute inset-0 w-full h-full object-cover object-[center_45%] origin-center transform-gpu will-change-transform transition-opacity duration-600 ease-in-out ${fadeVideo ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute top-0 left-0 w-full h-full object-cover object-[center_45%] origin-center transform-gpu will-change-transform transition-opacity duration-600 ease-in-out ${fadeVideo ? 'opacity-100' : 'opacity-0'}`}
           aria-hidden="true"
         >
           <source src={webmSrc} type="video/webm" />

@@ -124,7 +124,7 @@ export const Hero = () => {
   return (
     <section 
       ref={sectionRef} 
-      className="relative w-full h-screen overflow-hidden bg-[#0a0a0a] font-serif antialiased"
+      className="relative w-[100vw] h-[100vh] overflow-hidden font-serif antialiased"
       aria-label="Hero Section"
     >
       {/* TASK 1 & 2 — Video Layer (z-0) */}
@@ -137,14 +137,6 @@ export const Hero = () => {
           onPlay={handleVideoPlay}
         />
       </div>
-
-      {/* TASK 3 — Gradient Overlay (z-10) */}
-      <div 
-        className="absolute inset-0 z-10 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to right, rgba(10,26,47,0.35) 0%, rgba(10,26,47,0.2) 35%, rgba(10,26,47,0.05) 55%, transparent 70%)'
-        }}
-      />
 
       {/* TASK 4 — Brand Anchor (z-30) - Persistent */}
       <div 

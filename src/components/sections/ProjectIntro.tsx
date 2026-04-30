@@ -85,25 +85,13 @@ export const ProjectIntro = () => {
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full z-20 -mt-[100px] overflow-hidden antialiased subpixel-antialiased"
+      className="relative w-full bg-white z-[5] overflow-hidden antialiased subpixel-antialiased"
       style={{
-        backgroundColor: '#0A1A2F', // Hard fallback
-        background: 'linear-gradient(to bottom, #0A1A2F 0%, #0A1A2F 18%, rgba(10, 26, 47, 0.85) 28%, rgba(255, 255, 255, 0.6) 48%, #FFFFFF 65%)',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: '100% 100%',
-        paddingTop: '180px',
+        paddingTop: '120px',
         paddingBottom: '140px',
       }}
       id="overview"
     >
-      {/* EDGE BLEND SAFETY: Pointer-events: none is mandatory */}
-      <div 
-        className="absolute top-0 left-0 w-full h-[120px] pointer-events-none z-10"
-        style={{
-          background: 'linear-gradient(to bottom, #0A1A2F, transparent)'
-        }}
-      />
-
       <div className="max-w-[1200px] mx-auto px-[clamp(24px,6vw,80px)] relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-12 md:gap-[100px] items-start">
           
