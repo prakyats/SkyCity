@@ -4,12 +4,12 @@
 > **Current Focus**: Phase 4 Planning - Center-Focused Cinematic Hero Redesign
 
 ## Current Position
-- **Phase**: 8
-- **Task**: Premium Physics Tuning (Wave 2) Complete.
+- **Phase**: 7
+- **Task**: Visual Showcase Section (Wave 1) Complete.
 - **Status**: Complete
 
 ## Last Session Summary
-Tuned Lenis scroll physics with a `lerp: 0.08` and `power4.out` easing, achieving a weighted, agency-grade scroll feel with zero overshoot.
+Created the `VisualShowcase` component featuring a dominant architectural media block and minimal editorial content, integrated seamlessly after the highlights.
 
 ## Next Steps
 1. Execute Plan 7.2 to add the ProjectIntro section below the Hero.
