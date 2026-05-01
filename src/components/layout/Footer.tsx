@@ -59,29 +59,29 @@ export const Footer = () => {
 
       {/* Big display tagline */}
       <div className="overflow-hidden border-b"
-        style={{ borderColor: 'rgba(255,255,255,0.04)', paddingTop: 'clamp(60px,8vw,100px)', paddingBottom: 'clamp(40px,6vw,80px)' }}>
+        style={{ borderColor: 'rgba(255,255,255,0.04)', paddingTop: 'clamp(30px,4vw,50px)', paddingBottom: 'clamp(20px,3vw,40px)' }}>
         <div className="section-inner">
           <p className="footer-tagline font-display text-white/10 select-none whitespace-nowrap"
-            style={{ fontSize: 'clamp(36px,6vw,90px)', fontWeight: 300, lineHeight: 1, letterSpacing: '-0.02em' }}>
+            style={{ fontSize: 'clamp(30px,5vw,70px)', fontWeight: 300, lineHeight: 1, letterSpacing: '-0.02em' }}>
             Building Trust, Quality, Dreams, Success &amp; Excellence.
           </p>
         </div>
       </div>
 
       {/* Main grid */}
-      <div className="section-inner py-16 md:py-20">
+      <div className="section-inner py-10 md:py-14">
         <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr_1fr_1fr] gap-12 md:gap-8">
 
           {/* Brand col */}
           <div className="footer-col flex flex-col">
-            <div className="flex items-center gap-6 mb-10">
+            <div className="flex items-center gap-6 mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logos/skyfavicon.png" alt="Sky City" className="h-20 w-auto object-contain" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logos/yamuna_homes.png" alt="Yamuna Homes" className="h-20 w-auto object-contain opacity-80" />
             </div>
-            <p className="font-body text-[var(--text-white-45)] leading-relaxed mb-8"
-              style={{ fontSize: '0.9rem', maxWidth: '30ch' }}>
+            <p className="font-body text-[var(--text-white-45)] leading-relaxed mb-6"
+              style={{ fontSize: '0.85rem', maxWidth: '30ch' }}>
               Yamuna Homes and Design Pvt. Ltd. — shaping skylines across
               Karnataka since 1993 with trust, quality, and architectural ambition.
             </p>
@@ -151,7 +151,7 @@ export const Footer = () => {
 
       {/* Bottom bar */}
       <div className="border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-        <div className="section-inner py-6 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="section-inner py-4 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="label text-[var(--text-white-28)]" style={{ fontSize: '0.52rem' }}>
             © 2026 Yamuna Homes and Design Pvt. Ltd. All Rights Reserved.
           </p>
