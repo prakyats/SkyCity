@@ -116,6 +116,22 @@ export const Amenities = () => {
         track.addEventListener('mouseenter', slowDown);
         track.addEventListener('mouseleave', speedUp);
 
+        // ── MANUAL INTERACTION: React to horizontal wheel ──
+        const onWheel = (e: WheelEvent) => {
+          if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+            e.preventDefault();
+            // Nudge the animation's time based on scroll delta
+            gsap.to(loop, { 
+              time: loop.time() + (e.deltaX * 0.005), 
+              duration: 0.3, 
+              overwrite: true,
+              ease: 'power2.out'
+            });
+          }
+        };
+
+        track.addEventListener('wheel', onWheel as any, { passive: false });
+
         // Play only when section is in view
         ScrollTrigger.create({
           trigger: sectionRef.current,
