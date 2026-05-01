@@ -84,11 +84,10 @@ export const VisualShowcase = () => {
               className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0" 
             />
 
-            {/* Dark Gradient Overlay - Responsive for mobile readability */}
-            <div className="absolute inset-0 bg-black/40 pointer-events-none" 
+            {/* Left-aligned Gradient Overlay for text legibility */}
+            <div className="absolute inset-0 pointer-events-none" 
               style={{ 
-                background: 'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                // Overridden by media query for desktop in CSS usually, but here I'll just make it balanced
+                background: 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 70%)',
               }} />
           </div>
 
