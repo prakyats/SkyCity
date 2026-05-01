@@ -1,7 +1,8 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import Image from 'next/image';
+import { useState, useRef, useEffect } from 'react';
 
 const amenities = [
   {
@@ -210,8 +211,7 @@ export const Amenities = () => {
 
                 {/* Image with scale */}
                 <div className="absolute inset-0 transition-transform duration-[1400ms] ease-out group-hover:scale-110">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                  <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 768px) 300px, 400px" />
                 </div>
 
                 {/* Multi-layer gradient */}
