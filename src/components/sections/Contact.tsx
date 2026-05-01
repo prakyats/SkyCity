@@ -1,144 +1,145 @@
 'use client';
-
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
+const socials = [
+  { label: 'LinkedIn', href: '#' },
+  { label: 'YouTube',  href: '#' },
+  { label: 'Facebook', href: '#' },
+  { label: 'Instagram',href: '#' },
+];
+
 export const Contact = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const leftRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-
     const ctx = gsap.context(() => {
-      gsap.fromTo([leftRef.current, formRef.current],
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 75%',
-            toggleActions: 'play none none none',
-            once: true,
-          }
-        }
-      );
+      gsap.fromTo('.ctc-reveal', { opacity: 0, y: 36 },
+        { opacity: 1, y: 0, duration: 1, stagger: 0.15, ease: 'power3.out',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true } });
     }, sectionRef);
-
     return () => ctx.revert();
   }, []);
 
   return (
-    <section 
-      ref={sectionRef}
-      className="relative w-full py-32 bg-[#050505] overflow-hidden"
-      id="contact"
-    >
-      <div className="max-w-[1200px] mx-auto px-[clamp(24px,6vw,80px)]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-20 md:gap-32">
-          
-          {/* Left: Contact Info */}
-          <div ref={leftRef} className="flex flex-col">
-            <span className="text-[12px] tracking-[0.25em] uppercase text-white/40 mb-4 block">
-              Get in Touch
-            </span>
-            <h2 className="text-[clamp(32px,5vw,64px)] font-serif font-medium text-white leading-tight mb-8">
-              Book Your<br />Luxury Address
+    <section ref={sectionRef} className="bg-section-dark section-pad overflow-hidden" id="contact">
+      <div className="section-inner">
+        <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-16 md:gap-24 items-start">
+
+          {/* Left */}
+          <div className="ctc-reveal flex flex-col">
+            <span className="gold-rule" />
+            <span className="label text-[var(--gold)] mb-6 block">Get in Touch</span>
+            <h2 className="font-display text-white mb-8"
+              style={{ fontSize: 'clamp(2.4rem,5.5vw,6rem)', fontWeight: 300, lineHeight: 0.9 }}>
+              Book Your<br />
+              <em style={{ color: 'rgba(255,255,255,0.55)' }}>Luxury Address</em>
             </h2>
-            <p className="text-[16px] leading-relaxed text-white/60 mb-12 max-w-[420px]">
-              Experience the pinnacle of coastal living. Our team will reach you within 24 hours to arrange an exclusive site visit.
+            <p className="font-body text-[var(--text-white-45)] leading-[1.85] mb-14"
+              style={{ fontSize: 'clamp(0.9rem,1.1vw,1rem)', maxWidth: '38ch' }}>
+              Experience the pinnacle of coastal living. Our team will reach you
+              within 24 hours to arrange an exclusive site visit.
             </p>
 
-            <div className="flex flex-col gap-8">
-              <div className="flex items-start gap-6">
-                <span className="text-xl opacity-50">📍</span>
-                <div>
-                  <h4 className="text-[14px] font-serif text-white/90 mb-1">Visit Us</h4>
-                  <p className="text-[14px] text-white/40 leading-relaxed">
-                    1st Floor, Nalapad Building,<br />Mallikatta, Kadri, Mangalore
-                  </p>
+            <div className="flex flex-col gap-8 mb-14">
+              {[
+                { line1: 'Visit Us', line2: '1st Floor, Nalapad Building,\nMallikatta, Kadri, Mangalore' },
+                { line1: 'Direct Line', line2: '+91 88844 39155', href: 'tel:+918884439155' },
+                { line1: 'Email', line2: 'yamunahomes16@gmail.com', href: 'mailto:yamunahomes16@gmail.com' },
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col gap-1 border-b pb-6"
+                  style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+                  <span className="label text-[var(--gold)]" style={{ fontSize: '0.58rem' }}>{item.line1}</span>
+                  {item.href
+                    ? <a href={item.href} className="hover-gold-line font-body text-[var(--text-white-70)] text-sm leading-relaxed"
+                        style={{ whiteSpace: 'pre-line' }}>{item.line2}</a>
+                    : <span className="font-body text-[var(--text-white-70)] text-sm leading-relaxed"
+                        style={{ whiteSpace: 'pre-line' }}>{item.line2}</span>
+                  }
                 </div>
-              </div>
-              <div className="flex items-start gap-6">
-                <span className="text-xl opacity-50">📞</span>
-                <div>
-                  <h4 className="text-[14px] font-serif text-white/90 mb-1">Direct Line</h4>
-                  <p className="text-[14px] text-white/40">+91 88844 39155</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-6">
-                <span className="text-xl opacity-50">✉</span>
-                <div>
-                  <h4 className="text-[14px] font-serif text-white/90 mb-1">Email</h4>
-                  <p className="text-[14px] text-white/40">yamunahomes16@gmail.com</p>
-                </div>
-              </div>
+              ))}
+            </div>
+
+            <div className="flex gap-5">
+              {socials.map((s, i) => (
+                <a key={i} href={s.href}
+                  className="label text-[var(--text-white-28)] hover:text-[var(--gold)] transition-colors"
+                  style={{ fontSize: '0.56rem' }}>
+                  {s.label}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Right: Lead Form */}
-          <div 
-            ref={formRef}
-            className="p-10 md:p-16 rounded-[32px] bg-white/5 border border-white/10"
-          >
-            <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-white/40 ml-2">Full Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="John Doe"
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white text-[14px] outline-none focus:border-white/30 transition-all"
-                  />
+          {/* Right — form */}
+          <div className="ctc-reveal">
+            <div className="p-10 md:p-14" style={{
+              background: 'rgba(255,255,255,0.025)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 'var(--r-2xl)',
+            }}>
+              <h3 className="section-heading text-white mb-2"
+                style={{ fontSize: 'clamp(1.2rem,2vw,1.6rem)' }}>
+                Request a Consultation
+              </h3>
+              <p className="font-body text-[var(--text-white-45)] text-sm mb-10 leading-relaxed">
+                Fill in your details and a dedicated property consultant will
+                personally reach out within 24 hours.
+              </p>
+
+              <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="flex flex-col gap-2">
+                    <label className="label text-[var(--text-white-28)]" style={{ fontSize: '0.56rem' }}>
+                      Full Name *
+                    </label>
+                    <input type="text" placeholder="John Doe" className="input-dark" required />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="label text-[var(--text-white-28)]" style={{ fontSize: '0.56rem' }}>
+                      Email Address
+                    </label>
+                    <input type="email" placeholder="john@example.com" className="input-dark" />
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-white/40 ml-2">Email Address</label>
-                  <input 
-                    type="email" 
-                    placeholder="john@example.com"
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white text-[14px] outline-none focus:border-white/30 transition-all"
-                  />
+                  <label className="label text-[var(--text-white-28)]" style={{ fontSize: '0.56rem' }}>
+                    Mobile Number *
+                  </label>
+                  <div className="flex gap-3">
+                    <div className="input-dark flex items-center justify-center flex-shrink-0"
+                      style={{ width: 72, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+                      +91
+                    </div>
+                    <input type="tel" placeholder="98765 43210" className="input-dark flex-1" required />
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] tracking-[0.2em] uppercase text-white/40 ml-2">Mobile Number</label>
-                <input 
-                  type="tel" 
-                  placeholder="+91 00000 00000"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white text-[14px] outline-none focus:border-white/30 transition-all"
-                />
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] tracking-[0.2em] uppercase text-white/40 ml-2">Message</label>
-                <textarea 
-                  rows={4}
-                  placeholder="Tell us about your requirements..."
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white text-[14px] outline-none focus:border-white/30 transition-all resize-none"
-                />
-              </div>
+                <div className="flex flex-col gap-2">
+                  <label className="label text-[var(--text-white-28)]" style={{ fontSize: '0.56rem' }}>
+                    Message
+                  </label>
+                  <textarea rows={3} placeholder="Tell us about your requirements..."
+                    className="input-dark resize-none" />
+                </div>
 
-              <div className="flex items-start gap-4 mt-2">
-                <input type="checkbox" className="mt-1 accent-white/40" defaultChecked />
-                <p className="text-[12px] text-white/30 leading-relaxed">
-                  I agree to receive communications regarding Yamuna Sky City and acknowledge the processing of my personal data.
-                </p>
-              </div>
+                <div className="flex items-start gap-4 mt-1">
+                  <input type="checkbox" defaultChecked
+                    className="mt-1 flex-shrink-0 accent-[#E8A020]" />
+                  <p className="font-body text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.28)' }}>
+                    I agree to receive communications regarding Yamuna Sky City and acknowledge
+                    the processing of my personal data as per the Privacy Policy.
+                  </p>
+                </div>
 
-              <button 
-                type="submit"
-                className="w-full py-5 bg-white text-black rounded-full text-[12px] tracking-[0.2em] uppercase font-bold hover:bg-white/90 transition-all duration-300 mt-4"
-              >
-                Submit Enquiry →
-              </button>
-            </form>
+                <button type="submit" className="btn-gold w-full mt-3" style={{ fontSize: '0.68rem', padding: '1.1rem' }}>
+                  Submit Enquiry →
+                </button>
+              </form>
+            </div>
           </div>
 
         </div>

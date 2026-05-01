@@ -138,7 +138,7 @@ export const Hero = () => {
         />
       </div>
 
-      {/* TASK 4 — Brand Anchor (z-30) - Persistent */}
+      {/* TASK 4 — Brand Anchor (z-30) - Persistent Top Left */}
       <div 
         className="absolute z-30 pointer-events-none"
         style={{
@@ -146,9 +146,28 @@ export const Hero = () => {
           left: 'clamp(20px, 4vw, 80px)'
         }}
       >
-        <div className="text-white text-[12px] md:text-[14px] tracking-[0.2em] uppercase opacity-70">
-          YAMUNA SKY CITY
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img 
+          src="/logos/skyfavicon.png" 
+          alt="Sky City Logo" 
+          className="h-10 md:h-14 w-auto object-contain"
+        />
+      </div>
+
+      {/* Developer Logo (z-30) - Persistent Top Right */}
+      <div 
+        className="absolute z-30 pointer-events-none"
+        style={{
+          top: 'clamp(20px, 3vw, 40px)',
+          right: 'clamp(20px, 4vw, 80px)'
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img 
+          src="/logos/yamuna_homes.png" 
+          alt="Yamuna Homes Logo" 
+          className="h-14 md:h-20 w-auto object-contain opacity-100"
+        />
       </div>
 
       {/* TASK 7 — Split Composition Container (z-20) */}

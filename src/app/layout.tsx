@@ -1,38 +1,64 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  DM_Serif_Display,
+  DM_Sans,
+  Tenor_Sans,
+} from "next/font/google";
 import "./globals.css";
+import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
+import { Footer } from "@/components/layout/Footer";
+import { FloatingCTAs } from "@/components/ui/FloatingCTAs";
+// import { Navbar } from "@/components/ui/Navbar";
 
-const inter = Inter({ 
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
+  display: "swap",
 });
 
-const playfair = Playfair_Display({ 
+const dmSerif = DM_Serif_Display({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-dm-serif",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const tenorSans = Tenor_Sans({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-tenor",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Sky City | Sea View Homes",
-  description: "Where every day feels like a holiday. Explore luxury sea view homes at Sky City.",
+  title: "Yamuna Sky City | Luxury Sea-Facing Apartments in Mangalore",
+  description:
+    "296 all sea-facing luxury apartments at Yamuna Sky City, Mangalore. GF+60 floors on NH-66 corridor, 300m from the Arabian Sea. RERA registered.",
+  keywords: "Yamuna Sky City, luxury apartments Mangalore, sea view homes, coastal living Karnataka",
 };
-
-import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
-import { Footer } from '@/components/layout/Footer';
-import { FloatingCTAs } from '@/components/ui/FloatingCTAs';
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <head>
-        <link rel="preconnect" href="https://cdn.yoursite.com" crossOrigin="anonymous" />
-      </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-[#0a0a0a] overflow-x-hidden`}>
+    <html
+      lang="en"
+      className={`${cormorant.variable} ${dmSerif.variable} ${dmSans.variable} ${tenorSans.variable}`}
+    >
+      <body className="bg-section-dark overflow-x-hidden font-body antialiased">
         <SmoothScrollProvider>
+          {/* <Navbar /> */}
           {children}
           <Footer />
           <FloatingCTAs />

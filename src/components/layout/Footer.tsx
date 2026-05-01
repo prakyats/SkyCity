@@ -15,13 +15,29 @@ export const Footer = () => {
     <footer className="relative w-full py-24 bg-[#050505] border-t border-white/[0.05]">
       <div className="max-w-[1200px] mx-auto px-[clamp(24px,6vw,80px)]">
         
+        {/* Branding Logos */}
+        <div className="flex items-center gap-8 md:gap-12 mb-16 border-b border-white/[0.05] pb-12">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/logos/skyfavicon.png" 
+            alt="Sky City Logo" 
+            className="h-12 md:h-16 w-auto object-contain"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/logos/yamuna_homes.png" 
+            alt="Yamuna Homes Logo" 
+            className="h-12 md:h-16 w-auto object-contain"
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-16 md:gap-12 mb-20">
           
-          {/* Brand */}
+          {/* Brand Column */}
           <div className="flex flex-col">
-            <h3 className="text-[24px] font-serif font-medium text-white mb-6">Yamuna Sky City</h3>
+            <h3 className="text-[20px] font-serif font-medium text-white mb-6">Building Trust, Quality, & Excellence</h3>
             <p className="text-[14px] leading-relaxed text-white/40 mb-8 max-w-[280px]">
-              A luxury residential masterpiece on the coastline of New Mangalore, setting a new benchmark for high-rise living in Karnataka.
+              Yamuna Homes and Design Pvt. Ltd. delivers innovative, sustainable, and high-quality spaces, shaping modern lifestyles since 1993.
             </p>
             <div className="flex gap-4">
               <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 cursor-pointer transition-all">FB</div>
@@ -33,33 +49,31 @@ export const Footer = () => {
           {/* Location */}
           <div>
             <h4 className="text-[12px] tracking-[0.2em] uppercase text-white/80 mb-6">Location</h4>
-            <ul className="flex flex-col gap-4 text-[14px] text-white/40">
-              <li>Near Ryan Intl School, Kulai</li>
-              <li>Surathkal – NH 66</li>
-              <li>Mangalore, Karnataka</li>
-            </ul>
+            <div className="flex flex-col gap-4 text-[14px] text-white/40 leading-relaxed">
+              <p>1st Floor, Nalapad Building,</p>
+              <p>Mallikatta, Kadri,</p>
+              <p>Mangalore – 575003</p>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="text-[12px] tracking-[0.2em] uppercase text-white/80 mb-6">Get in Touch</h4>
+            <p className="text-[14px] text-white/40 mb-10">+91 88844 39155</p>
+            
+            <h4 className="text-[12px] tracking-[0.2em] uppercase text-white/80 mb-6">Mail Us</h4>
+            <p className="text-[14px] text-white/40">yamunahomes16@gmail.com</p>
           </div>
 
           {/* Navigation */}
           <div>
             <h4 className="text-[12px] tracking-[0.2em] uppercase text-white/80 mb-6">Explore</h4>
             <ul className="flex flex-col gap-4 text-[14px] text-white/40">
-              {links.map((link, i) => (
-                <li key={i}>
-                  <a href={link.href} className="hover:text-white transition-colors">{link.label}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Technical */}
-          <div>
-            <h4 className="text-[12px] tracking-[0.2em] uppercase text-white/80 mb-6">Project Info</h4>
-            <ul className="flex flex-col gap-4 text-[14px] text-white/40">
-              <li>RERA PR: PRM/KA/RERA/1257/334/PR/230124/006579</li>
-              <li>Developed by: Yamuna Homes</li>
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
+              <li>Home</li>
+              <li>Highlights</li>
+              <li>Location</li>
+              <li>Overview</li>
+              <li>Site Progress</li>
             </ul>
           </div>
 
