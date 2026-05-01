@@ -1,8 +1,7 @@
 'use client';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
 
 const amenities = [
   {
@@ -13,37 +12,37 @@ const amenities = [
   },
   {
     title: 'Private Mini Theatre', cat: 'Entertainment',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672872/Theater_s9f5ws.jpg',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672872/Theater_s9f5ws.jpg',
     desc: 'A bespoke cinematic experience with state-of-the-art acoustics and plush reclining seats.',
     index: '02',
   },
   {
     title: 'Grand Banquet Hall', cat: 'Events',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672873/Banquet_ek3fc8.jpg',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672873/Banquet_ek3fc8.jpg',
     desc: 'A majestic venue for grand celebrations, weddings, and elite corporate gatherings.',
     index: '03',
   },
   {
     title: 'Royal Wellness Spa', cat: 'Wellness',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672872/Spa_lkqfyf.jpg',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672872/Spa_lkqfyf.jpg',
     desc: 'Deep rejuvenation through traditional and modern therapies in a tranquil, ocean-side setting.',
     index: '04',
   },
   {
     title: 'Yoga & Meditation Studio', cat: 'Energy',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672710/Yoga_jxg4ne.jpg',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672710/Yoga_jxg4ne.jpg',
     desc: 'A serene, light-filled space designed for mindfulness, breathwork, and spiritual balance.',
     index: '05',
   },
   {
     title: 'Arcade & Game Room', cat: 'Recreation',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672705/Gameroom_u43si8.jpg',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672705/Gameroom_u43si8.jpg',
     desc: 'A vibrant social hub featuring high-end gaming consoles, billiards, and interactive entertainment.',
     index: '06',
   },
   {
     title: 'Elite Fitness Center', cat: 'Performance',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672704/Gym_n6nqft.jpg',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672704/Gym_n6nqft.jpg',
     desc: 'A world-class gym equipped with the latest strength and cardio technology for peak health.',
     index: '07',
   },
@@ -108,6 +107,7 @@ export const Amenities = () => {
           ease: 'none',
           repeat: -1,
           paused: true,
+          force3D: true, // GPU acceleration
         });
 
         // Slow down on hover (but slightly faster now), speed up on leave
@@ -125,8 +125,9 @@ export const Amenities = () => {
             gsap.to(loop, { 
               time: loop.time() + (e.deltaX * 0.02), 
               duration: 0.5, 
-              overwrite: true,
-              ease: 'power2.out'
+              overwrite: 'auto', // Smart overwrite
+              ease: 'power2.out',
+              force3D: true
             });
           }
         };
@@ -211,7 +212,8 @@ export const Amenities = () => {
 
                 {/* Image with scale */}
                 <div className="absolute inset-0 transition-transform duration-[1400ms] ease-out group-hover:scale-110">
-                  <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 768px) 300px, 400px" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                 </div>
 
                 {/* Multi-layer gradient */}

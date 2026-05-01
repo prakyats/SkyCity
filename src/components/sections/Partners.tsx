@@ -1,8 +1,7 @@
 'use client';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import Image from 'next/image';
-import React, { useEffect, useRef } from 'react';
 
 const partners = [
   {
@@ -147,9 +146,7 @@ export const Partners = () => {
               {/* Logo / name */}
               <div className="h-16 mb-8 flex items-center">
                 {p.logo
-                  ? <div className="relative h-10 w-32">
-                      <Image src={p.logo} alt={p.name} fill className="object-contain" />
-                    </div>
+                  ? <img src={p.logo} alt={p.name} className="max-h-10 object-contain" />
                   : <span className="font-display text-[var(--near-black)] opacity-55"
                     style={{ fontSize: '1.05rem', fontWeight: 400, lineHeight: 1.2 }}>
                     {p.name}

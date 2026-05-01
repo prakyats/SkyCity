@@ -1,8 +1,7 @@
 'use client';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import Image from 'next/image';
-import React, { useEffect, useRef } from 'react';
 
 const navLinks = [
   { label: 'Overview', href: '#overview' },
@@ -76,12 +75,10 @@ export const Footer = () => {
           {/* Brand col */}
           <div className="footer-col flex flex-col">
             <div className="flex items-center gap-6 mb-12">
-              <div className="relative h-24 w-24">
-                <Image src="/logos/skyfavicon.png" alt="Sky City" fill className="object-contain" />
-              </div>
-              <div className="relative h-24 w-48">
-                <Image src="/logos/yamuna_homes.png" alt="Yamuna Homes" fill className="object-contain opacity-80" />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logos/skyfavicon.png" alt="Sky City" className="h-24 w-auto object-contain" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logos/yamuna_homes.png" alt="Yamuna Homes" className="h-24 w-auto object-contain opacity-80" />
             </div>
             <p className="font-body text-[var(--text-white-45)] leading-relaxed mb-6"
               style={{ fontSize: '0.85rem', maxWidth: '30ch' }}>
