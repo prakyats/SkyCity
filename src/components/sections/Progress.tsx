@@ -86,6 +86,7 @@ export const Progress = () => {
               {m.image ? (
                 <div className="img-zoom w-full aspect-[4/3] mb-8 overflow-hidden"
                   style={{ borderRadius: 'var(--r-lg)' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={m.image} alt={m.title} className="w-full h-full object-cover" />
                 </div>
               ) : (

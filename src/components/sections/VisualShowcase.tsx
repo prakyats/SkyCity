@@ -27,6 +27,7 @@ export const VisualShowcase = () => {
           {/* Image placeholder — replace src with real asset */}
           <div className="vs-img img-zoom relative w-full aspect-[16/10] bg-[var(--navy-mid)]"
             style={{ borderRadius: 'var(--r-2xl)' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/visual_showcase_main.png"
               alt="Yamuna Sky City — Living Above the Coastline"

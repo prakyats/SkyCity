@@ -70,6 +70,7 @@ export const Amenities = () => {
               style={{ borderRadius: 'var(--r-2xl)' }}>
               {/* Image — PLACEHOLDER: swap src */}
               <div className="absolute inset-0 transition-transform duration-[1200ms] ease-out group-hover:scale-110">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
               </div>
               {/* Overlay */}

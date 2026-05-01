@@ -2,14 +2,6 @@
 
 import React from 'react';
 
-const links = [
-  { label: "Architecture", href: "#project-intro" },
-  { label: "Connectivity", href: "#connectivity" },
-  { label: "Floor Plans", href: "#floorplans" },
-  { label: "Expertise", href: "#partners" },
-  { label: "Progress", href: "#progress" }
-];
-
 export const Footer = () => {
   return (
     <footer className="relative w-full py-24 bg-[#050505] border-t border-white/[0.05]">

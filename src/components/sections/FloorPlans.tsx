@@ -80,6 +80,7 @@ export const FloorPlans = () => {
           <div ref={imageRef}
             className="relative aspect-[4/3] bg-white flex items-center justify-center p-10 md:p-16"
             style={{ borderRadius: 'var(--r-2xl)', border: '1px solid var(--sand)' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={plans[active].image} alt={`${plans[active].type} Floor Plan`}
               className="w-full h-full object-contain opacity-80" />
             {/* Placeholder label — remove when real image is added */}

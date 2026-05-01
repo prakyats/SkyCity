@@ -63,7 +63,10 @@ export const Partners = () => {
               {/* Logo placeholder */}
               <div className="w-full h-20 mb-10 flex items-center justify-start">
                 {p.logo
-                  ? <img src={p.logo} alt={p.name} className="max-h-12 object-contain" />
+                  ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={p.logo} alt={p.name} className="max-h-12 object-contain" />
+                  )
                   : (
                     /* PLACEHOLDER: replace this div with <img src={partner_logo} /> */
                     <div className="h-10 flex items-center">

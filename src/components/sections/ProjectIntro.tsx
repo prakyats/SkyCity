@@ -40,7 +40,7 @@ export const ProjectIntro = () => {
             className="section-heading text-[var(--near-black)] max-w-[720px]"
             style={{ fontSize: 'clamp(2rem,4.5vw,4.5rem)' }}
           >
-            South India's Tallest
+            South India&apos;s Tallest
             <em className="block font-display font-light italic"
               style={{ fontSize: 'clamp(2.4rem,5.5vw,5.5rem)', lineHeight: 0.9 }}>
               Sea View Tower
