@@ -84,56 +84,53 @@ export const Amenities = () => {
         }
       );
 
-      // ── CARDS: pinwheel/fan entrance + WOW hover effects ──
+      // ── CARDS: pinwheel/fan entrance ──
       const cards = gsap.utils.toArray<HTMLElement>('.amen-card');
       cards.forEach((card, i) => {
         gsap.fromTo(card,
-          {
-            opacity: 0,
-            y: 120,
-            rotate: i === 0 ? -6 : i === 1 ? 0 : 6,
-            scale: 0.85,
-          },
+          { opacity: 0, y: 120, rotate: i % 2 === 0 ? -3 : 3, scale: 0.85 },
           {
             opacity: 1, y: 0, rotate: 0, scale: 1,
-            duration: 1.1, delay: i * 0.15,
+            duration: 1.1, delay: i * 0.1,
             ease: 'power3.out',
-            scrollTrigger: { trigger: '.amen-grid', start: 'top 85%', once: true }
+            scrollTrigger: { trigger: '.amen-track-wrapper', start: 'top 85%', once: true }
           }
         );
       });
 
-      // ── AUTO-PLAY LOGIC: smooth horizontal drift ──
-      if (scrollContainerRef.current) {
-        const container = scrollContainerRef.current;
-        let isPaused = false;
+      // ── NEW PREMIUM INFINITE CAROUSEL LOGIC ──
+      const track = scrollContainerRef.current;
+      if (track) {
+        // Calculate the total width of the original items
+        const items = gsap.utils.toArray<HTMLElement>('.amen-card');
+        const itemWidth = items[0].offsetWidth + 24; // width + gap
+        const totalWidth = itemWidth * amenities.length;
 
-        const drift = gsap.to(container, {
-          scrollLeft: container.scrollWidth - container.clientWidth,
-          duration: 40, // Very slow, elegant drift
+        // Create the seamless loop animation
+        const loop = gsap.to(track, {
+          x: -totalWidth,
+          duration: 35,
           ease: 'none',
           repeat: -1,
-          yoyo: true,
           paused: true,
         });
 
-        // Trigger auto-play only when in view
+        // Slow down on hover, speed up on leave
+        const slowDown = () => gsap.to(loop, { timeScale: 0.08, duration: 1, ease: 'power2.out' });
+        const speedUp = () => gsap.to(loop, { timeScale: 1, duration: 1.5, ease: 'power2.inOut' });
+
+        track.addEventListener('mouseenter', slowDown);
+        track.addEventListener('mouseleave', speedUp);
+
+        // Play only when section is in view
         ScrollTrigger.create({
           trigger: sectionRef.current,
-          start: 'top center',
-          onEnter: () => drift.play(),
-          onLeave: () => drift.pause(),
-          onEnterBack: () => drift.play(),
-          onLeaveBack: () => drift.pause(),
+          start: 'top 80%',
+          onEnter: () => loop.play(),
+          onLeave: () => loop.pause(),
+          onEnterBack: () => loop.play(),
+          onLeaveBack: () => loop.pause(),
         });
-
-        const slowDown = () => gsap.to(drift, { timeScale: 0.1, duration: 0.8, ease: 'power2.out' });
-        const speedUp = () => gsap.to(drift, { timeScale: 1, duration: 1.2, ease: 'power2.inOut' });
-
-        container.addEventListener('mouseenter', slowDown);
-        container.addEventListener('mouseleave', speedUp);
-        container.addEventListener('touchstart', slowDown);
-        container.addEventListener('touchend', speedUp);
       }
 
     }, sectionRef);
@@ -187,16 +184,18 @@ export const Amenities = () => {
           <button className="btn-ghost-dark self-start md:self-auto">View All 10+ Amenities</button>
         </div>
 
-        <div 
-          ref={scrollContainerRef}
-          className="relative -mx-[clamp(24px,6vw,80px)] px-[clamp(24px,6vw,80px)] overflow-x-auto hide-scrollbar snap-x snap-mandatory"
-        >
-          <div className="flex gap-6 pb-12 w-max">
-            {amenities.map((item, i) => (
+        {/* Seamless Loop Track */}
+        <div className="amen-track-wrapper relative -mx-[clamp(24px,6vw,80px)] overflow-hidden">
+          <div 
+            ref={scrollContainerRef}
+            className="flex gap-6 pb-12 w-max will-change-transform"
+          >
+            {/* Original + Cloned items for seamless loop */}
+            {[...amenities, ...amenities].map((item, i) => (
               <div key={i}
-                className="amen-card group relative w-[320px] md:w-[400px] aspect-[3/4] overflow-hidden cursor-pointer snap-center"
-                style={{ borderRadius: 'var(--r-2xl)', shadow: '0 20px 40px rgba(0,0,0,0.4)', willChange: 'transform' }}
-                onMouseEnter={() => setActiveIdx(i)}
+                className="amen-card group relative w-[300px] md:w-[400px] aspect-[3/4] overflow-hidden cursor-pointer"
+                style={{ borderRadius: 'var(--r-2xl)', willChange: 'transform' }}
+                onMouseEnter={() => setActiveIdx(i % amenities.length)}
                 onMouseLeave={() => setActiveIdx(-1)}>
 
                 {/* Image with scale */}
@@ -219,15 +218,15 @@ export const Amenities = () => {
                   {item.index}
                 </div>
 
-                {/* Gold corner accent - animated */}
+                {/* Gold corner accent */}
                 <div className="absolute top-6 right-6 pointer-events-none overflow-hidden"
                   style={{ width: 32, height: 32 }}>
                   <div style={{
                     width: 32, height: 32,
                     borderTop: '1px solid var(--gold)',
                     borderRight: '1px solid var(--gold)',
-                    opacity: activeIdx === i ? 1 : 0,
-                    transform: activeIdx === i ? 'scale(1)' : 'scale(0.5)',
+                    opacity: activeIdx === (i % amenities.length) ? 1 : 0,
+                    transform: activeIdx === (i % amenities.length) ? 'scale(1)' : 'scale(0.5)',
                     transition: 'all 0.4s ease',
                   }} />
                 </div>
