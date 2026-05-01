@@ -5,46 +5,52 @@ import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 const amenities = [
   {
-    title: 'Kawaki Forest Trails', cat: 'Nature',
-    image: '/images/amenity_forest.png',
-    desc: 'A landscaped green corridor for morning runs and evening strolls, woven into the coastal ecosystem.',
-    index: '01',
-  },
-  {
-    title: 'Yoga & Wellness Studio', cat: 'Energy',
-    image: '/images/amenity_wellness.png',
-    desc: 'Ocean-facing studio designed for mindfulness and peak performance, bathed in natural light.',
-    index: '02',
-  },
-  {
     title: 'Podium Infinity Pool', cat: 'Serenity',
     image: '/images/amenity_pool.png',
     desc: 'An architectural marvel where the pool edge meets the Arabian Sea on the horizon.',
-    index: '03',
+    index: '01',
   },
   {
-    title: 'Sky Observation Deck', cat: 'Vantage',
-    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1000',
-    desc: 'Breathtaking 360-degree views from South India\'s highest residential point.',
-    index: '04',
-  },
-  {
-    title: 'Private Cine-Theater', cat: 'Entertainment',
-    image: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed0963c?auto=format&fit=crop&q=80&w=1000',
-    desc: 'A 20-seater luxury screening room with state-of-the-art acoustics and deep-recline seating.',
-    index: '05',
+    title: 'Private Mini Theatre', cat: 'Entertainment',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672872/Theater_s9f5ws.jpg',
+    desc: 'A bespoke cinematic experience with state-of-the-art acoustics and plush reclining seats.',
+    index: '02',
   },
   {
     title: 'Grand Banquet Hall', cat: 'Events',
-    image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1000',
-    desc: 'A double-height ceiling venue for your most significant celebrations and corporate gatherings.',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672873/Banquet_ek3fc8.jpg',
+    desc: 'A majestic venue for grand celebrations, weddings, and elite corporate gatherings.',
+    index: '03',
+  },
+  {
+    title: 'Royal Wellness Spa', cat: 'Wellness',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672872/Spa_lkqfyf.jpg',
+    desc: 'Deep rejuvenation through traditional and modern therapies in a tranquil, ocean-side setting.',
+    index: '04',
+  },
+  {
+    title: 'Yoga & Meditation Studio', cat: 'Energy',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672710/Yoga_jxg4ne.jpg',
+    desc: 'A serene, light-filled space designed for mindfulness, breathwork, and spiritual balance.',
+    index: '05',
+  },
+  {
+    title: 'Arcade & Game Room', cat: 'Recreation',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672705/Gameroom_u43si8.jpg',
+    desc: 'A vibrant social hub featuring high-end gaming consoles, billiards, and interactive entertainment.',
     index: '06',
   },
   {
-    title: 'Kids Adventure Zone', cat: 'Play',
-    image: 'https://images.unsplash.com/photo-1566367576585-051277d52997?auto=format&fit=crop&q=80&w=1000',
-    desc: 'Safe, creative, and engaging indoor-outdoor play spaces designed for young minds.',
+    title: 'Elite Fitness Center', cat: 'Performance',
+    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/v1777672704/Gym_n6nqft.jpg',
+    desc: 'A world-class gym equipped with the latest strength and cardio technology for peak health.',
     index: '07',
+  },
+  {
+    title: 'Kawaki Forest Trails', cat: 'Nature',
+    image: '/images/amenity_forest.png',
+    desc: 'A landscaped green corridor for morning runs and evening strolls, woven into the coastal ecosystem.',
+    index: '08',
   },
 ];
 
