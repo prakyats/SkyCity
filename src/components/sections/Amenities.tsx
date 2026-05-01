@@ -101,6 +101,8 @@ export const Amenities = () => {
             scrollTrigger: { trigger: '.amen-grid', start: 'top 85%', once: true }
           }
         );
+      });
+
       // ── AUTO-PLAY LOGIC: smooth horizontal drift ──
       if (scrollContainerRef.current) {
         const container = scrollContainerRef.current;
