@@ -56,6 +56,7 @@ const amenities = [
 
 export const Amenities = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(-1);
   const bgTextRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +101,38 @@ export const Amenities = () => {
             scrollTrigger: { trigger: '.amen-grid', start: 'top 85%', once: true }
           }
         );
-      });
+      // ── AUTO-PLAY LOGIC: smooth horizontal drift ──
+      if (scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        let isPaused = false;
+
+        const drift = gsap.to(container, {
+          scrollLeft: container.scrollWidth - container.clientWidth,
+          duration: 40, // Very slow, elegant drift
+          ease: 'none',
+          repeat: -1,
+          yoyo: true,
+          paused: true,
+        });
+
+        // Trigger auto-play only when in view
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: 'top center',
+          onEnter: () => drift.play(),
+          onLeave: () => drift.pause(),
+          onEnterBack: () => drift.play(),
+          onLeaveBack: () => drift.pause(),
+        });
+
+        const pauseDrift = () => { isPaused = true; drift.pause(); };
+        const resumeDrift = () => { isPaused = false; drift.play(); };
+
+        container.addEventListener('mouseenter', pauseDrift);
+        container.addEventListener('mouseleave', resumeDrift);
+        container.addEventListener('touchstart', pauseDrift);
+        container.addEventListener('touchend', resumeDrift);
+      }
 
     }, sectionRef);
     return () => ctx.revert();
@@ -153,8 +185,10 @@ export const Amenities = () => {
           <button className="btn-ghost-dark self-start md:self-auto">View All 10+ Amenities</button>
         </div>
 
-        {/* Horizontal Carousel */}
-        <div className="relative -mx-[clamp(24px,6vw,80px)] px-[clamp(24px,6vw,80px)] overflow-x-auto hide-scrollbar snap-x snap-mandatory">
+        <div 
+          ref={scrollContainerRef}
+          className="relative -mx-[clamp(24px,6vw,80px)] px-[clamp(24px,6vw,80px)] overflow-x-auto hide-scrollbar snap-x snap-mandatory"
+        >
           <div className="flex gap-6 pb-12 w-max">
             {amenities.map((item, i) => (
               <div key={i}
