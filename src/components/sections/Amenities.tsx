@@ -120,10 +120,10 @@ export const Amenities = () => {
         const onWheel = (e: WheelEvent) => {
           if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
             e.preventDefault();
-            // Nudge the animation's time based on scroll delta
+            // Nudge the animation's time based on scroll delta (increased sensitivity)
             gsap.to(loop, { 
-              time: loop.time() + (e.deltaX * 0.005), 
-              duration: 0.3, 
+              time: loop.time() + (e.deltaX * 0.02), 
+              duration: 0.5, 
               overwrite: true,
               ease: 'power2.out'
             });
