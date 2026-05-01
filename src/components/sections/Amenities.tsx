@@ -127,13 +127,13 @@ export const Amenities = () => {
           onLeaveBack: () => drift.pause(),
         });
 
-        const pauseDrift = () => { isPaused = true; drift.pause(); };
-        const resumeDrift = () => { isPaused = false; drift.play(); };
+        const slowDown = () => gsap.to(drift, { timeScale: 0.1, duration: 0.8, ease: 'power2.out' });
+        const speedUp = () => gsap.to(drift, { timeScale: 1, duration: 1.2, ease: 'power2.inOut' });
 
-        container.addEventListener('mouseenter', pauseDrift);
-        container.addEventListener('mouseleave', resumeDrift);
-        container.addEventListener('touchstart', pauseDrift);
-        container.addEventListener('touchend', resumeDrift);
+        container.addEventListener('mouseenter', slowDown);
+        container.addEventListener('mouseleave', speedUp);
+        container.addEventListener('touchstart', slowDown);
+        container.addEventListener('touchend', speedUp);
       }
 
     }, sectionRef);
