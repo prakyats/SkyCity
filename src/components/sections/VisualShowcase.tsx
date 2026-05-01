@@ -84,10 +84,10 @@ export const VisualShowcase = () => {
               className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0" 
             />
 
-            {/* Left-aligned Gradient Overlay for text legibility */}
+            {/* Left-aligned Gradient Overlay for text legibility - Subtler Intensity */}
             <div className="absolute inset-0 pointer-events-none" 
               style={{ 
-                background: 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, transparent 70%)',
+                background: 'linear-gradient(to right, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.32) 30%, transparent 70%)',
               }} />
           </div>
 
