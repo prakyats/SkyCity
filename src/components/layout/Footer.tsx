@@ -74,11 +74,11 @@ export const Footer = () => {
 
           {/* Brand col */}
           <div className="footer-col flex flex-col">
-            <div className="flex items-center gap-6 mb-10">
+            <div className="flex items-center gap-6 mb-12">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logos/skyfavicon.png" alt="Sky City" className="h-20 w-auto object-contain" />
+              <img src="/logos/skyfavicon.png" alt="Sky City" className="h-24 w-auto object-contain" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logos/yamuna_homes.png" alt="Yamuna Homes" className="h-20 w-auto object-contain opacity-80" />
+              <img src="/logos/yamuna_homes.png" alt="Yamuna Homes" className="h-24 w-auto object-contain opacity-80" />
             </div>
             <p className="font-body text-[var(--text-white-45)] leading-relaxed mb-6"
               style={{ fontSize: '0.85rem', maxWidth: '30ch' }}>
