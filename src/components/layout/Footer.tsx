@@ -59,22 +59,22 @@ export const Footer = () => {
 
       {/* Big display tagline */}
       <div className="overflow-hidden border-b"
-        style={{ borderColor: 'rgba(255,255,255,0.04)', paddingTop: 'clamp(35px,4.5vw,55px)', paddingBottom: 'clamp(25px,3.5vw,45px)' }}>
+        style={{ borderColor: 'rgba(255,255,255,0.04)', paddingTop: 'clamp(40px,5vw,60px)', paddingBottom: 'clamp(30px,4vw,50px)' }}>
         <div className="section-inner">
           <p className="footer-tagline font-display text-white/10 select-none whitespace-nowrap"
-            style={{ fontSize: 'clamp(32px,5.5vw,75px)', fontWeight: 300, lineHeight: 1, letterSpacing: '-0.02em' }}>
+            style={{ fontSize: 'clamp(34px,6vw,80px)', fontWeight: 300, lineHeight: 1, letterSpacing: '-0.02em' }}>
             Building Trust, Quality, Dreams, Success &amp; Excellence.
           </p>
         </div>
       </div>
 
       {/* Main grid */}
-      <div className="section-inner py-12 md:py-16">
+      <div className="section-inner py-14 md:py-18">
         <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr_1fr_1fr] gap-12 md:gap-8">
 
           {/* Brand col */}
           <div className="footer-col flex flex-col">
-            <div className="flex items-center gap-6 mb-8">
+            <div className="flex items-center gap-6 mb-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logos/skyfavicon.png" alt="Sky City" className="h-20 w-auto object-contain" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
