@@ -1,7 +1,6 @@
 import { Hero } from "@/components/sections/Hero";
 import { ProjectIntro } from "@/components/sections/ProjectIntro";
 import { VisualShowcase } from "@/components/sections/VisualShowcase";
-import { WaveToArchitecture } from "@/components/sections/WaveToArchitecture";
 import { Connectivity } from "@/components/sections/Connectivity";
 import { Specifications } from "@/components/sections/Specifications";
 import { Amenities } from "@/components/sections/Amenities";
@@ -17,11 +16,10 @@ export default function Home() {
     <main className="min-h-screen bg-white">
       <Hero />
       <ProjectIntro />
-      <VisualShowcase />
-      <WaveToArchitecture />
       <Connectivity />
       <Specifications />
       <Amenities />
+      <VisualShowcase />
       <FloorPlans />
       <Location />
       <Partners />

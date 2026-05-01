@@ -88,7 +88,6 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         }}
       >
         <div style={{ overflow: 'hidden', display: 'inline-block' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             ref={logoRef}
             src="/logos/yamuna_homes.png"

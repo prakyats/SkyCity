@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
@@ -26,12 +26,16 @@ const amenities = [
 
 export const Amenities = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [activeIdx, setActiveIdx] = useState(-1);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
 
       // ── HEADER: split chars fly in from random angles ──
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const chars = 'Unmatched\nAmenities'.split('');
       gsap.fromTo('.amen-title-char',
         { opacity: 0, y: () => gsap.utils.random(-60, 60), x: () => gsap.utils.random(-40, 40), rotate: () => gsap.utils.random(-15, 15) },
         {
@@ -103,7 +107,9 @@ export const Amenities = () => {
           {amenities.map((item, i) => (
             <div key={i}
               className="amen-card group relative aspect-[3/4] overflow-hidden cursor-pointer"
-              style={{ borderRadius: 'var(--r-2xl)' }}>
+              style={{ borderRadius: 'var(--r-2xl)' }}
+              onMouseEnter={() => setActiveIdx(i)}
+              onMouseLeave={() => setActiveIdx(-1)}>
 
               {/* Image with scale */}
               <div className="absolute inset-0 transition-transform duration-[1400ms] ease-out group-hover:scale-110">
