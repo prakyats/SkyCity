@@ -46,12 +46,6 @@ const amenities = [
     desc: 'A world-class gym equipped with the latest strength and cardio technology for peak health.',
     index: '07',
   },
-  {
-    title: 'Kawaki Forest Trails', cat: 'Nature',
-    image: '/images/amenity_forest.png',
-    desc: 'A landscaped green corridor for morning runs and evening strolls, woven into the coastal ecosystem.',
-    index: '08',
-  },
 ];
 
 export const Amenities = () => {
@@ -115,8 +109,8 @@ export const Amenities = () => {
           paused: true,
         });
 
-        // Slow down on hover, speed up on leave
-        const slowDown = () => gsap.to(loop, { timeScale: 0.08, duration: 1, ease: 'power2.out' });
+        // Slow down on hover (but slightly faster now), speed up on leave
+        const slowDown = () => gsap.to(loop, { timeScale: 0.20, duration: 1, ease: 'power2.out' });
         const speedUp = () => gsap.to(loop, { timeScale: 1, duration: 1.5, ease: 'power2.inOut' });
 
         track.addEventListener('mouseenter', slowDown);
