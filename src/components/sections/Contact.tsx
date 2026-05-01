@@ -12,20 +12,56 @@ const socials = [
 
 export const Contact = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const bgTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
+
+      // ── BIG BACKGROUND TEXT: parallax ──
+      if (bgTextRef.current) {
+        gsap.fromTo(bgTextRef.current,
+          { xPercent: -3 },
+          { xPercent: 3, ease: 'none',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+          }
+        );
+      }
+
+      // ── SECTION REVEAL ──
       gsap.fromTo('.ctc-reveal', { opacity: 0, y: 36 },
         { opacity: 1, y: 0, duration: 1, stagger: 0.15, ease: 'power3.out',
           scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true } });
+
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-section-dark section-pad overflow-hidden" id="contact">
-      <div className="section-inner">
+    <section ref={sectionRef} className="bg-section-dark section-pad overflow-hidden relative" id="contact">
+
+      {/* Radial glow at top */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{
+          width: '80%', height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(232,160,32,0.3), transparent)',
+        }} />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        style={{
+          width: '50%', height: '300px',
+          background: 'radial-gradient(ellipse at top, rgba(232,160,32,0.04) 0%, transparent 70%)',
+        }} />
+
+      {/* Big watermark text */}
+      <div ref={bgTextRef} className="absolute inset-0 flex items-center overflow-hidden pointer-events-none select-none"
+        style={{ zIndex: 0 }}>
+        <span className="font-display text-white whitespace-nowrap"
+          style={{ fontSize: 'clamp(80px,14vw,200px)', fontWeight: 700, opacity: 0.018, lineHeight: 1 }}>
+          CONTACT US
+        </span>
+      </div>
+
+      <div className="section-inner relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-16 md:gap-24 items-start">
 
           {/* Left */}
@@ -49,7 +85,7 @@ export const Contact = () => {
                 { line1: 'Direct Line', line2: '+91 88844 39155', href: 'tel:+918884439155' },
                 { line1: 'Email', line2: 'yamunahomes16@gmail.com', href: 'mailto:yamunahomes16@gmail.com' },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col gap-1 border-b pb-6"
+                <div key={i} className="flex flex-col gap-1 border-b pb-6 group"
                   style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
                   <span className="label text-[var(--gold)]" style={{ fontSize: '0.58rem' }}>{item.line1}</span>
                   {item.href
@@ -75,11 +111,17 @@ export const Contact = () => {
 
           {/* Right — form */}
           <div className="ctc-reveal">
-            <div className="p-10 md:p-14" style={{
+            <div className="p-10 md:p-14 relative overflow-hidden scan-line-card" style={{
               background: 'rgba(255,255,255,0.025)',
               border: '1px solid rgba(255,255,255,0.07)',
               borderRadius: 'var(--r-2xl)',
             }}>
+              {/* Corner accents */}
+              <div className="absolute top-0 left-0 w-12 h-12 pointer-events-none"
+                style={{ borderTop: '1px solid rgba(232,160,32,0.2)', borderLeft: '1px solid rgba(232,160,32,0.2)' }} />
+              <div className="absolute bottom-0 right-0 w-12 h-12 pointer-events-none"
+                style={{ borderBottom: '1px solid rgba(232,160,32,0.2)', borderRight: '1px solid rgba(232,160,32,0.2)' }} />
+
               <h3 className="section-heading text-white mb-2"
                 style={{ fontSize: 'clamp(1.2rem,2vw,1.6rem)' }}>
                 Request a Consultation

@@ -118,7 +118,13 @@ export const Hero = () => {
     };
   }, []);
 
-  const handleVideoReady = () => setIsReady(true);
+  const handleVideoReady = () => {
+    setIsReady(true);
+    // Refresh ScrollTrigger when video is ready to ensure height calculations are accurate
+    import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+      ScrollTrigger.refresh();
+    });
+  };
   const handleVideoPlay = () => setIsPlaying(true);
 
   return (
@@ -187,7 +193,13 @@ export const Hero = () => {
 
              {/* TASK 12 — CTA Button (Phase 3) - Space Reserved */}
              <div className={`phase-3-cta mt-[clamp(32px,10vw,80px)] transition-opacity duration-500 ${narrativePhase >= 3 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-               <button className="pointer-events-auto border border-white/30 hover:border-white/60 px-10 py-3.5 md:py-4 text-white/80 text-[12px] md:text-[14px] tracking-[0.2em] uppercase rounded-full transition-all backdrop-blur-sm shadow-2xl">
+               <button 
+                 onClick={() => {
+                   const target = document.getElementById('overview');
+                   if (target) target.scrollIntoView({ behavior: 'smooth' });
+                 }}
+                 className="pointer-events-auto border border-white/30 hover:border-white/60 px-10 py-3.5 md:py-4 text-white/80 text-[12px] md:text-[14px] tracking-[0.2em] uppercase rounded-full transition-all backdrop-blur-sm shadow-2xl"
+               >
                  Explore More
                </button>
              </div>
@@ -230,7 +242,7 @@ export const Hero = () => {
       {/* RERA info anchor - Space Reserved */}
       <div className={`absolute bottom-10 left-6 md:left-12 lg:left-20 z-20 opacity-0 transition-opacity duration-500 ${narrativePhase >= 3 ? 'opacity-30' : 'opacity-0 pointer-events-none'}`}>
         <p className="text-white text-[10px] tracking-widest uppercase font-light">
-          RERA NO.  PRM/KA/RERA/1257/334/PR/171023/006331
+          RERA NO.: PRM/KA/RERA/1257/334/PR/171023/006331
         </p>
       </div>
 

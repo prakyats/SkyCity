@@ -17,10 +17,28 @@ const subSpecs = [
 
 export const Specifications = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const bgTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
+
+      // ── MASSIVE BACKGROUND TEXT: parallax scrub ──
+      if (bgTextRef.current) {
+        gsap.fromTo(bgTextRef.current,
+          { xPercent: -5 },
+          {
+            xPercent: 5,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1,
+            }
+          }
+        );
+      }
 
       // ── HEADLINE: slide in from right, masked ──
       gsap.fromTo('.spec-headline',
@@ -31,7 +49,7 @@ export const Specifications = () => {
         }
       );
 
-      // ── SPEC CARDS: explode in from corners, each different direction ──
+      // ── SPEC CARDS: explode in from corners, each different direction + WOW hover ──
       const origins = [[-100, -80], [100, -80], [0, 100]];
       mainSpecs.forEach((spec, i) => {
         const card = document.querySelectorAll<HTMLElement>('.spec-card')[i];
@@ -47,7 +65,6 @@ export const Specifications = () => {
           { x: 0, y: 0, opacity: 1, rotate: 0, duration: 1, ease: 'power3.out' }
         );
 
-        // Odometer number count-up with scale pulse
         if (num) {
           const counter = { val: 0 };
           tl.to(counter,
@@ -61,6 +78,14 @@ export const Specifications = () => {
           );
           tl.fromTo(num, { scale: 1.3 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' }, '-=0.1');
         }
+
+        // WOW hover magnetic effect
+        card.addEventListener('mouseenter', () => {
+          gsap.to(card, { y: -10, scale: 1.02, boxShadow: '0 30px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(232,160,32,0.2)', duration: 0.4, ease: 'power2.out' });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, { y: 0, scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.5, ease: 'power2.out' });
+        });
       });
 
       // ── SUB SPECS: stagger up with gold line draw ──
@@ -72,7 +97,6 @@ export const Specifications = () => {
         }
       );
 
-      // Horizontal gold line between sub-specs
       gsap.fromTo('.sub-spec-line',
         { scaleX: 0, transformOrigin: 'left' },
         {
@@ -87,6 +111,16 @@ export const Specifications = () => {
 
   return (
     <section ref={sectionRef} className="bg-section-cream section-pad grain overflow-hidden relative" id="specifications">
+
+      {/* Huge watermark background text */}
+      <div ref={bgTextRef} className="absolute inset-0 flex items-center overflow-hidden pointer-events-none select-none"
+        style={{ zIndex: 0 }}>
+        <span className="font-display text-[var(--near-black)] whitespace-nowrap"
+          style={{ fontSize: 'clamp(100px, 18vw, 240px)', fontWeight: 700, opacity: 0.025, lineHeight: 1, letterSpacing: '-0.04em' }}>
+          GF+60 FLOORS
+        </span>
+      </div>
+
       <div className="section-inner relative z-10">
 
         <div className="mb-20 overflow-hidden">
@@ -105,8 +139,16 @@ export const Specifications = () => {
         {/* Main specs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16" style={{ perspective: '800px' }}>
           {mainSpecs.map((spec, i) => (
-            <div key={i} className="spec-card card-light p-10 md:p-14 flex flex-col group
-              hover:-translate-y-2 transition-transform duration-500 cursor-default">
+            <div key={i} className="spec-card card-light p-10 md:p-14 flex flex-col group cursor-default relative overflow-hidden diagonal-accent"
+              style={{ willChange: 'transform, box-shadow' }}>
+              {/* Scan line effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, height: '60%', top: '-60%',
+                  background: 'linear-gradient(180deg, transparent, rgba(232,160,32,0.03), transparent)',
+                  animation: 'scanLine 2s linear infinite',
+                }} />
+              </div>
               <div className="flex items-baseline gap-1 mb-5">
                 <span className="spec-num font-display text-[var(--near-black)]"
                   style={{ fontSize: 'clamp(3.5rem,6vw,6rem)', fontWeight: 300, lineHeight: 1 }}>
@@ -121,7 +163,6 @@ export const Specifications = () => {
                 {spec.label}
               </span>
               <p className="font-body text-[var(--text-muted)] text-sm leading-relaxed">{spec.desc}</p>
-              {/* kinetic bottom border on hover */}
               <div className="mt-auto pt-8 h-[2px] w-0 group-hover:w-full kinetic-border transition-all duration-700 rounded-full" />
             </div>
           ))}
@@ -145,7 +186,6 @@ export const Specifications = () => {
 
       </div>
 
-      {/* Floating particles */}
       {[...Array(8)].map((_, i) => (
         <span key={i} className="particle" style={{
           left: `${10 + i * 11}%`, top: `${20 + (i % 3) * 25}%`,

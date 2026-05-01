@@ -12,10 +12,21 @@ const values = [
 
 export const Journey = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const bgNumRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
+
+      // ── BACKGROUND NUMBER: parallax scrub ──
+      if (bgNumRef.current) {
+        gsap.fromTo(bgNumRef.current,
+          { yPercent: 5 },
+          { yPercent: -15, ease: 'none',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 }
+          }
+        );
+      }
 
       // ── LEFT COL: slides in from left with clip-path wipe ──
       gsap.fromTo('.jrn-left',
@@ -39,7 +50,6 @@ export const Journey = () => {
           { x: 0, opacity: 1, duration: 0.6, delay: 0.8 + i * 0.15, ease: 'power2.out',
             scrollTrigger: { trigger: '.jrn-checklist', start: 'top 85%', once: true } }
         );
-        // SVG path draw
         const path = item.querySelector<SVGPathElement>('.check-path');
         if (path) {
           const len = path.getTotalLength?.() ?? 14;
@@ -51,7 +61,7 @@ export const Journey = () => {
         }
       });
 
-      // ── VALUE TAGS: stagger scale-in from center ──
+      // ── VALUE TAGS: stagger scale-in from center with WOW ──
       gsap.fromTo('.jrn-tag',
         { scale: 0.7, opacity: 0, rotate: () => gsap.utils.random(-3, 3) },
         { scale: 1, opacity: 1, rotate: 0, duration: 0.5, stagger: 0.08, ease: 'back.out(1.8)',
@@ -65,6 +75,16 @@ export const Journey = () => {
           scrollTrigger: { trigger: '.jrn-legacy', start: 'top 88%', once: true } }
       );
 
+      // ── LEGACY CARD: continuous border shimmer ──
+      const legacyCard = document.querySelector<HTMLElement>('.jrn-legacy');
+      if (legacyCard) {
+        gsap.to(legacyCard, {
+          boxShadow: '0 0 40px rgba(232,160,32,0.12), 0 0 0 1px rgba(232,160,32,0.25)',
+          duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut',
+          scrollTrigger: { trigger: '.jrn-legacy', start: 'top 88%' }
+        });
+      }
+
     }, sectionRef);
     return () => ctx.revert();
   }, []);
@@ -73,9 +93,22 @@ export const Journey = () => {
     <section ref={sectionRef} className="section-pad overflow-hidden relative"
       style={{ background: 'var(--warm-dark)' }} id="journey">
 
-      {/* Subtle warm radial glow */}
+      {/* Warm radial glow */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 70% 50% at 30% 50%, rgba(232,160,32,0.04) 0%, transparent 70%)' }} />
+
+      {/* Watermark number */}
+      <div ref={bgNumRef} className="absolute right-0 bottom-0 overflow-hidden pointer-events-none select-none"
+        style={{ zIndex: 0 }}>
+        <span className="font-display text-white whitespace-nowrap"
+          style={{ fontSize: 'clamp(120px, 22vw, 320px)', fontWeight: 700, opacity: 0.025, lineHeight: 1 }}>
+          30+
+        </span>
+      </div>
+
+      {/* Top separator */}
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(232,160,32,0.15), transparent)' }} />
 
       <div className="section-inner relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-28">
@@ -96,15 +129,15 @@ export const Journey = () => {
             </p>
             <div className="jrn-checklist flex flex-col gap-5">
               {checklist.map((item, i) => (
-                <div key={i} className="jrn-check-item flex items-center gap-5">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center"
+                <div key={i} className="jrn-check-item flex items-center gap-5 group cursor-default">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-300 group-hover:bg-[rgba(232,160,32,0.1)] group-hover:scale-110"
                     style={{ borderColor: 'var(--gold)' }}>
                     <svg width="10" height="10" viewBox="0 0 12 9" fill="none">
                       <path className="check-path" d="M1 4.5L4.5 8L11 1"
                         stroke="#E8A020" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
-                  <span className="font-body text-[var(--text-white-70)] text-sm tracking-wide">{item}</span>
+                  <span className="font-body text-[var(--text-white-70)] text-sm tracking-wide group-hover:text-white transition-colors">{item}</span>
                 </div>
               ))}
             </div>
@@ -121,8 +154,8 @@ export const Journey = () => {
             <div className="jrn-tags grid grid-cols-2 gap-3 mb-12">
               {values.map((v, i) => (
                 <div key={i} className="jrn-tag card-dark p-5 hover:border-[var(--gold)]/40
-                  hover:-translate-y-1 transition-all duration-300 cursor-default">
-                  <span className="font-body text-[var(--text-white-70)] text-sm leading-snug">{v}</span>
+                  hover:-translate-y-1 transition-all duration-300 cursor-default group diagonal-accent">
+                  <span className="font-body text-[var(--text-white-70)] text-sm leading-snug group-hover:text-white transition-colors">{v}</span>
                 </div>
               ))}
             </div>
@@ -134,7 +167,6 @@ export const Journey = () => {
                 borderRadius: 'var(--r-2xl)',
                 border: '1px solid rgba(232,160,32,0.2)',
               }}>
-              {/* Floating particles inside card */}
               {[...Array(4)].map((_, i) => (
                 <span key={i} className="particle" style={{
                   left: `${20 + i * 20}%`, top: `${30 + (i%2)*30}%`,

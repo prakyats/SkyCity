@@ -26,16 +26,24 @@ const amenities = [
 
 export const Amenities = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeIdx, setActiveIdx] = useState(-1);
+  const bgTextRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
 
+      // ── BIG BACKGROUND TEXT: parallax ──
+      if (bgTextRef.current) {
+        gsap.fromTo(bgTextRef.current,
+          { xPercent: 5 },
+          { xPercent: -5, ease: 'none',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 }
+          }
+        );
+      }
+
       // ── HEADER: split chars fly in from random angles ──
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const chars = 'Unmatched\nAmenities'.split('');
       gsap.fromTo('.amen-title-char',
         { opacity: 0, y: () => gsap.utils.random(-60, 60), x: () => gsap.utils.random(-40, 40), rotate: () => gsap.utils.random(-15, 15) },
         {
@@ -45,7 +53,7 @@ export const Amenities = () => {
         }
       );
 
-      // ── CARDS: pinwheel/fan entrance ──
+      // ── CARDS: pinwheel/fan entrance + WOW hover effects ──
       const cards = gsap.utils.toArray<HTMLElement>('.amen-card');
       cards.forEach((card, i) => {
         gsap.fromTo(card,
@@ -78,6 +86,19 @@ export const Amenities = () => {
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(232,160,32,0.04) 0%, transparent 70%)' }} />
 
+      {/* Large watermark background text */}
+      <div ref={bgTextRef} className="absolute bottom-0 left-0 overflow-hidden pointer-events-none select-none"
+        style={{ zIndex: 0 }}>
+        <span className="font-display text-white whitespace-nowrap"
+          style={{ fontSize: 'clamp(80px,14vw,200px)', fontWeight: 700, opacity: 0.02, lineHeight: 1 }}>
+          ELITE LIVING
+        </span>
+      </div>
+
+      {/* Top separator gold */}
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(232,160,32,0.15), transparent)' }} />
+
       <div className="section-inner relative z-10">
 
         <div className="amen-header flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-20">
@@ -107,7 +128,7 @@ export const Amenities = () => {
           {amenities.map((item, i) => (
             <div key={i}
               className="amen-card group relative aspect-[3/4] overflow-hidden cursor-pointer"
-              style={{ borderRadius: 'var(--r-2xl)' }}
+              style={{ borderRadius: 'var(--r-2xl)', willChange: 'transform' }}
               onMouseEnter={() => setActiveIdx(i)}
               onMouseLeave={() => setActiveIdx(-1)}>
 
@@ -117,9 +138,13 @@ export const Amenities = () => {
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
               </div>
 
-              {/* Gradient */}
+              {/* Multi-layer gradient */}
               <div className="absolute inset-0 transition-opacity duration-500"
                 style={{ background: 'linear-gradient(to top, rgba(4,12,22,0.95) 0%, rgba(4,12,22,0.2) 50%, transparent 100%)' }} />
+
+              {/* Hover overlay tint */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                style={{ background: 'linear-gradient(135deg, rgba(232,160,32,0.04) 0%, transparent 60%)' }} />
 
               {/* Index number — large background */}
               <div className="absolute top-6 left-6 font-display text-white/10 group-hover:text-white/20 transition-colors duration-500 select-none pointer-events-none"
@@ -127,9 +152,18 @@ export const Amenities = () => {
                 {item.index}
               </div>
 
-              {/* Gold top-right accent */}
-              <div className="absolute top-6 right-6 w-8 h-8 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110"
-                style={{ borderTop: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
+              {/* Gold corner accent - animated */}
+              <div className="absolute top-6 right-6 pointer-events-none overflow-hidden"
+                style={{ width: 32, height: 32 }}>
+                <div style={{
+                  width: 32, height: 32,
+                  borderTop: '1px solid var(--gold)',
+                  borderRight: '1px solid var(--gold)',
+                  opacity: activeIdx === i ? 1 : 0,
+                  transform: activeIdx === i ? 'scale(1)' : 'scale(0.5)',
+                  transition: 'all 0.4s ease',
+                }} />
+              </div>
 
               {/* Content */}
               <div className="absolute inset-0 p-10 flex flex-col justify-end">
@@ -144,6 +178,8 @@ export const Amenities = () => {
                 <div className="overflow-hidden h-0 group-hover:h-20 transition-all duration-500">
                   <p className="font-body text-[var(--text-white-45)] text-sm leading-relaxed">{item.desc}</p>
                 </div>
+                {/* Read more line */}
+                <div className="h-px w-0 group-hover:w-full transition-all duration-700 delay-100 kinetic-border mt-2" />
               </div>
 
               {/* Border rim */}

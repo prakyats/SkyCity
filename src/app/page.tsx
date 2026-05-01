@@ -13,7 +13,7 @@ import { Contact } from "@/components/sections/Contact";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[var(--navy-deep)]">
       <Hero />
       <ProjectIntro />
       <Connectivity />

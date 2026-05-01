@@ -18,10 +18,18 @@ export const Connectivity = () => {
   const nodesRef   = useRef<(HTMLDivElement|null)[]>([]);
   const centerRef  = useRef<HTMLDivElement>(null);
   const orbRef     = useRef<HTMLDivElement>(null);
+  const bgGlowRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
+
+      // ── BACKGROUND GLOW: pulses in ──
+      gsap.fromTo(bgGlowRef.current,
+        { scale: 0.5, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 1.5, ease: 'power2.out',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true } }
+      );
 
       // ── HEADLINE: text scatters then re-assembles ──
       const words = gsap.utils.toArray<HTMLElement>('.conn-word');
@@ -47,7 +55,7 @@ export const Connectivity = () => {
       const tl = gsap.timeline({
         scrollTrigger: { trigger: sectionRef.current, start: 'top 65%', once: true }
       });
-      tl.to({}, { duration: 0.6 }); // wait for center
+      tl.to({}, { duration: 0.6 });
 
       linesRef.current.forEach((line, i) => {
         if (!line) return;
@@ -75,6 +83,17 @@ export const Connectivity = () => {
         });
       }
 
+      // ── NODE HOVER: pulse glow ──
+      nodesRef.current.forEach((node) => {
+        if (!node) return;
+        node.addEventListener('mouseenter', () => {
+          gsap.to(node, { scale: 1.1, duration: 0.3, ease: 'power2.out' });
+        });
+        node.addEventListener('mouseleave', () => {
+          gsap.to(node, { scale: 1, duration: 0.4, ease: 'power2.out' });
+        });
+      });
+
     }, sectionRef);
     return () => ctx.revert();
   }, []);
@@ -86,9 +105,23 @@ export const Connectivity = () => {
       className="relative w-full min-h-[90vh] flex flex-col items-center justify-center py-24 overflow-hidden"
       style={{ background: 'var(--navy-deep)' }} id="connectivity">
 
-      {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none"
+      {/* Animated radial background glow */}
+      <div ref={bgGlowRef} className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(15,32,53,0.8) 0%, transparent 70%)' }} />
+
+      {/* Extra atmospheric gold glow at center */}
+      <div className="absolute pointer-events-none"
+        style={{
+          left: '50%', top: '55%', transform: 'translate(-50%, -50%)',
+          width: '40vmin', height: '40vmin',
+          background: 'radial-gradient(circle, rgba(232,160,32,0.04) 0%, transparent 70%)',
+          borderRadius: '50%',
+          animation: 'breathe 4s ease-in-out infinite',
+        }} />
+
+      {/* Horizontal separator at top */}
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(232,160,32,0.2), transparent)' }} />
 
       <div className="relative z-10 text-center mb-16 px-6">
         <span className="label text-[var(--gold)] mb-4 block" style={{ fontSize: '0.65rem' }}>
@@ -107,10 +140,13 @@ export const Connectivity = () => {
         {/* Outer orbital ring */}
         <div ref={orbRef} className="absolute inset-[-20px]"
           style={{ border: '1px dashed rgba(232,160,32,0.12)', borderRadius: '50%' }}>
-          {/* Dot on ring */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
             style={{ background: 'var(--gold)', boxShadow: '0 0 6px var(--gold)' }} />
         </div>
+
+        {/* Second ring */}
+        <div className="absolute drift-rotate-slow"
+          style={{ inset: '-50px', border: '1px dashed rgba(232,160,32,0.05)', borderRadius: '50%' }} />
 
         {/* SVG spokes */}
         <svg viewBox="0 0 540 540" className="absolute inset-0 w-full h-full pointer-events-none">
@@ -124,7 +160,6 @@ export const Connectivity = () => {
               />
             );
           })}
-          {/* Concentric rings */}
           {[80, 140, 200].map((r, i) => (
             <circle key={i} cx="270" cy="270" r={r}
               stroke="rgba(255,255,255,0.04)" strokeWidth="1" fill="none" />
@@ -160,6 +195,10 @@ export const Connectivity = () => {
           );
         })}
       </div>
+
+      {/* Bottom separator */}
+      <div className="absolute bottom-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(232,160,32,0.15), transparent)' }} />
     </section>
   );
 };

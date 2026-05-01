@@ -41,12 +41,24 @@ export const initHeroAnimations = (
     scrollTl.to(videoRef.current, { scale: 1.20, ease: 'none', duration: 20 }, 55);
 
     // Phase 4: Narrative fade-out/blur
-    scrollTl.to(videoRef.current, { 
-      filter: 'blur(4px)', 
-      opacity: 0.5,
-      ease: 'none', 
-      duration: 25 
-    }, 75);
+    // Using fromTo with immediateRender: false to prevent the "refresh blur" bug
+    scrollTl.fromTo(videoRef.current, 
+      { filter: 'blur(0px)', opacity: 1 },
+      { 
+        filter: 'blur(10px)', 
+        opacity: 0.35,
+        ease: 'none', 
+        duration: 20,
+        immediateRender: false // CRITICAL: Prevents style application before scroll threshold
+      }, 
+      80
+    );
+
+    // CRITICAL: Refresh ScrollTrigger after a short delay to account for 
+    // browser scroll restoration and preloader layout shifts
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
 
     return scrollTl;
   }

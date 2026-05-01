@@ -12,10 +12,32 @@ const stats = [
 
 export const ProjectIntro = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const orbRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
+
+      // ── SECTION ENTRANCE: dramatic scale + blur reveal ──
+      gsap.fromTo(sectionRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.8, ease: 'power2.out',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 90%', once: true } }
+      );
+
+      // ── BACKGROUND ORB: parallax drift ──
+      if (orbRef.current) {
+        gsap.to(orbRef.current, {
+          yPercent: -40,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.5,
+          }
+        });
+      }
 
       // ── HEADLINE: each word barrel-rolls in from bottom, staggered ──
       const words = gsap.utils.toArray<HTMLElement>('.pi-word');
@@ -27,6 +49,13 @@ export const ProjectIntro = () => {
           ease: 'power4.out',
           scrollTrigger: { trigger: '.pi-headline', start: 'top 85%', once: true },
         }
+      );
+
+      // ── GOLD RULE: kinetic draw ──
+      gsap.fromTo('.pi-gold-rule',
+        { scaleX: 0, transformOrigin: 'left center' },
+        { scaleX: 1, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: '.pi-gold-rule', start: 'top 90%', once: true } }
       );
 
       // ── BODY TEXT: clip-path curtain wipe left-to-right ──
@@ -41,7 +70,7 @@ export const ProjectIntro = () => {
           scrollTrigger: { trigger: '.pi-body-2', start: 'top 88%', once: true } }
       );
 
-      // ── STAT CARDS: 3D flip in from different directions ──
+      // ── STAT CARDS: 3D flip in from different directions + counter ──
       const cards = gsap.utils.toArray<HTMLElement>('.pi-stat');
       cards.forEach((card, i) => {
         const dir = i % 2 === 0 ? -1 : 1;
@@ -54,14 +83,14 @@ export const ProjectIntro = () => {
             scrollTrigger: { trigger: '.pi-stats', start: 'top 86%', once: true }
           }
         );
+        // Hover shimmer
+        card.addEventListener('mouseenter', () => {
+          gsap.to(card, { y: -6, scale: 1.02, duration: 0.35, ease: 'power2.out' });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, { y: 0, scale: 1, duration: 0.5, ease: 'power2.out' });
+        });
       });
-
-      // ── GOLD RULE: draw left to right via scaleX ──
-      gsap.fromTo('.pi-gold-rule',
-        { scaleX: 0, transformOrigin: 'left center' },
-        { scaleX: 1, duration: 0.8, ease: 'power3.out',
-          scrollTrigger: { trigger: '.pi-gold-rule', start: 'top 90%', once: true } }
-      );
 
     }, sectionRef);
     return () => ctx.revert();
@@ -70,8 +99,33 @@ export const ProjectIntro = () => {
   const headlineWords = ["South India's", "Tallest", "Sea View", "Tower"];
 
   return (
-    <section ref={sectionRef} className="bg-section-white section-pad perspective-container" id="overview">
-      <div className="section-inner">
+    <section ref={sectionRef} className="bg-section-white section-pad perspective-container relative overflow-hidden" id="overview">
+
+      {/* Atmospheric background orb */}
+      <div ref={orbRef} className="absolute pointer-events-none"
+        style={{
+          top: '10%', right: '-10%',
+          width: '60vw', height: '60vw',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(232,160,32,0.04) 0%, transparent 70%)',
+          filter: 'blur(40px)',
+        }} />
+
+      {/* Floating geometric accent */}
+      <div className="absolute top-16 right-16 pointer-events-none hidden md:block"
+        style={{
+          width: 80, height: 80,
+          border: '1px solid rgba(232,160,32,0.12)',
+          transform: 'rotate(45deg)',
+        }} />
+      <div className="absolute top-24 right-24 pointer-events-none hidden md:block"
+        style={{
+          width: 50, height: 50,
+          border: '1px solid rgba(232,160,32,0.07)',
+          transform: 'rotate(45deg)',
+        }} />
+
+      <div className="section-inner relative z-10">
 
         {/* Header */}
         <div className="flex flex-col items-start mb-20 md:mb-28">
@@ -115,7 +169,8 @@ export const ProjectIntro = () => {
           style={{ borderRadius: 'var(--r-2xl)', overflow: 'hidden' }}>
           {stats.map((s, i) => (
             <div key={i} className="pi-stat bg-[var(--cream)] flex flex-col items-center justify-center
-              text-center py-14 px-8 group hover:bg-white transition-colors duration-500 cursor-default">
+              text-center py-14 px-8 group hover:bg-white transition-colors duration-500 cursor-default diagonal-accent relative"
+              style={{ willChange: 'transform' }}>
               <span className="font-display text-[var(--near-black)] mb-2 group-hover:text-gold transition-colors"
                 style={{ fontSize: 'clamp(2.2rem,4vw,3.5rem)', fontWeight: 300, lineHeight: 1 }}>
                 {s.value}

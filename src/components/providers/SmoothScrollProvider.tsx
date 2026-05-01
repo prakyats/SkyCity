@@ -22,20 +22,16 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
       wheelMultiplier: 0.9,
     });
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
     // GSAP SYNC (CRITICAL)
+    // Synchronize ScrollTrigger with Lenis updates
     lenis.on('scroll', ScrollTrigger.update);
 
-    gsap.ticker.add((time) => {
+    // Use GSAP's ticker to drive Lenis for perfect synchronization
+    const updateLenis = (time: number) => {
       lenis.raf(time * 1000);
-    });
+    };
 
+    gsap.ticker.add(updateLenis);
     gsap.ticker.lagSmoothing(0);
 
     // Handle initial scroll trigger setup
@@ -45,7 +41,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
 
     return () => {
       lenis.destroy();
-      gsap.ticker.remove(lenis.raf);
+      gsap.ticker.remove(updateLenis);
     };
   }, []);
 
