@@ -41,6 +41,8 @@ const tenorSans = Tenor_Sans({
   display: "swap",
 });
 
+import LayoutClient from "@/components/layout/LayoutClient";
+
 export const metadata: Metadata = {
   title: "Yamuna Sky City | Luxury Sea-Facing Apartments in Mangalore",
   description:
@@ -57,12 +59,14 @@ export default function RootLayout({
       className={`${cormorant.variable} ${dmSerif.variable} ${dmSans.variable} ${tenorSans.variable}`}
     >
       <body className="bg-section-dark overflow-x-hidden font-body antialiased">
-        <SmoothScrollProvider>
-          {/* <Navbar /> */}
-          {children}
-          <Footer />
-          <FloatingCTAs />
-        </SmoothScrollProvider>
+        <LayoutClient>
+          <SmoothScrollProvider>
+            {/* <Navbar /> */}
+            {children}
+            <Footer />
+            <FloatingCTAs />
+          </SmoothScrollProvider>
+        </LayoutClient>
       </body>
     </html>
   );
