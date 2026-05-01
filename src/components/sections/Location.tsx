@@ -138,8 +138,8 @@ export const Location = () => {
               style={{ borderLeft: '1px solid rgba(232,160,32,0.3)' }}>
               <p className="font-display text-white/45 leading-relaxed"
                 style={{ fontSize: 'clamp(0.95rem,1.2vw,1.1rem)', fontWeight: 300 }}>
-                "300 metres from the Arabian Sea, perfectly positioned between
-                serenity and connectivity."
+                &quot;300 metres from the Arabian Sea, perfectly positioned between
+                serenity and connectivity.&quot;
               </p>
             </blockquote>
           </div>

@@ -101,6 +101,7 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       img.addEventListener('error', onLoad); // fail gracefully
     }
 
+    const barElement = progressBarRef.current;
     return () => {
       clearTimeout(minTimer);
       if (img) {
@@ -108,7 +109,7 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         img.removeEventListener('error', onLoad);
       }
       tl.kill();
-      gsap.killTweensOf(progressBarRef.current);
+      if (barElement) gsap.killTweensOf(barElement);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

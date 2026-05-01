@@ -114,7 +114,7 @@ export const Partners = () => {
             </h2>
           </div>
           <span className="label text-[var(--text-subtle)] hidden md:block" style={{ fontSize: '0.58rem', maxWidth: '20ch', textAlign: 'right' }}>
-            Global consultants. India's tallest coastal tower.
+            Global consultants. India&apos;s tallest coastal tower.
           </span>
         </div>
 
