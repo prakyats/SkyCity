@@ -146,7 +146,10 @@ export const Partners = () => {
               {/* Logo / name */}
               <div className="h-16 mb-8 flex items-center">
                 {p.logo
-                  ? <img src={p.logo} alt={p.name} className="max-h-10 object-contain" />
+                  ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={p.logo} alt={p.name} className="max-h-10 object-contain" />
+                  )
                   : <span className="font-display text-[var(--near-black)] opacity-55"
                     style={{ fontSize: '1.05rem', fontWeight: 400, lineHeight: 1.2 }}>
                     {p.name}

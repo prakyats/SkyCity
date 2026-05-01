@@ -132,7 +132,7 @@ export const Amenities = () => {
           }
         };
 
-        track.addEventListener('wheel', onWheel as any, { passive: false });
+        track.addEventListener('wheel', onWheel as EventListener, { passive: false });
 
         // Play only when section is in view
         ScrollTrigger.create({
