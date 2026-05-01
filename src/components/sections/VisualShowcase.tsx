@@ -63,7 +63,7 @@ export const VisualShowcase = () => {
 
   return (
     <div ref={triggerRef} className="relative h-[300vh] bg-section-dark">
-      <section ref={sectionRef} className="sticky top-0 h-screen w-full flex items-center overflow-hidden">
+      <section ref={sectionRef} className="sticky top-0 h-screen h-[100dvh] w-full flex items-center overflow-hidden">
         
         {/* Full-Screen Visual Stack */}
         <div className="absolute inset-0 w-full h-full">
@@ -84,58 +84,62 @@ export const VisualShowcase = () => {
               className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0" 
             />
 
-            {/* Dark Vignet Overlay for text readability */}
+            {/* Dark Gradient Overlay - Responsive for mobile readability */}
             <div className="absolute inset-0 bg-black/40 pointer-events-none" 
-              style={{ background: 'radial-gradient(circle at 20% 50%, rgba(0,0,0,0.6) 0%, transparent 70%)' }} />
+              style={{ 
+                background: 'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                // Overridden by media query for desktop in CSS usually, but here I'll just make it balanced
+              }} />
           </div>
 
-          {/* Decorative Overlays */}
-          <div className="absolute top-12 left-12 w-20 h-20 pointer-events-none opacity-40"
+          {/* Decorative Overlays - Scaled for Mobile */}
+          <div className="absolute top-6 left-6 md:top-12 md:left-12 w-10 h-10 md:w-20 md:h-20 pointer-events-none opacity-40"
             style={{ borderTop: '1px solid var(--gold)', borderLeft: '1px solid var(--gold)' }} />
-          <div className="absolute bottom-12 right-12 w-20 h-20 pointer-events-none opacity-40"
+          <div className="absolute bottom-6 right-6 md:bottom-12 md:right-12 w-10 h-10 md:w-20 md:h-20 pointer-events-none opacity-40"
             style={{ borderBottom: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
           
           {/* Scanline Effect */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.05]"
+          <div className="absolute inset-0 pointer-events-none opacity-[0.03] md:opacity-[0.05]"
             style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, #fff 3px)' }} />
         </div>
 
         {/* Narrative Text Overlay */}
-        <div className="section-inner relative w-full z-10 px-6 md:px-20">
-          <div className="max-w-2xl vs-text flex flex-col">
-            <span className="gold-rule mb-8" />
-            <span className="label text-[var(--gold)] mb-6 tracking-[0.3em] uppercase text-xs">Architectural Narrative</span>
+        <div className="section-inner relative w-full z-10 px-6 md:px-20 mt-10 md:mt-0">
+          <div className="max-w-2xl vs-text flex flex-col items-start text-left">
+            <span className="gold-rule mb-6 md:mb-8" />
+            <span className="label text-[var(--gold)] mb-4 md:mb-6 tracking-[0.2em] md:tracking-[0.3em] uppercase text-[10px] md:text-xs">
+              Architectural Narrative
+            </span>
 
-            <h2 className="section-heading text-white mb-10 leading-tight"
-              style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>
+            <h2 className="section-heading text-white mb-6 md:mb-10 leading-[1.1]"
+              style={{ fontSize: 'clamp(2rem, 8vw, 4.5rem)' }}>
               <span className="reveal-line overflow-hidden block">
                 <span className="vs-line block">Nature Transcribed</span>
               </span>
               <span className="reveal-line overflow-hidden block">
                 <em className="vs-line block font-display font-light italic text-white/70"
-                  style={{ fontSize: '1.1em', lineHeight: 0.88 }}>
+                  style={{ fontSize: '1em', lineHeight: 0.9 }}>
                   Into Geometry
                 </em>
               </span>
             </h2>
 
-            <p className="font-body text-white/70 leading-[1.8] mb-12 vs-line max-w-lg"
-              style={{ fontSize: 'clamp(1rem, 1.2vw, 1.15rem)' }}>
+            <p className="font-body text-white/80 md:text-white/70 leading-relaxed md:leading-[1.8] mb-8 md:mb-12 vs-line max-w-lg"
+              style={{ fontSize: 'clamp(0.85rem, 4vw, 1.15rem)' }}>
               The architecture of Yamuna Sky City is a direct extension of the coastline. 
               The organic rhythm of the Arabian Sea waves is distilled into rigid, 
-              high-performance structural perimeters, creating a seamless synthesis 
-              of nature and engineering.
+              high-performance structural perimeters.
             </p>
 
-            <div className="vs-bullets flex flex-col gap-6">
+            <div className="vs-bullets flex flex-col gap-4 md:gap-6 w-full">
               {[
                 'Wave-inspired balcony perimeters',
                 'Biophilic structural engineering',
                 'Seamless sea-to-home transition'
               ].map((pt, i) => (
-                <div key={i} className="vs-bullet flex items-center gap-6">
-                  <div className="w-8 h-px flex-shrink-0" style={{ background: 'var(--gold)' }} />
-                  <span className="font-body text-white/60 tracking-wider text-sm uppercase">{pt}</span>
+                <div key={i} className="vs-bullet flex items-center gap-4 md:gap-6">
+                  <div className="w-6 h-px flex-shrink-0" style={{ background: 'var(--gold)' }} />
+                  <span className="font-body text-white/60 tracking-wider text-[10px] md:text-sm uppercase">{pt}</span>
                 </div>
               ))}
             </div>
