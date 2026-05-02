@@ -29,6 +29,7 @@ export const VideoBackground = ({
     let id: ReturnType<typeof setTimeout>;
     const load = () => setIsLoaded(true);
     if ('requestIdleCallback' in window) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).requestIdleCallback(load);
       id = setTimeout(load, 1200);
     } else {

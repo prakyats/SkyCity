@@ -360,7 +360,7 @@ export const Hero = () => {
                 fontWeight: 300,
                 letterSpacing: '0.02em',
               }}>
-                South India's Tallest<br />Sea View Residential Tower
+                South India&apos;s Tallest<br />Sea View Residential Tower
               </p>
             </div>
           </div>
