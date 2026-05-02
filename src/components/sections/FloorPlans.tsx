@@ -2,27 +2,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { cld } from '@/lib/cloudinary';
 
 const plans = [
   {
     type: '2 BHK', floors: '3rd – 32nd Floor', size: '1,500 – 1,650',
     desc: 'Thoughtfully designed for families seeking panoramic sea views. All units sea-facing with private balconies and premium coastal finishes.',
-    image: '/images/blueprint.png',
+    image: cld("v1777708500/blueprint.png", 1200),
   },
   {
     type: '3 BHK', floors: '5th – 45th Floor', size: '1,850 – 2,100',
     desc: 'Spacious family homes with split-level living, home office nook, and uninterrupted Arabian Sea views from every room.',
-    image: '/images/blueprint.png',
+    image: cld("v1777708500/blueprint.png", 1200),
   },
   {
     type: '4 BHK', floors: '20th – 55th Floor', size: '2,400 – 2,850',
     desc: 'Grand residences for those who demand more. Double-height living rooms, chef\'s kitchen, and sky-terrace balconies.',
-    image: '/images/blueprint.png',
+    image: cld("v1777708500/blueprint.png", 1200),
   },
   {
     type: '5 BHK', floors: '45th – 60th Floor', size: '3,400 – 4,200',
     desc: 'Ultra-luxury penthouses with private plunge pools, panoramic wraparound decks, and bespoke interior finishes.',
-    image: '/images/blueprint.png',
+    image: cld("v1777708500/blueprint.png", 1200),
   },
 ];
 

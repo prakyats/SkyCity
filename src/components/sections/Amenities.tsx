@@ -2,47 +2,48 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { cld } from '@/lib/cloudinary';
 
 const amenities = [
   {
     title: 'Podium Infinity Pool', cat: 'Serenity',
-    image: '/images/amenity_pool.png',
+    image: cld("v1777708500/amenity_pool.png", 800),
     desc: 'An architectural marvel where the pool edge meets the Arabian Sea on the horizon.',
     index: '01',
   },
   {
     title: 'Private Mini Theatre', cat: 'Entertainment',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672872/Theater_s9f5ws.jpg',
+    image: cld("v1777672872/Theater_s9f5ws.jpg", 800),
     desc: 'A bespoke cinematic experience with state-of-the-art acoustics and plush reclining seats.',
     index: '02',
   },
   {
     title: 'Grand Banquet Hall', cat: 'Events',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672873/Banquet_ek3fc8.jpg',
+    image: cld("v1777672873/Banquet_ek3fc8.jpg", 800),
     desc: 'A majestic venue for grand celebrations, weddings, and elite corporate gatherings.',
     index: '03',
   },
   {
     title: 'Royal Wellness Spa', cat: 'Wellness',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672872/Spa_lkqfyf.jpg',
+    image: cld("v1777672872/Spa_lkqfyf.jpg", 800),
     desc: 'Deep rejuvenation through traditional and modern therapies in a tranquil, ocean-side setting.',
     index: '04',
   },
   {
     title: 'Yoga & Meditation Studio', cat: 'Energy',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672710/Yoga_jxg4ne.jpg',
+    image: cld("v1777672710/Yoga_jxg4ne.jpg", 800),
     desc: 'A serene, light-filled space designed for mindfulness, breathwork, and spiritual balance.',
     index: '05',
   },
   {
     title: 'Arcade & Game Room', cat: 'Recreation',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672705/Gameroom_u43si8.jpg',
+    image: cld("v1777672705/Gameroom_u43si8.jpg", 800),
     desc: 'A vibrant social hub featuring high-end gaming consoles, billiards, and interactive entertainment.',
     index: '06',
   },
   {
     title: 'Elite Fitness Center', cat: 'Performance',
-    image: 'https://res.cloudinary.com/drzbbbncs/image/upload/q_auto,f_auto/v1777672704/Gym_n6nqft.jpg',
+    image: cld("v1777672704/Gym_n6nqft.jpg", 800),
     desc: 'A world-class gym equipped with the latest strength and cardio technology for peak health.',
     index: '07',
   },

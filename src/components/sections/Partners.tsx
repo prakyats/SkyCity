@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { cld } from '@/lib/cloudinary';
 
 const partners = [
   {
@@ -148,7 +149,7 @@ export const Partners = () => {
                 {p.logo
                   ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={p.logo} alt={p.name} className="max-h-10 object-contain" />
+                    <img src={cld(p.logo, 400)} alt={p.name} className="max-h-10 object-contain" />
                   )
                   : <span className="font-display text-[var(--near-black)] opacity-55"
                     style={{ fontSize: '1.05rem', fontWeight: 400, lineHeight: 1.2 }}>

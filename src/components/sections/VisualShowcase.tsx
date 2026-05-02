@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { cld } from '@/lib/cloudinary';
 
 export const VisualShowcase = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -71,7 +72,7 @@ export const VisualShowcase = () => {
             {/* State 1: The Inspiration */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="https://res.cloudinary.com/drzbbbncs/image/upload/v1777698110/wave-start_lp5h52.png" 
+              src={cld("v1777698110/wave-start_lp5h52.png", 2000)} 
               alt="Organic wave inspiration" 
               className="vs-state-1 absolute inset-0 w-full h-full object-cover object-center" 
             />
@@ -79,7 +80,7 @@ export const VisualShowcase = () => {
             {/* State 2: The Plan */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="https://res.cloudinary.com/drzbbbncs/image/upload/v1777698109/balcony-plan_ob6gd2.jpg" 
+              src={cld("v1777698109/balcony-plan_ob6gd2.jpg", 2000)} 
               alt="Technical architectural plan" 
               className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0" 
             />

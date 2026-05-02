@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { VideoBackground } from '@/components/ui/VideoBackground';
 import { initHeroAnimations } from '@/lib/animations/heroAnimation';
+import { cld } from '@/lib/cloudinary';
 
 export const Hero = () => {
   const sectionRef      = useRef<HTMLElement>(null);
@@ -130,7 +131,7 @@ export const Hero = () => {
         <VideoBackground
           webmSrc="https://res.cloudinary.com/drzbbbncs/video/upload/v1777554895/hero_b0imcd.webm"
           mp4Src="https://res.cloudinary.com/drzbbbncs/video/upload/v1777554838/hero_gxnqcd.mp4"
-          posterSrc="https://res.cloudinary.com/drzbbbncs/image/upload/v1777554903/hero-poster_emnfvb.jpg"
+          posterSrc={cld("v1777554903/hero-poster_emnfvb.jpg", 2000)}
           onReady={handleVideoReady}
           onPlay={handleVideoPlay}
         />
@@ -165,13 +166,13 @@ export const Hero = () => {
       <div className="absolute z-30 pointer-events-none"
         style={{ top: 'clamp(22px,3vw,40px)', left: 'clamp(22px,4vw,56px)' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logos/skyfavicon.png" alt="Sky City" className="h-9 md:h-12 w-auto object-contain" />
+        <img src={cld("v1777699538/skyfavicon_1_tufy14.png", 200)} alt="Sky City" className="h-9 md:h-12 w-auto object-contain" />
       </div>
       {/* Yamuna Homes logo — top right */}
       <div className="absolute z-30 pointer-events-none"
         style={{ top: 'clamp(22px,3vw,40px)', right: 'clamp(22px,4vw,56px)' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logos/yamuna_homes.png" alt="Yamuna Homes" className="h-12 md:h-16 w-auto object-contain" />
+        <img src={cld("v1777696301/yamuna_homes_z4hnie.png", 200)} alt="Yamuna Homes" className="h-12 md:h-16 w-auto object-contain" />
       </div>
 
       {/* ── MAIN SPLIT LAYOUT ────────────────────────────────────────────── */}

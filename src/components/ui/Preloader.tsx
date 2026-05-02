@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { cld } from '@/lib/cloudinary';
 
 export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -225,7 +226,7 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           ref={logoRef}
-          src="https://res.cloudinary.com/drzbbbncs/image/upload/v1777696301/yamuna_homes_z4hnie.png"
+          src={cld("v1777696301/yamuna_homes_z4hnie.png", 400)}
           alt="Yamuna Homes"
           style={{
             width: 'clamp(160px, 14vw, 220px)',

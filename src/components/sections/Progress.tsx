@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { cld } from '@/lib/cloudinary';
 
 const milestones = [
   { date: 'March 2023',   title: 'Site Establishment',     desc: 'Site clearing, boundary establishment, and foundation survey completed.', image: null },
@@ -142,7 +143,7 @@ export const Progress = () => {
               {m.image ? (
                 <div className="img-zoom w-full aspect-[4/3] mb-8 overflow-hidden" style={{ borderRadius: 'var(--r-lg)' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={m.image} alt={m.title} className="w-full h-full object-cover" />
+                  <img src={cld(m.image, 1000)} alt={m.title} className="w-full h-full object-cover" />
                 </div>
               ) : (
                 <div className="w-full aspect-[4/3] mb-8 flex items-center justify-center relative overflow-hidden"
