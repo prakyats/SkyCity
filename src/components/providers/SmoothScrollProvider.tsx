@@ -7,41 +7,33 @@ import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface SmoothScrollProviderProps {
-  children: ReactNode;
-}
-
-export default function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
+export default function SmoothScrollProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.08,
-      easing: (t) => 1 - Math.pow(1 - t, 4), // power4.out
+      lerp: 0.1,          // slightly snappier — 0.08 can feel sluggish on fast scrolls
       smoothWheel: true,
-      // @ts-expect-error - Some versions of Lenis use smoothTouch, others touchMultiplier
-      smoothTouch: false,
-      wheelMultiplier: 0.9,
+      // @ts-expect-error - smoothTouch varies by Lenis version
+      smoothTouch: false, // never smooth touch — causes jank on iOS
+      wheelMultiplier: 0.95,
     });
 
-    // GSAP SYNC (CRITICAL)
-    // Synchronize ScrollTrigger with Lenis updates
+    // Sync GSAP ScrollTrigger with Lenis position
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Use GSAP's ticker to drive Lenis for perfect synchronization
-    const updateLenis = (time: number) => {
-      lenis.raf(time * 1000);
-    };
+    // Drive Lenis via GSAP ticker for perfect frame alignment
+    const tick = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(tick);
 
-    gsap.ticker.add(updateLenis);
-    gsap.ticker.lagSmoothing(0);
+    // NOTE: do NOT call gsap.ticker.lagSmoothing(0) — it disables GSAP's
+    // built-in frame-drop protection. Default (500ms, 33ms) is correct.
 
-    // Handle initial scroll trigger setup
-    ScrollTrigger.defaults({
-      scroller: document.documentElement
-    });
+    // Set default scroller for all ScrollTrigger instances
+    // eslint-disable-next-line no-restricted-globals
+    ScrollTrigger.defaults({ scroller: document.documentElement });
 
     return () => {
       lenis.destroy();
-      gsap.ticker.remove(updateLenis);
+      gsap.ticker.remove(tick);
     };
   }, []);
 
