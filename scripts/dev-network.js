@@ -25,9 +25,8 @@ console.log(`\n  Connect on your phone: \x1b[1mhttp://${ip}:3000\x1b[0m\n`);
 console.log('\x1b[36m%s\x1b[0m', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
 // Start the actual next dev server
-const nextDev = spawn('npx', ['next', 'dev', '-H', '0.0.0.0'], { 
-  stdio: 'inherit',
-  shell: true 
+const nextDev = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['next', 'dev', '-H', '0.0.0.0'], { 
+  stdio: 'inherit'
 });
 
 nextDev.on('exit', (code) => {

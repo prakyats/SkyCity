@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   swcMinify: true,
-  experimental: {
-    legacyBrowsers: false
-  }
+  experimental: {}
 };
 
 export default nextConfig;
