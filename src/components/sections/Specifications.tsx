@@ -134,8 +134,7 @@ export const Specifications = () => {
         <div className="sub-specs grid grid-cols-2 md:grid-cols-4 gap-px bg-[var(--sand)]"
           style={{ borderRadius: 'var(--r-xl)', overflow: 'hidden' }}>
           {subSpecs.map((s, i) => (
-            <div key={i} className="sub-spec bg-white flex flex-col items-center justify-center py-10 px-6 text-center
-              group hover:bg-[var(--cream)] transition-colors duration-300 relative overflow-hidden">
+            <div key={i} className="sub-spec bg-white flex flex-col items-center justify-center py-10 px-6 text-center group hover:bg-[var(--cream)] transition-colors duration-300 relative overflow-hidden">
               <span className="font-display text-[var(--near-black)] mb-2 group-hover:scale-110 transition-transform inline-block"
                 style={{ fontSize: 'clamp(1.6rem,2.5vw,2.5rem)', fontWeight: 300 }}>
                 {s.value}
