@@ -96,9 +96,9 @@ export const Amenities = () => {
       // ── NEW PREMIUM INFINITE CAROUSEL LOGIC ──
       const track = scrollContainerRef.current;
       if (track) {
-        // Calculate the total width of the original items
         const items = gsap.utils.toArray<HTMLElement>('.amen-card');
-        const itemWidth = items[0].offsetWidth + 24; // width + gap
+        const firstItem = items[0];
+        const itemWidth = firstItem.getBoundingClientRect().width + 24; // width + gap
         const totalWidth = itemWidth * amenities.length;
 
         // Create the seamless loop animation
@@ -254,7 +254,7 @@ export const Amenities = () => {
                     style={{ fontSize: 'clamp(1.2rem,2vw,1.6rem)' }}>
                     {item.title}
                   </h3>
-                  <div className="overflow-hidden h-0 group-hover:h-20 transition-all duration-500">
+                  <div className="opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-75">
                     <p className="font-body text-[var(--text-white-45)] text-sm leading-relaxed">{item.desc}</p>
                   </div>
                   {/* Read more line */}

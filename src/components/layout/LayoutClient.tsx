@@ -42,8 +42,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       mousePos.current = { x: e.clientX, y: e.clientY };
       // Dot follows instantly
       if (dotRef.current) {
-        dotRef.current.style.left = `${e.clientX}px`;
-        dotRef.current.style.top = `${e.clientY}px`;
+        dotRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
       }
     };
 
@@ -51,8 +50,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     const onEnter = () => {
       isHovering.current = true;
       if (outerRef.current) {
-        outerRef.current.style.width = '56px';
-        outerRef.current.style.height = '56px';
+        outerRef.current.style.transform = `${outerRef.current.style.transform.split(' scale')[0]} scale(1.55)`;
         outerRef.current.style.borderColor = 'rgba(232,160,32,0.8)';
         outerRef.current.style.background = 'rgba(232,160,32,0.05)';
       }
@@ -60,8 +58,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     const onLeave = () => {
       isHovering.current = false;
       if (outerRef.current) {
-        outerRef.current.style.width = '36px';
-        outerRef.current.style.height = '36px';
+        outerRef.current.style.transform = `${outerRef.current.style.transform.split(' scale')[0]} scale(1)`;
         outerRef.current.style.borderColor = 'rgba(232,160,32,0.5)';
         outerRef.current.style.background = 'transparent';
       }
@@ -85,8 +82,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         cursorPos.current.x += (mousePos.current.x - cursorPos.current.x) * 0.1;
         cursorPos.current.y += (mousePos.current.y - cursorPos.current.y) * 0.1;
         if (outerRef.current) {
-          outerRef.current.style.left = `${cursorPos.current.x}px`;
-          outerRef.current.style.top = `${cursorPos.current.y}px`;
+          const s = isHovering.current ? 1.55 : 1;
+          outerRef.current.style.transform = `translate(${cursorPos.current.x}px, ${cursorPos.current.y}px) translate(-50%, -50%) scale(${s})`;
         }
       }
       rafRef.current = requestAnimationFrame(animate);
@@ -107,8 +104,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     position: 'fixed',
     pointerEvents: 'none',
     zIndex: 9990,
-    transform: 'translate(-50%, -50%)',
-    willChange: 'left, top',
+    top: 0,
+    left: 0,
+    willChange: 'transform',
   };
 
   return (
@@ -126,7 +124,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             border: '1px solid rgba(232,160,32,0.5)',
             borderRadius: '50%',
             background: 'transparent',
-            transition: 'width 0.3s ease, height 0.3s ease, border-color 0.3s ease, background 0.3s ease',
+            transition: 'transform 0.3s ease, border-color 0.3s ease, background 0.3s ease',
             mixBlendMode: 'difference',
           }}
         />

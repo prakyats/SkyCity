@@ -51,11 +51,11 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
     // the exit sequence takes it there.
     progressTl
       .fromTo(progressBarRef.current,
-        { width: '0%' },
-        { width: '70%', duration: 0.9, ease: 'power2.out' }
+        { scaleX: 0, transformOrigin: 'left' },
+        { scaleX: 0.7, duration: 0.9, ease: 'power2.out' }
       )
       .to(progressBarRef.current,
-        { width: '92%', duration: 2.5, ease: 'sine.inOut' }
+        { scaleX: 0.92, duration: 2.5, ease: 'sine.inOut' }
       );
 
     // ── EXIT ──────────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       exitTl
         // Fill bar to 100%
         .to(progressBarRef.current, {
-          width: '100%', duration: 0.4, ease: 'power3.out',
+          scaleX: 1, duration: 0.4, ease: 'power3.out',
         })
         // Hold a beat — let the eye register completion
         .to({}, { duration: 0.35 })
@@ -258,11 +258,13 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
             ref={progressBarRef}
             style={{
               position: 'absolute', top: 0, left: 0,
-              height: '100%', width: '0%',
+              height: '100%', width: '100%',
               background: 'linear-gradient(90deg, #7a4d0a, #c88018, #E8A020, #F5C842, #E8A020, #c88018)',
               backgroundSize: '300% 100%',
               borderRadius: 1,
+              transformOrigin: 'left',
               animation: 'plShimmer 2.4s linear infinite',
+              willChange: 'transform',
             }}
           />
         </div>

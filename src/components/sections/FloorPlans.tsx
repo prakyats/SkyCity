@@ -129,8 +129,8 @@ export const FloorPlans = () => {
               }}>
               {p.type}
               {/* Active bar */}
-              <span className="absolute bottom-0 left-0 h-[2px] transition-all duration-500"
-                style={{ background: 'var(--gold)', width: active === i ? '100%' : '0%' }} />
+              <span className="absolute bottom-0 left-0 h-[2px] bg-[var(--gold)] transition-transform duration-500 origin-left"
+                style={{ width: '100%', transform: active === i ? 'scaleX(1)' : 'scaleX(0)' }} />
             </button>
           ))}
         </div>
@@ -189,10 +189,12 @@ export const FloorPlans = () => {
                 <button key={i} onClick={() => setActive(i)}
                   className="transition-all duration-300"
                   style={{
-                    width: active === i ? 24 : 6,
+                    width: 24,
                     height: 6,
                     borderRadius: 3,
                     background: active === i ? 'var(--gold)' : 'var(--sand)',
+                    transform: active === i ? 'scaleX(1)' : 'scaleX(0.25)',
+                    transformOrigin: 'left',
                   }} />
               ))}
             </div>
