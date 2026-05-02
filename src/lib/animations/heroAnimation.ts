@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+// eslint-disable-next-line no-restricted-globals
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
@@ -10,6 +11,7 @@ export const initHeroAnimations = (
   contentRef: React.RefObject<HTMLDivElement> | null,
   videoRef: React.RefObject<HTMLDivElement>
 ) => {
+  // eslint-disable-next-line no-restricted-globals
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (prefersReducedMotion) return null;

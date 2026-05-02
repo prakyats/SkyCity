@@ -1,3 +1,19 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    "no-unused-vars": "error",
+    "no-console": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-restricted-globals": [
+      "error",
+      {
+        "name": "document",
+        "message": "Avoid direct DOM manipulation. Use React refs instead."
+      },
+      {
+        "name": "window",
+        "message": "Avoid direct window access where possible. Use hooks or ensure client-side only."
+      }
+    ]
+  }
 }
