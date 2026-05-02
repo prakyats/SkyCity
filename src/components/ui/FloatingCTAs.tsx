@@ -6,14 +6,17 @@ export const FloatingCTAs = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line no-restricted-globals
     const fn = () => setVisible(window.scrollY > window.innerHeight * 0.5);
+    // eslint-disable-next-line no-restricted-globals
     window.addEventListener('scroll', fn, { passive: true });
+    // eslint-disable-next-line no-restricted-globals
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
   return (
     <div
-      className={`fixed bottom-8 right-8 z-[100] flex flex-col gap-3 transition-all duration-500 ${
+      className={`fixed bottom-4 md:bottom-8 right-4 md:right-8 z-[100] flex flex-col gap-3 transition-all duration-500 ${
         visible ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
       }`}
     >

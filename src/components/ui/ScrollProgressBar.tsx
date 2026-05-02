@@ -11,11 +11,13 @@ export const ScrollProgressBar = () => {
     gsap.registerPlugin(ScrollTrigger);
     if (!barRef.current) return;
 
+    // eslint-disable-next-line no-restricted-globals
+    const trigger = document.documentElement;
     const anim = gsap.to(barRef.current, {
       scaleX: 1,
       ease: 'none',
       scrollTrigger: {
-        trigger: document.documentElement,
+        trigger,
         start: 'top top',
         end: 'bottom bottom',
         scrub: 0.3,
@@ -25,7 +27,7 @@ export const ScrollProgressBar = () => {
     return () => {
       anim.kill();
       ScrollTrigger.getAll().forEach(t => {
-        if (t.vars.trigger === document.documentElement) t.kill();
+        if (t.vars.trigger === trigger) t.kill();
       });
     };
   }, []);
