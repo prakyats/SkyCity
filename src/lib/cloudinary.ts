@@ -17,7 +17,6 @@ export const cld = (path: string | null | undefined, w: number = 1200): string =
       // Find the next slash after /upload/ (skipping existing transformations if any)
       const parts = path.split('/upload/');
       const pathPart = parts[1];
-      const firstSlashIdx = pathPart.indexOf('/');
       
       // If the first part after /upload/ starts with v[digits], it's a version string
       // or if it's a transformation string (contains ,).
