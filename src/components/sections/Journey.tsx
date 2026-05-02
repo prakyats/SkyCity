@@ -153,8 +153,7 @@ export const Journey = () => {
             </h2>
             <div className="jrn-tags grid grid-cols-2 gap-3 mb-12">
               {values.map((v, i) => (
-                <div key={i} className="jrn-tag card-dark p-5 hover:border-[var(--gold)]/40
-                  hover:-translate-y-1 transition-all duration-300 cursor-default group diagonal-accent">
+                <div key={i} className="jrn-tag card-dark p-5 hover:border-[var(--gold)]/40 hover:-translate-y-1 transition-all duration-300 cursor-default group diagonal-accent">
                   <span className="font-body text-[var(--text-white-70)] text-sm leading-snug group-hover:text-white transition-colors">{v}</span>
                 </div>
               ))}
