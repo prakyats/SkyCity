@@ -7,16 +7,16 @@ import { initHeroAnimations } from '@/lib/animations/heroAnimation';
 import { cld } from '@/lib/cloudinary';
 
 export const Hero = () => {
-  const sectionRef      = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [isReady,   setIsReady]   = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
-  const [phase,     setPhase]     = useState(0); // 0=hidden 1=titles 2=details
+  const [phase, setPhase] = useState(0); // 0=hidden 1=titles 2=details
 
   const hasTriggered = useRef(false);
-  const fallbackRef  = useRef<NodeJS.Timeout | null>(null);
+  const fallbackRef = useRef<NodeJS.Timeout | null>(null);
 
   // ── Wait for preloader ────────────────────────────────────────────────
   useEffect(() => {
@@ -54,14 +54,18 @@ export const Hero = () => {
         // LEFT: "Yamuna" — slides in from left with clip reveal
         gsap.fromTo('.hero-left-title',
           { x: -60, opacity: 0, clipPath: 'inset(0 100% 0 0)' },
-          { x: 0, opacity: 1, clipPath: 'inset(0 0% 0 0)',
-            duration: 1.4, ease: 'power3.out' }
+          {
+            x: 0, opacity: 1, clipPath: 'inset(0 0% 0 0)',
+            duration: 1.4, ease: 'power3.out'
+          }
         );
         // RIGHT: "Sky City" — slides in from right with clip reveal
         gsap.fromTo('.hero-right-title',
           { x: 60, opacity: 0, clipPath: 'inset(0 0 0 100%)' },
-          { x: 0, opacity: 1, clipPath: 'inset(0 0 0 0%)',
-            duration: 1.4, ease: 'power3.out' }
+          {
+            x: 0, opacity: 1, clipPath: 'inset(0 0 0 0%)',
+            duration: 1.4, ease: 'power3.out'
+          }
         );
         // Left vertical line draws down
         gsap.fromTo('.hero-left-vline',
@@ -210,6 +214,7 @@ export const Hero = () => {
                   opacity: 0.7,
                 }} />
               <h1 className="hero-left-title text-white text-left"
+                suppressHydrationWarning
                 style={{
                   fontFamily: 'var(--font-dm-serif), Georgia, serif',
                   fontSize: 'clamp(52px, 8.5vw, 136px)',
@@ -217,9 +222,7 @@ export const Hero = () => {
                   lineHeight: 0.92,
                   letterSpacing: '-0.02em',
                   opacity: phase >= 1 ? 1 : 0,
-                }}>
-                Yamuna
-              </h1>
+                }}>Yamuna<span className="sr-only"> Sky City</span></h1>
             </div>
 
             {/* — CTA button — */}
@@ -262,7 +265,7 @@ export const Hero = () => {
                 {/* Arrow */}
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                   style={{ opacity: 0.6, flexShrink: 0 }}>
-                  <path d="M2 7h10M8 3l4 4-4 4" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M2 7h10M8 3l4 4-4 4" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
@@ -306,7 +309,8 @@ export const Hero = () => {
           {/* — Middle: "Sky City" — */}
           <div className="flex flex-col items-end gap-6">
             <div className="flex items-center gap-5">
-              <h1 className="hero-right-title text-white text-right"
+              <div className="hero-right-title text-white text-right"
+                role="presentation"
                 style={{
                   fontFamily: 'var(--font-cormorant), Georgia, serif',
                   fontSize: 'clamp(52px, 8.5vw, 136px)',
@@ -315,9 +319,7 @@ export const Hero = () => {
                   lineHeight: 0.92,
                   letterSpacing: '-0.01em',
                   opacity: phase >= 1 ? 1 : 0,
-                }}>
-                Sky City
-              </h1>
+                }}>Sky City</div>
               {/* Vertical accent line right of title */}
               <div className="hero-right-vline w-px"
                 style={{
