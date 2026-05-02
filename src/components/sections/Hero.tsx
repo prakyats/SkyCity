@@ -26,12 +26,13 @@ export const Hero = () => {
 
   // ── Fallback: guarantee content shows even if video never plays ────────
   useEffect(() => {
+    if (!isActivated) return;
     if (window.innerWidth < 768) { setPhase(2); hasTriggered.current = true; return; }
     fallbackRef.current = setTimeout(() => {
       if (!hasTriggered.current) { setPhase(2); hasTriggered.current = true; }
-    }, 2200);
+    }, 2400);
     return () => { if (fallbackRef.current) clearTimeout(fallbackRef.current); };
-  }, []);
+  }, [isActivated]);
 
   // ── Cinematic phase timeline (video-driven) ────────────────────────────
   useEffect(() => {
