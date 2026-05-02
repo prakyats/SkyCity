@@ -58,6 +58,9 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${dmSerif.variable} ${dmSans.variable} ${tenorSans.variable}`}
     >
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+      </head>
       <body className="bg-section-dark overflow-x-hidden font-body antialiased">
         <LayoutClient>
           <SmoothScrollProvider>

@@ -144,7 +144,7 @@ export const FloorPlans = () => {
             style={{ borderRadius: 'var(--r-2xl)', border: '1px solid var(--sand)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={plans[active].image} alt={`${plans[active].type} Floor Plan`}
-              className="w-full h-full object-contain opacity-80 transition-transform duration-700 group-hover:scale-105" />
+              className="w-full h-full object-contain opacity-80 transition-transform duration-700 group-hover:scale-105" loading="lazy" />
             <div className="absolute bottom-5 left-6">
               <span className="label text-[var(--text-subtle)]" style={{ fontSize: '0.5rem' }}>
                 Floor Plan · {plans[active].type} · {plans[active].floors}

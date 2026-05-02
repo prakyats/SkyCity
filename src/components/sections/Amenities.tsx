@@ -214,7 +214,7 @@ export const Amenities = () => {
                 {/* Image with scale */}
                 <div className="absolute inset-0 transition-transform duration-[1400ms] ease-out group-hover:scale-110">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
                 </div>
 
                 {/* Multi-layer gradient */}

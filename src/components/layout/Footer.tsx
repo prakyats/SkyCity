@@ -77,9 +77,9 @@ export const Footer = () => {
           <div className="footer-col flex flex-col">
             <div className="flex items-center gap-6 mb-12">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cld("v1777699538/skyfavicon_1_tufy14.png", 200)} alt="Sky City" className="h-24 w-auto object-contain" />
+              <img src={cld("v1777699538/skyfavicon_1_tufy14.png", 200)} alt="Sky City" className="h-24 w-auto object-contain" loading="lazy" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cld("v1777696301/yamuna_homes_z4hnie.png", 200)} alt="Yamuna Homes" className="h-24 w-auto object-contain opacity-80" />
+              <img src={cld("v1777696301/yamuna_homes_z4hnie.png", 200)} alt="Yamuna Homes" className="h-24 w-auto object-contain opacity-80" loading="lazy" />
             </div>
             <p className="font-body text-[var(--text-white-45)] leading-relaxed mb-6"
               style={{ fontSize: '0.85rem', maxWidth: '30ch' }}>
