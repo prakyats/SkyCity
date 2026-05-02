@@ -140,20 +140,20 @@ export const Hero = () => {
       {/* Left column fog — gives the left panel atmospheric depth */}
       <div className="absolute inset-y-0 left-0 z-10 pointer-events-none"
         style={{
-          width: '34%',
-          background: 'linear-gradient(to right, rgba(4,10,20,0.72) 0%, rgba(4,10,20,0.35) 65%, transparent 100%)',
+          width: '30%',
+          background: 'linear-gradient(to right, rgba(4, 10, 20, 0.55) 0%, rgba(4, 10, 20, 0.22) 65%, transparent 100%)',
         }}
       />
       {/* Right column fog — mirrors left */}
       <div className="absolute inset-y-0 right-0 z-10 pointer-events-none"
         style={{
-          width: '32%',
+          width: '30%',
           background: 'linear-gradient(to left, rgba(4,10,20,0.68) 0%, rgba(4,10,20,0.30) 65%, transparent 100%)',
         }}
       />
       {/* Bottom legibility fade */}
       <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none"
-        style={{ height: 80, background: 'linear-gradient(to top, rgba(4,10,20,0.7) 0%, transparent 100%)' }}
+        style={{ height: 60, background: 'linear-gradient(to top, rgba(4, 10, 20, 0.41) 0%, transparent 100%)' }}
       />
       {/* Top fade for logos */}
       <div className="absolute inset-x-0 top-0 z-10 pointer-events-none"

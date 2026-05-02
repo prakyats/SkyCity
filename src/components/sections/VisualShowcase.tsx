@@ -71,7 +71,7 @@ export const VisualShowcase = () => {
             {/* State 1: The Inspiration */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="/frames/wave-start.png" 
+              src="https://res.cloudinary.com/drzbbbncs/image/upload/v1777698110/wave-start_lp5h52.png" 
               alt="Organic wave inspiration" 
               className="vs-state-1 absolute inset-0 w-full h-full object-cover object-center" 
             />
@@ -79,7 +79,7 @@ export const VisualShowcase = () => {
             {/* State 2: The Plan */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="/frames/balcony-plan.png" 
+              src="https://res.cloudinary.com/drzbbbncs/image/upload/v1777698109/balcony-plan_ob6gd2.jpg" 
               alt="Technical architectural plan" 
               className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0" 
             />
