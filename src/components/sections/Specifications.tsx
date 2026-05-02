@@ -9,120 +9,91 @@ const mainSpecs = [
   { value: 1, suffix: '', label: 'Iconic Tower', desc: 'A singular landmark on the Mangalore skyline.' },
 ];
 const subSpecs = [
-  { value: 10, suffix: '+', label: 'World-Class Amenities' },
-  { value: 3, suffix: '+', label: 'Acres of Greenery' },
-  { value: 30, suffix: '+', label: 'Years of Excellence' },
-  { value: 4500, suffix: ' sqft', label: 'Club House' },
+  { value: '10+', label: 'World-Class Amenities' },
+  { value: '3+', label: 'Acres of Greenery' },
+  { value: '30+', label: 'Years of Excellence' },
+  { value: '4500sqft', label: 'Club House' },
 ];
 
 export const Specifications = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const bgTextRef = useRef<HTMLDivElement>(null);
+  // Refs for each card so we never use document.querySelectorAll
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const numRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-
-      // ── MASSIVE BACKGROUND TEXT: parallax scrub ──
       if (bgTextRef.current) {
         gsap.fromTo(bgTextRef.current,
           { xPercent: -5 },
           {
-            xPercent: 5,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: 1,
-            }
+            xPercent: 5, ease: 'none',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 1 }
           }
         );
       }
 
-      // ── HEADLINE: slide in from right, masked ──
       gsap.fromTo('.spec-headline',
-        { x: 120, opacity: 0 },
+        { x: 100, opacity: 0 },
         {
-          x: 0, opacity: 1, duration: 1.2, ease: 'power4.out',
+          x: 0, opacity: 1, duration: 1.1, ease: 'power4.out',
           scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true }
         }
       );
 
-      // ── SPEC CARDS: explode in from corners, each different direction + WOW hover ──
-      const origins = [[-100, -80], [100, -80], [0, 100]];
+      const origins: [number, number][] = [[-90, -70], [90, -70], [0, 90]];
       mainSpecs.forEach((spec, i) => {
-        const card = document.querySelectorAll<HTMLElement>('.spec-card')[i];
-        if (!card) return;
-        const num = card.querySelector<HTMLElement>('.spec-num');
+        const card = cardRefs.current[i];
+        const num = numRefs.current[i];
+        const origin = origins[i];
+        if (!card || !origin) return;
 
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: card, start: 'top 88%', once: true }
+          scrollTrigger: { trigger: card, start: 'top 88%', once: true },
         });
 
         tl.fromTo(card,
-          { x: origins[i][0], y: origins[i][1], opacity: 0, rotate: i === 1 ? 3 : i === 0 ? -2 : 1 },
-          { x: 0, y: 0, opacity: 1, rotate: 0, duration: 1, ease: 'power3.out' }
+          { x: origin[0], y: origin[1], opacity: 0 },
+          { x: 0, y: 0, opacity: 1, duration: 0.95, ease: 'power3.out' }
         );
 
-        if (num) {
+        if (num && spec.value > 1) {
           const counter = { val: 0 };
-          tl.to(counter,
-            {
-              val: spec.value,
-              duration: 1.8,
-              ease: 'power2.out',
-              onUpdate() { if (num) num.textContent = String(Math.round(counter.val)); },
-            },
-            '-=0.8'
-          );
-          tl.fromTo(num, { scale: 1.3 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' }, '-=0.1');
+          tl.to(counter, {
+            val: spec.value, duration: 1.6, ease: 'power2.out',
+            onUpdate() { if (num) num.textContent = String(Math.round(counter.val)); },
+          }, '-=0.75');
         }
 
-        // WOW hover magnetic effect
-        card.addEventListener('mouseenter', () => {
-          gsap.to(card, { y: -10, scale: 1.02, boxShadow: '0 30px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(232,160,32,0.2)', duration: 0.4, ease: 'power2.out' });
-        });
-        card.addEventListener('mouseleave', () => {
-          gsap.to(card, { y: 0, scale: 1, boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 0.5, ease: 'power2.out' });
-        });
+        card.addEventListener('mouseenter', () =>
+          gsap.to(card, { y: -8, scale: 1.02, duration: 0.35, ease: 'power2.out' }), { passive: true });
+        card.addEventListener('mouseleave', () =>
+          gsap.to(card, { y: 0, scale: 1, duration: 0.45, ease: 'power2.out' }), { passive: true });
       });
 
-      // ── SUB SPECS: stagger up with gold line draw ──
       gsap.fromTo('.sub-spec',
-        { y: 40, opacity: 0 },
+        { y: 36, opacity: 0 },
         {
-          y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out',
+          y: 0, opacity: 1, duration: 0.75, stagger: 0.1, ease: 'power3.out',
           scrollTrigger: { trigger: '.sub-specs', start: 'top 88%', once: true }
         }
       );
-
-      gsap.fromTo('.sub-spec-line',
-        { scaleX: 0, transformOrigin: 'left' },
-        {
-          scaleX: 1, duration: 1, ease: 'power3.out',
-          scrollTrigger: { trigger: '.sub-specs', start: 'top 88%', once: true }
-        }
-      );
-
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
   return (
     <section ref={sectionRef} className="bg-section-cream section-pad grain overflow-hidden relative" id="specifications">
-
-      {/* Huge watermark background text */}
-      <div ref={bgTextRef} className="absolute inset-0 flex items-center overflow-hidden pointer-events-none select-none"
-        style={{ zIndex: 0 }}>
+      <div ref={bgTextRef} className="absolute inset-0 flex items-center overflow-hidden pointer-events-none select-none" style={{ zIndex: 0 }}>
         <span className="font-display text-[var(--near-black)] whitespace-nowrap"
-          style={{ fontSize: 'clamp(100px, 18vw, 240px)', fontWeight: 700, opacity: 0.025, lineHeight: 1, letterSpacing: '-0.04em' }}>
+          style={{ fontSize: 'clamp(100px,18vw,240px)', fontWeight: 700, opacity: 0.025, lineHeight: 1, letterSpacing: '-0.04em' }}>
           GF+60 FLOORS
         </span>
       </div>
 
       <div className="section-inner relative z-10">
-
         <div className="mb-20 overflow-hidden">
           <span className="gold-rule" />
           <span className="label text-[var(--gold)] mb-5 block">Technical Excellence</span>
@@ -136,39 +107,30 @@ export const Specifications = () => {
           </h2>
         </div>
 
-        {/* Main specs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16" style={{ perspective: '800px' }}>
           {mainSpecs.map((spec, i) => (
-            <div key={i} className="spec-card card-light p-10 md:p-14 flex flex-col group cursor-default relative overflow-hidden diagonal-accent"
-              style={{ willChange: 'transform, box-shadow' }}>
-              {/* Scan line effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
-                <div style={{
-                  position: 'absolute', left: 0, right: 0, height: '60%', top: '-60%',
-                  background: 'linear-gradient(180deg, transparent, rgba(232,160,32,0.03), transparent)',
-                  animation: 'scanLine 2s linear infinite',
-                }} />
-              </div>
+            <div key={i}
+              ref={el => { cardRefs.current[i] = el; }}
+              className="card-light p-10 md:p-14 flex flex-col group cursor-default relative overflow-hidden diagonal-accent"
+              style={{ willChange: 'transform' }}>
               <div className="flex items-baseline gap-1 mb-5">
-                <span className="spec-num font-display text-[var(--near-black)]"
+                <span ref={el => { numRefs.current[i] = el; }}
+                  className="font-display text-[var(--near-black)]"
                   style={{ fontSize: 'clamp(3.5rem,6vw,6rem)', fontWeight: 300, lineHeight: 1 }}>
-                  0
+                  {spec.value <= 1 ? spec.value : 0}
                 </span>
                 <span className="font-display text-[var(--near-black)]"
                   style={{ fontSize: 'clamp(2rem,3.5vw,3.5rem)', fontWeight: 300 }}>
                   {spec.suffix}
                 </span>
               </div>
-              <span className="label text-[var(--gold)] mb-3" style={{ fontSize: '0.6rem' }}>
-                {spec.label}
-              </span>
+              <span className="label text-[var(--gold)] mb-3" style={{ fontSize: '0.6rem' }}>{spec.label}</span>
               <p className="font-body text-[var(--text-muted)] text-sm leading-relaxed">{spec.desc}</p>
               <div className="mt-auto pt-8 h-[2px] w-0 group-hover:w-full kinetic-border transition-all duration-700 rounded-full" />
             </div>
           ))}
         </div>
 
-        {/* Sub specs */}
         <div className="sub-specs grid grid-cols-2 md:grid-cols-4 gap-px bg-[var(--sand)]"
           style={{ borderRadius: 'var(--r-xl)', overflow: 'hidden' }}>
           {subSpecs.map((s, i) => (
@@ -176,23 +138,14 @@ export const Specifications = () => {
               group hover:bg-[var(--cream)] transition-colors duration-300 relative overflow-hidden">
               <span className="font-display text-[var(--near-black)] mb-2 group-hover:scale-110 transition-transform inline-block"
                 style={{ fontSize: 'clamp(1.6rem,2.5vw,2.5rem)', fontWeight: 300 }}>
-                {s.value}{s.suffix}
+                {s.value}
               </span>
               <span className="label text-[var(--text-subtle)]" style={{ fontSize: '0.58rem' }}>{s.label}</span>
               <div className="sub-spec-line absolute bottom-0 left-0 right-0 h-px kinetic-border opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
           ))}
         </div>
-
       </div>
-
-      {[...Array(8)].map((_, i) => (
-        <span key={i} className="particle" style={{
-          left: `${10 + i * 11}%`, top: `${20 + (i % 3) * 25}%`,
-          '--dur': `${5 + i * 1.2}s`,
-          '--delay': `${i * 0.7}s`,
-        } as React.CSSProperties} />
-      ))}
     </section>
   );
 };

@@ -10,7 +10,7 @@ export const VisualShowcase = () => {
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
+
     const ctx = gsap.context(() => {
       // ── MAIN TIMELINE: Scroll-synchronized transition ──
       const tl = gsap.timeline({
@@ -18,13 +18,15 @@ export const VisualShowcase = () => {
           trigger: triggerRef.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1,
+          scrub: 1.5, // Smoother scrub
         }
       });
 
-      // State 1 to 2: wave-start -> balcony-plan
-      tl.to('.vs-state-1', { opacity: 0, duration: 1 }, 0)
-        .fromTo('.vs-state-2', { opacity: 0 }, { opacity: 1, duration: 1 }, 0);
+      // Cinematic transition with holds
+      tl.to({}, { duration: 1.5 }) // Initial hold on the inspiration image
+        .to('.vs-state-1', { opacity: 0, duration: 2, ease: 'power2.inOut' })
+        .to('.vs-state-2', { opacity: 1, duration: 2, ease: 'power2.inOut' }, '<')
+        .to({}, { duration: 0.4 }); // Reduced final hold after the reveal
 
       // ── TEXT REVEALS: Staggered with the states ──
       const lines = gsap.utils.toArray<HTMLElement>('.vs-line');
@@ -63,31 +65,31 @@ export const VisualShowcase = () => {
   }, []);
 
   return (
-    <div ref={triggerRef} className="relative h-[300vh] bg-section-dark">
+    <div ref={triggerRef} className="relative h-[250vh] bg-section-dark">
       <section ref={sectionRef} className="sticky top-0 h-screen h-[100dvh] w-full flex items-center overflow-hidden">
-        
+
         {/* Full-Screen Visual Stack */}
         <div className="absolute inset-0 w-full h-full">
           <div className="vs-img-container relative w-full h-full">
             {/* State 1: The Inspiration */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={cld("v1777698110/wave-start_lp5h52.png", 2000)} 
-              alt="Organic wave inspiration" 
-              className="vs-state-1 absolute inset-0 w-full h-full object-cover object-center" 
+            <img
+              src={cld("v1777698110/wave-start_lp5h52.png", 2000)}
+              alt="Organic wave inspiration"
+              className="vs-state-1 absolute inset-0 w-full h-full object-cover object-center"
             />
-            
+
             {/* State 2: The Plan */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={cld("v1777698109/balcony-plan_ob6gd2.jpg", 2000)} 
-              alt="Technical architectural plan" 
-              className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0" 
+            <img
+              src={cld("v1777698109/balcony-plan_ob6gd2.jpg", 2000)}
+              alt="Technical architectural plan"
+              className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0"
             />
 
             {/* Left-aligned Gradient Overlay for text legibility - Subtler Intensity */}
-            <div className="absolute inset-0 pointer-events-none" 
-              style={{ 
+            <div className="absolute inset-0 pointer-events-none"
+              style={{
                 background: 'linear-gradient(to right, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.32) 30%, transparent 70%)',
               }} />
           </div>
@@ -97,7 +99,7 @@ export const VisualShowcase = () => {
             style={{ borderTop: '1px solid var(--gold)', borderLeft: '1px solid var(--gold)' }} />
           <div className="absolute bottom-6 right-6 md:bottom-12 md:right-12 w-10 h-10 md:w-20 md:h-20 pointer-events-none opacity-40"
             style={{ borderBottom: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
-          
+
           {/* Scanline Effect */}
           <div className="absolute inset-0 pointer-events-none opacity-[0.03] md:opacity-[0.05]"
             style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, #fff 3px)' }} />
@@ -126,8 +128,8 @@ export const VisualShowcase = () => {
 
             <p className="font-body text-white/80 md:text-white/70 leading-relaxed md:leading-[1.8] mb-8 md:mb-12 vs-line max-w-lg"
               style={{ fontSize: 'clamp(0.85rem, 4vw, 1.15rem)' }}>
-              The architecture of Yamuna Sky City is a direct extension of the coastline. 
-              The organic rhythm of the Arabian Sea waves is distilled into rigid, 
+              The architecture of Yamuna Sky City is a direct extension of the coastline.
+              The organic rhythm of the Arabian Sea waves is distilled into rigid,
               high-performance structural perimeters.
             </p>
 

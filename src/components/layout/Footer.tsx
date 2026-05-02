@@ -46,6 +46,7 @@ export const Footer = () => {
   }, []);
 
   const go = (href: string) => {
+    // eslint-disable-next-line no-restricted-globals
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 

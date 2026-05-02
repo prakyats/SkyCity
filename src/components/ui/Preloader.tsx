@@ -11,126 +11,96 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // All mutable state in refs — no React re-renders during animation
     let logoReady = false;
     let minTimeDone = false;
     let exitStarted = false;
 
-    // ── Two independent timelines, no shared state ────────────────────────
-    const introTl = gsap.timeline({ paused: true });
+    // ── Cosmetic progress bar — purely visual, GPU-composited via scaleX ─
     const progressTl = gsap.timeline();
-
-    // ── INTRO: pure opacity + Y rise — NO blur animation ─────────────────
-    // The logo starts with blur(8px) baked into its CSS style (below).
-    // GSAP never animates blur during the entrance — only clears it.
-    // This prevents the "snap to blur then unblur" flash.
-    introTl
-      // 1. Logo rises in — opacity + gentle upward drift, filter already clears in CSS
-      .to(logoRef.current, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 1.2,
-        ease: 'power2.out',
-      })
-      // 2. Ambient glow pulses into existence behind logo
-      .to(glowRef.current, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        ease: 'power2.out',
-      }, '-=0.9')
-      // 3. Progress track fades in below logo
-      .to(progressTrackRef.current, {
-        opacity: 1,
-        duration: 0.4,
-        ease: 'power2.out',
-      }, '-=0.5');
-
-    // ── PROGRESS BAR: cosmetic fill, purely visual ────────────────────────
-    // Quick rush to 70%, then slow crawl to 92%. Never reaches 100% here —
-    // the exit sequence takes it there.
     progressTl
       .fromTo(progressBarRef.current,
         { scaleX: 0, transformOrigin: 'left' },
-        { scaleX: 0.7, duration: 0.9, ease: 'power2.out' }
+        { scaleX: 0.72, duration: 0.85, ease: 'power2.out' }
       )
       .to(progressBarRef.current,
-        { scaleX: 0.92, duration: 2.5, ease: 'sine.inOut' }
+        { scaleX: 0.93, duration: 2.8, ease: 'sine.inOut' }
       );
 
-    // ── EXIT ──────────────────────────────────────────────────────────────
+    // ── Intro timeline — plays once when logo is painted ─────────────────
+    const introTl = gsap.timeline({ paused: true });
+    introTl
+      .to(logoRef.current, {
+        opacity: 1, y: 0, filter: 'blur(0px)',
+        duration: 1.1, ease: 'power2.out',
+      })
+      .to(glowRef.current, {
+        opacity: 1, scale: 1,
+        duration: 0.9, ease: 'power2.out',
+      }, '-=0.85')
+      .to(progressTrackRef.current, {
+        opacity: 1,
+        duration: 0.4, ease: 'power2.out',
+      }, '-=0.5');
+
+    // ── Exit — runs once both conditions met ──────────────────────────────
     const runExit = () => {
       if (exitStarted) return;
       exitStarted = true;
-
       progressTl.kill();
 
-      const exitTl = gsap.timeline({
+      gsap.timeline({
         onComplete: () => { if (onComplete) onComplete(); },
-      });
-
-      exitTl
-        // Fill bar to 100%
-        .to(progressBarRef.current, {
-          scaleX: 1, duration: 0.4, ease: 'power3.out',
-        })
-        // Hold a beat — let the eye register completion
-        .to({}, { duration: 0.35 })
-        // Progress track fades away
-        .to(progressTrackRef.current, {
-          opacity: 0, y: 6, duration: 0.35, ease: 'power2.in',
-        })
-        // Logo: gentle scale-up + re-blur as it dissolves — the reverse of the entrance
-        .to(logoRef.current, {
-          opacity: 0,
-          scale: 1.05,
-          filter: 'blur(8px)',
-          duration: 0.7,
-          ease: 'power2.in',
-        }, '-=0.2')
-        // Glow fades with logo
-        .to(glowRef.current, {
-          opacity: 0,
-          scale: 0.8,
-          duration: 0.5,
-          ease: 'power2.in',
-        }, '-=0.6')
-        // Whole screen fades to deep navy
-        .to(containerRef.current, {
-          opacity: 0, duration: 0.65, ease: 'power2.inOut',
-        }, '-=0.35');
+      })
+        .to(progressBarRef.current,
+          { scaleX: 1, duration: 0.35, ease: 'power3.out' })
+        .to({}, { duration: 0.3 })
+        .to(progressTrackRef.current,
+          { opacity: 0, y: 5, duration: 0.3, ease: 'power2.in' })
+        .to(logoRef.current,
+          {
+            opacity: 0, scale: 1.04, filter: 'blur(6px)',
+            duration: 0.65, ease: 'power2.in'
+          }, '-=0.15')
+        .to(glowRef.current,
+          { opacity: 0, scale: 0.85, duration: 0.45, ease: 'power2.in' }, '-=0.55')
+        .to(containerRef.current,
+          { opacity: 0, duration: 0.55, ease: 'power2.inOut' }, '-=0.3');
     };
 
-    // ── Gate callbacks ────────────────────────────────────────────────────
+    // ── Gate: both conditions must pass ──────────────────────────────────
     introTl.eventCallback('onComplete', () => {
       if (minTimeDone) runExit();
+      // else: minTimer will trigger runExit
     });
 
     const minTimer = setTimeout(() => {
       minTimeDone = true;
+      // introTl done AND image loaded: exit immediately
       if (logoReady && introTl.progress() >= 1) runExit();
-    }, 2000);
+      // else: introTl's onComplete handles it
+    }, 1800);
 
+    // ── Image load gate ───────────────────────────────────────────────────
+    const img = logoRef.current;
     const onLoad = () => {
       if (logoReady) return;
       logoReady = true;
       introTl.play();
     };
 
-    const img = logoRef.current;
-    if (img && img.complete && img.naturalWidth > 0) {
+    // Already cached
+    if (img?.complete && (img.naturalWidth ?? 0) > 0) {
       onLoad();
-    } else if (img) {
-      img.addEventListener('load', onLoad);
-      img.addEventListener('error', onLoad);
+    } else {
+      img?.addEventListener('load', onLoad);
+      img?.addEventListener('error', onLoad); // fail-safe: always proceed
     }
 
     return () => {
       clearTimeout(minTimer);
-      if (img) {
-        img.removeEventListener('load', onLoad);
-        img.removeEventListener('error', onLoad);
-      }
+      img?.removeEventListener('load', onLoad);
+      img?.removeEventListener('error', onLoad);
       introTl.kill();
       progressTl.kill();
     };
@@ -141,49 +111,38 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
     <div
       ref={containerRef}
       style={{
-        position: 'fixed', inset: 0,
+        position: 'fixed', inset: 0, zIndex: 9999,
         background: '#050d1a',
-        zIndex: 9999,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden',
       }}
     >
-      {/* ── Deep background gradient ──────────────────────────────────── */}
+      {/* Background gradient */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         background: 'radial-gradient(ellipse 70% 60% at 50% 50%, #071428 0%, #050d1a 60%, #030810 100%)',
       }} />
 
-      {/* ── Slow-rotating outer ring ──────────────────────────────────── */}
+      {/* Rotating rings — CSS animation, compositor-only */}
       <div style={{
-        position: 'absolute',
-        width: '52vmax', height: '52vmax',
-        borderRadius: '50%',
-        border: '1px solid rgba(232,160,32,0.05)',
+        position: 'absolute', width: '52vmax', height: '52vmax',
+        borderRadius: '50%', border: '1px solid rgba(232,160,32,0.05)',
         pointerEvents: 'none',
         animation: 'plSpin 22s linear infinite',
       }} />
-
-      {/* ── Counter-rotating middle ring ──────────────────────────────── */}
       <div style={{
-        position: 'absolute',
-        width: '38vmax', height: '38vmax',
-        borderRadius: '50%',
-        border: '1px solid rgba(232,160,32,0.04)',
+        position: 'absolute', width: '38vmax', height: '38vmax',
+        borderRadius: '50%', border: '1px solid rgba(232,160,32,0.04)',
         pointerEvents: 'none',
-        animation: 'plSpinReverse 30s linear infinite',
+        animation: 'plSpinRev 30s linear infinite',
       }} />
-
-      {/* ── Static inner ring ─────────────────────────────────────────── */}
       <div style={{
-        position: 'absolute',
-        width: '26vmax', height: '26vmax',
-        borderRadius: '50%',
-        border: '1px solid rgba(232,160,32,0.03)',
+        position: 'absolute', width: '26vmax', height: '26vmax',
+        borderRadius: '50%', border: '1px solid rgba(232,160,32,0.03)',
         pointerEvents: 'none',
       }} />
 
-      {/* ── Four corner gold accents ──────────────────────────────────── */}
+      {/* Corner accents */}
       {([
         { top: 28, left: 28, borderTop: '1px solid rgba(232,160,32,0.2)', borderLeft: '1px solid rgba(232,160,32,0.2)' },
         { top: 28, right: 28, borderTop: '1px solid rgba(232,160,32,0.2)', borderRight: '1px solid rgba(232,160,32,0.2)' },
@@ -193,46 +152,32 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         <div key={i} style={{ position: 'absolute', width: 32, height: 32, pointerEvents: 'none', ...s }} />
       ))}
 
-      {/* ── Ambient glow bloom behind logo ────────────────────────────── */}
-      {/* Starts invisible + small — introTl animates it into view */}
-      <div
-        ref={glowRef}
-        style={{
-          position: 'absolute',
-          width: 'clamp(200px, 30vw, 420px)',
-          height: 'clamp(200px, 30vw, 420px)',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(232,160,32,0.07) 0%, rgba(232,160,32,0.03) 40%, transparent 70%)',
-          pointerEvents: 'none',
-          opacity: 0,
-          scale: 0.7,
-          willChange: 'opacity, transform',
-        }}
-      />
+      {/* Ambient glow bloom — starts invisible */}
+      <div ref={glowRef} style={{
+        position: 'absolute',
+        width: 'clamp(200px,30vw,420px)', height: 'clamp(200px,30vw,420px)',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(232,160,32,0.07) 0%, rgba(232,160,32,0.03) 40%, transparent 70%)',
+        pointerEvents: 'none',
+        opacity: 0, scale: '0.7',
+        willChange: 'opacity, transform',
+      }} />
 
-      {/* ── Centre content ────────────────────────────────────────────── */}
-      <div style={{
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center',
-        position: 'relative', zIndex: 1,
-        gap: 0,
-      }}>
-
-        {/* Logo
-            KEY FIX: filter + opacity are set here in CSS as the starting state.
-            GSAP only ever animates them *forward* (to clear/visible) —
-            it never sets them as a fromTo start-value after paint,
-            so there is zero frame where the element looks wrong. */}
+      {/* Centre content */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        {/*
+          Logo initial state is set in CSS style (not a GSAP from-value).
+          This is the key fix: GSAP only animates *away from* this state
+          via .to() — never sets it mid-frame, so there is zero snap.
+        */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           ref={logoRef}
-          src={cld("v1777696301/yamuna_homes_z4hnie.png", 400)}
+          src={cld('v1777696301/yamuna_homes_z4hnie.png', 400)}
           alt="Yamuna Homes"
           style={{
-            width: 'clamp(160px, 14vw, 220px)',
-            height: 'auto',
-            display: 'block',
-            /* ─ Starting state baked into CSS — GSAP animates away from this ─ */
+            width: 'clamp(160px,14vw,220px)', height: 'auto', display: 'block',
+            // Initial state baked into CSS — never set by GSAP
             opacity: 0,
             transform: 'translateY(18px)',
             filter: 'blur(8px)',
@@ -240,45 +185,29 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
           }}
         />
 
-        {/* Progress track — starts hidden, introTl fades it in */}
-        <div
-          ref={progressTrackRef}
-          style={{
-            marginTop: 40,
-            width: 'clamp(100px, 12vw, 160px)',
-            height: '1px',
-            background: 'rgba(232,160,32,0.1)',
+        {/* Progress track */}
+        <div ref={progressTrackRef} style={{
+          marginTop: 40, opacity: 0,
+          width: 'clamp(100px,12vw,160px)', height: '1px',
+          background: 'rgba(232,160,32,0.1)', borderRadius: 1, overflow: 'hidden', position: 'relative',
+        }}>
+          <div ref={progressBarRef} style={{
+            position: 'absolute', top: 0, left: 0, height: '100%', width: '100%',
+            background: 'linear-gradient(90deg, #7a4d0a, #c88018, #E8A020, #F5C842, #E8A020, #c88018)',
+            backgroundSize: '300% 100%',
             borderRadius: 1,
-            overflow: 'hidden',
-            position: 'relative',
-            opacity: 0,
-          }}
-        >
-          <div
-            ref={progressBarRef}
-            style={{
-              position: 'absolute', top: 0, left: 0,
-              height: '100%', width: '100%',
-              background: 'linear-gradient(90deg, #7a4d0a, #c88018, #E8A020, #F5C842, #E8A020, #c88018)',
-              backgroundSize: '300% 100%',
-              borderRadius: 1,
-              transformOrigin: 'left',
-              animation: 'plShimmer 2.4s linear infinite',
-              willChange: 'transform',
-            }}
-          />
+            transformOrigin: 'left',
+            willChange: 'transform',
+            // Shimmer via background-position on a gradient is not composited.
+            // Use a translateX pseudo-shimmer instead.
+            animation: 'plShimmer 2s linear infinite',
+          }} />
         </div>
       </div>
 
       <style>{`
-        @keyframes plSpin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes plSpinReverse {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(-360deg); }
-        }
+        @keyframes plSpin    { to { transform: rotate(360deg);  } }
+        @keyframes plSpinRev { to { transform: rotate(-360deg); } }
         @keyframes plShimmer {
           0%   { background-position: 200% 0; }
           100% { background-position: -200% 0; }

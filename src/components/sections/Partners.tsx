@@ -51,11 +51,14 @@ export const Partners = () => {
       const cards = gsap.utils.toArray<HTMLElement>('.partner-card');
       const rotations = [[-12, 0, -2], [0, -10, 2], [12, 0, -1]];
       cards.forEach((card, i) => {
+        const rotation = rotations[i];
+        if (!rotation) return;
+        
         gsap.fromTo(card,
           {
-            rotateY: rotations[i][0],
-            rotateX: rotations[i][1],
-            rotate: rotations[i][2],
+            rotateY: rotation[0],
+            rotateX: rotation[1],
+            rotate: rotation[2],
             opacity: 0, scale: 0.88, transformOrigin: 'center center',
           },
           {

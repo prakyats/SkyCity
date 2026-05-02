@@ -13,95 +13,113 @@ interface VideoBackgroundProps {
 export const VideoBackground = ({
   webmSrc, mp4Src, posterSrc, className = '', onReady, onPlay,
 }: VideoBackgroundProps) => {
-  const videoRef  = useRef<HTMLVideoElement>(null);
-  const [isLoaded, setIsLoaded]   = useState(false);
-  const [fadeVideo, setFadeVideo] = useState(false);
-  const [isActivated, setIsActivated] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const idleRef = useRef<number>(0);          // idleCallback handle
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [fadeIn, setFadeIn] = useState(false);
 
+  // Wait for preloader to complete before loading video
   useEffect(() => {
-    const onComplete = () => setIsActivated(true);
-    window.addEventListener('preloaderComplete', onComplete);
+    const onComplete = () => setShouldLoad(true);
+    // eslint-disable-next-line no-restricted-globals
+    window.addEventListener('preloaderComplete', onComplete, { once: true });
+    // eslint-disable-next-line no-restricted-globals
     return () => window.removeEventListener('preloaderComplete', onComplete);
   }, []);
 
+  // Once preloader done — schedule video load via idle callback
   useEffect(() => {
-    if (window.innerWidth < 768) return;
-    let id: ReturnType<typeof setTimeout>;
-    const load = () => setIsLoaded(true);
-    if ('requestIdleCallback' in window) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).requestIdleCallback(load);
-      id = setTimeout(load, 1200);
-    } else {
-      id = setTimeout(load, 1200);
-    }
-    return () => clearTimeout(id);
-  }, []);
+    if (!shouldLoad) return;
+    // eslint-disable-next-line no-restricted-globals
+    if (window.innerWidth < 768) return; // no video on mobile — saves ~5MB
 
-  useEffect(() => {
-    if (isLoaded && isActivated && videoRef.current) {
-      videoRef.current.play().catch(console.warn);
+    const load = () => {
+      const v = videoRef.current;
+      if (!v) return;
+      v.load();
+      v.play().catch(() => {/* autoplay blocked — poster stays */ });
+    };
+
+    // eslint-disable-next-line no-restricted-globals
+    if ('requestIdleCallback' in window) {
+      // eslint-disable-next-line no-restricted-globals
+      idleRef.current = window.requestIdleCallback(load, { timeout: 1500 });
+    } else {
+      timeoutRef.current = setTimeout(load, 800);
     }
-  }, [isLoaded, isActivated]);
+
+    return () => {
+      // eslint-disable-next-line no-restricted-globals
+      if (idleRef.current) window.cancelIdleCallback?.(idleRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [shouldLoad]);
 
   const handleLoadedData = () => {
     onReady?.();
-    setTimeout(() => setFadeVideo(true), 100);
+    // Crossfade poster → video
+    setTimeout(() => setFadeIn(true), 80);
   };
 
   return (
     <div className={`absolute inset-0 w-full h-full overflow-hidden ${className}`}>
-      {/* Poster — shows instantly, valid Tailwind duration */}
+      {/* Poster — visible immediately, critical for LCP */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={posterSrc}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover object-[center_45%] transform-gpu will-change-transform"
+        fetchPriority="high"
+        className="absolute inset-0 w-full h-full object-cover object-[center_45%]"
         style={{
-          opacity: fadeVideo ? 0 : 1,
-          transition: 'opacity 700ms ease-in-out', // inline — no invalid Tailwind class
+          opacity: fadeIn ? 0 : 1,
+          transition: 'opacity 800ms ease-in-out',
+          // Promote to its own layer immediately — reduces paint cost
+          willChange: 'opacity',
+          transform: 'translateZ(0)',
         }}
       />
 
-      {/* Video — deferred, crossfades in */}
-      {isLoaded && (
+      {/* Video — only rendered after idle + preloader */}
+      {shouldLoad && (
         <video
           ref={videoRef}
-          muted playsInline loop preload="metadata"
+          muted
+          playsInline
+          loop
+          preload="none"        // do NOT preload metadata — the idle callback triggers load()
           disablePictureInPicture
           onLoadedData={handleLoadedData}
-          onPlay={() => onPlay?.()}
+          onPlay={onPlay}
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-[center_45%] origin-center transform-gpu will-change-transform"
+          className="absolute inset-0 w-full h-full object-cover object-[center_45%]"
           style={{
-            opacity: fadeVideo ? 1 : 0,
-            transition: 'opacity 700ms ease-in-out',
+            opacity: fadeIn ? 1 : 0,
+            transition: 'opacity 800ms ease-in-out',
+            willChange: 'opacity, transform',
+            transform: 'translateZ(0)',
           }}
         >
+          {/* WebM first — smaller, better quality */}
           <source src={webmSrc} type="video/webm" />
-          <source src={mp4Src}  type="video/mp4"  />
+          <source src={mp4Src} type="video/mp4" />
         </video>
       )}
 
-      {/* Cinematic vignette — dark edges, not just bottom */}
+      {/* Cinematic edge vignette */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `
-            radial-gradient(ellipse 110% 100% at 50% 50%,
-              transparent 40%,
-              rgba(4,12,22,0.55) 100%
-            )
-          `,
+          background: 'radial-gradient(ellipse 110% 100% at 50% 50%, transparent 38%, rgba(4,12,22,0.5) 100%)',
         }}
       />
-      {/* Bottom fade — text legibility */}
+      {/* Bottom legibility fade */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-48 pointer-events-none"
-        style={{ background: 'linear-gradient(to top, rgba(4,12,22,0.7), transparent)' }}
+        className="absolute inset-x-0 bottom-0 h-40 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, rgba(4,12,22,0.65), transparent)' }}
       />
     </div>
   );

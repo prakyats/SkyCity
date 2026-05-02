@@ -121,6 +121,9 @@ export const FloorPlans = () => {
           style={{ borderColor: 'var(--sand)' }}>
           {plans.map((p, i) => (
             <button key={i} onClick={() => setActive(i)}
+              aria-label={`View ${p.type} plans`}
+              aria-selected={active === i}
+              role="tab"
               className="fp-tab relative pb-5 px-8 transition-colors duration-300 whitespace-nowrap group"
               style={{
                 fontFamily: 'var(--font-tenor)', fontSize: '0.7rem',
@@ -136,71 +139,81 @@ export const FloorPlans = () => {
         </div>
 
         {/* Content */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 md:gap-24 items-center">
+        {(() => {
+          const activePlan = plans[active];
+          if (!activePlan) return null;
+          
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 md:gap-24 items-center">
 
-          {/* Floor plan image */}
-          <div ref={imageRef}
-            className="relative aspect-[4/3] bg-white flex items-center justify-center p-10 md:p-14 group"
-            style={{ borderRadius: 'var(--r-2xl)', border: '1px solid var(--sand)' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={plans[active].image} alt={`${plans[active].type} Floor Plan`}
-              className="w-full h-full object-contain opacity-80 transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-            <div className="absolute bottom-5 left-6">
-              <span className="label text-[var(--text-subtle)]" style={{ fontSize: '0.5rem' }}>
-                Floor Plan · {plans[active].type} · {plans[active].floors}
-              </span>
+              {/* Floor plan image */}
+              <div ref={imageRef}
+                className="relative aspect-[4/3] bg-white flex items-center justify-center p-10 md:p-14 group"
+                style={{ borderRadius: 'var(--r-2xl)', border: '1px solid var(--sand)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={activePlan.image} alt={`${activePlan.type} Floor Plan`}
+                  className="w-full h-full object-contain opacity-80 transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                <div className="absolute bottom-5 left-6">
+                  <span className="label text-[var(--text-subtle)]" style={{ fontSize: '0.5rem' }}>
+                    Floor Plan · {activePlan.type} · {activePlan.floors}
+                  </span>
+                </div>
+                {/* Gold corner */}
+                <div className="absolute top-5 right-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
+                  style={{ borderTop: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
+                <div className="absolute bottom-5 left-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
+                  style={{ borderBottom: '1px solid var(--gold)', borderLeft: '1px solid var(--gold)' }} />
+              </div>
+
+              {/* Details */}
+              <div ref={contentRef} className="flex flex-col">
+                <span className="label text-[var(--text-subtle)] mb-3 block" style={{ fontSize: '0.6rem' }}>
+                  {activePlan.floors}
+                </span>
+                <div className="flex items-baseline gap-3 mb-6">
+                  <span className="font-display text-[var(--near-black)]"
+                    style={{ fontSize: 'clamp(2.8rem,5vw,5rem)', fontWeight: 300, lineHeight: 1 }}>
+                    {activePlan.size}
+                  </span>
+                  <span className="font-body text-[var(--text-subtle)]" style={{ fontSize: '1rem' }}>sq.ft</span>
+                </div>
+
+                {/* Gold divider */}
+                <div className="w-full h-px mb-8" style={{ background: 'var(--sand)' }} />
+
+                <p className="font-body text-[var(--text-muted)] leading-[1.85] mb-12"
+                  style={{ fontSize: 'clamp(0.9rem,1.1vw,1rem)', maxWidth: '38ch' }}>
+                  {activePlan.desc}
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button className="btn-gold">Download Brochure</button>
+                  <button className="btn-ghost-light">Schedule Site Visit</button>
+                </div>
+
+                {/* Type indicator dots */}
+                <div className="flex gap-2 mt-10" role="tablist">
+                  {plans.map((p, i) => (
+                    <button key={i} onClick={() => setActive(i)}
+                      aria-label={`Switch to ${p.type}`}
+                      aria-selected={active === i}
+                      role="tab"
+                      className="transition-all duration-300"
+                      style={{
+                        width: 24,
+                        height: 6,
+                        borderRadius: 3,
+                        background: active === i ? 'var(--gold)' : 'var(--sand)',
+                        transform: active === i ? 'scaleX(1)' : 'scaleX(0.25)',
+                        transformOrigin: 'left',
+                      }} />
+                  ))}
+                </div>
+              </div>
+
             </div>
-            {/* Gold corner */}
-            <div className="absolute top-5 right-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-              style={{ borderTop: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
-            <div className="absolute bottom-5 left-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-              style={{ borderBottom: '1px solid var(--gold)', borderLeft: '1px solid var(--gold)' }} />
-          </div>
-
-          {/* Details */}
-          <div ref={contentRef} className="flex flex-col">
-            <span className="label text-[var(--text-subtle)] mb-3 block" style={{ fontSize: '0.6rem' }}>
-              {plans[active].floors}
-            </span>
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="font-display text-[var(--near-black)]"
-                style={{ fontSize: 'clamp(2.8rem,5vw,5rem)', fontWeight: 300, lineHeight: 1 }}>
-                {plans[active].size}
-              </span>
-              <span className="font-body text-[var(--text-subtle)]" style={{ fontSize: '1rem' }}>sq.ft</span>
-            </div>
-
-            {/* Gold divider */}
-            <div className="w-full h-px mb-8" style={{ background: 'var(--sand)' }} />
-
-            <p className="font-body text-[var(--text-muted)] leading-[1.85] mb-12"
-              style={{ fontSize: 'clamp(0.9rem,1.1vw,1rem)', maxWidth: '38ch' }}>
-              {plans[active].desc}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button className="btn-gold">Download Brochure</button>
-              <button className="btn-ghost-light">Schedule Site Visit</button>
-            </div>
-
-            {/* Type indicator dots */}
-            <div className="flex gap-2 mt-10">
-              {plans.map((_, i) => (
-                <button key={i} onClick={() => setActive(i)}
-                  className="transition-all duration-300"
-                  style={{
-                    width: 24,
-                    height: 6,
-                    borderRadius: 3,
-                    background: active === i ? 'var(--gold)' : 'var(--sand)',
-                    transform: active === i ? 'scaleX(1)' : 'scaleX(0.25)',
-                    transformOrigin: 'left',
-                  }} />
-              ))}
-            </div>
-          </div>
-
-        </div>
+          );
+        })()}
       </div>
     </section>
   );

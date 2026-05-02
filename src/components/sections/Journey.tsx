@@ -13,6 +13,7 @@ const values = [
 export const Journey = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const bgNumRef = useRef<HTMLDivElement>(null);
+  const legacyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -76,12 +77,11 @@ export const Journey = () => {
       );
 
       // ── LEGACY CARD: continuous border shimmer ──
-      const legacyCard = document.querySelector<HTMLElement>('.jrn-legacy');
-      if (legacyCard) {
-        gsap.to(legacyCard, {
+      if (legacyRef.current) {
+        gsap.to(legacyRef.current, {
           boxShadow: '0 0 40px rgba(232,160,32,0.12), 0 0 0 1px rgba(232,160,32,0.25)',
           duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut',
-          scrollTrigger: { trigger: '.jrn-legacy', start: 'top 88%' }
+          scrollTrigger: { trigger: legacyRef.current, start: 'top 88%' }
         });
       }
 
@@ -161,7 +161,7 @@ export const Journey = () => {
             </div>
 
             {/* Legacy card */}
-            <div className="jrn-legacy p-10 flex flex-col relative overflow-hidden"
+            <div ref={legacyRef} className="jrn-legacy p-10 flex flex-col relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%)',
                 borderRadius: 'var(--r-2xl)',

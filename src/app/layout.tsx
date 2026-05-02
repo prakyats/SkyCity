@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Cormorant_Garamond,
   DM_Serif_Display,
@@ -9,14 +9,16 @@ import "./globals.css";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingCTAs } from "@/components/ui/FloatingCTAs";
-// import { Navbar } from "@/components/ui/Navbar";
+import LayoutClient from "@/components/layout/LayoutClient";
 
+// ── Fonts: display:swap + preload only the subsets we use ─────────────────────
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500"],
   style: ["normal", "italic"],
   variable: "--font-cormorant",
   display: "swap",
+  preload: true,
 });
 
 const dmSerif = DM_Serif_Display({
@@ -25,6 +27,7 @@ const dmSerif = DM_Serif_Display({
   style: ["normal", "italic"],
   variable: "--font-dm-serif",
   display: "swap",
+  preload: true,
 });
 
 const dmSans = DM_Sans({
@@ -32,6 +35,7 @@ const dmSans = DM_Sans({
   weight: ["300", "400", "500"],
   variable: "--font-dm-sans",
   display: "swap",
+  preload: false, // body font — defer after LCP
 });
 
 const tenorSans = Tenor_Sans({
@@ -39,15 +43,43 @@ const tenorSans = Tenor_Sans({
   weight: ["400"],
   variable: "--font-tenor",
   display: "swap",
+  preload: false,
 });
 
-import LayoutClient from "@/components/layout/LayoutClient";
-
+// ── SEO Metadata ──────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
-  title: "Yamuna Sky City | Luxury Sea-Facing Apartments in Mangalore",
+  title: "Yamuna Sky City | South India's Tallest Sea-View Tower, Mangalore",
   description:
-    "296 all sea-facing luxury apartments at Yamuna Sky City, Mangalore. GF+60 floors on NH-66 corridor, 300m from the Arabian Sea. RERA registered.",
-  keywords: "Yamuna Sky City, luxury apartments Mangalore, sea view homes, coastal living Karnataka",
+    "296 all sea-facing luxury apartments at Yamuna Sky City, Mangalore. GF+60 floors on NH-66 corridor, 300m from the Arabian Sea. RERA: PRM/KA/RERA/1257/334/PR/171023/006331.",
+  keywords:
+    "Yamuna Sky City, luxury apartments Mangalore, sea view flats, coastal living Karnataka, NH-66 apartments, RERA registered Mangalore",
+  openGraph: {
+    title: "Yamuna Sky City | Luxury Sea-View Tower, Mangalore",
+    description:
+      "South India's tallest residential tower — 296 sea-facing apartments, GF+60 floors, 300m from the Arabian Sea.",
+    type: "website",
+    locale: "en_IN",
+    images: [
+      {
+        url: "https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto,w_1200/v1777554903/hero-poster_emnfvb.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Yamuna Sky City, Mangalore",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Yamuna Sky City | Luxury Sea-View Tower",
+    description: "South India's tallest residential tower, Mangalore.",
+  },
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#040c16",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -59,12 +91,26 @@ export default function RootLayout({
       className={`${cormorant.variable} ${dmSerif.variable} ${dmSans.variable} ${tenorSans.variable}`}
     >
       <head>
+        {/* Preconnect to Cloudinary CDN early */}
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        {/* Preload LCP image — hero poster */}
+        <link
+          rel="preload"
+          as="image"
+          href="https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto:eco,w_2000/v1777554903/hero-poster_emnfvb.jpg"
+          fetchPriority="high"
+        />
+        {/* Preload Yamuna logo for preloader */}
+        <link
+          rel="preload"
+          as="image"
+          href="https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto:eco,w_400/v1777696301/yamuna_homes_z4hnie.png"
+        />
       </head>
       <body className="bg-section-dark overflow-x-hidden font-body antialiased">
         <LayoutClient>
           <SmoothScrollProvider>
-            {/* <Navbar /> */}
             {children}
             <Footer />
             <FloatingCTAs />

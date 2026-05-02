@@ -18,20 +18,15 @@ export const cld = (path: string | null | undefined, w: number = 1200): string =
       const parts = path.split('/upload/');
       const pathPart = parts[1];
       
-      // If the first part after /upload/ starts with v[digits], it's a version string
-      // or if it's a transformation string (contains ,).
-      // We want to keep the version string if it exists.
-      if (pathPart.includes(',') || !pathPart.startsWith('v')) {
-        // It likely contains transformations, so we skip to the first part that looks like a version or public ID
+      if (pathPart && (pathPart.includes(',') || !pathPart.startsWith('v'))) {
         const pathSegments = pathPart.split('/');
         const firstActualSegmentIdx = pathSegments.findIndex(seg => seg.startsWith('v') && /^\d+$/.test(seg.slice(1)));
         if (firstActualSegmentIdx !== -1) {
             cleanPath = pathSegments.slice(firstActualSegmentIdx).join('/');
         } else {
-            // No version found, just take everything after the transformation segment if it exists
             cleanPath = pathSegments.slice(pathPart.includes(',') ? 1 : 0).join('/');
         }
-      } else {
+      } else if (pathPart) {
         cleanPath = pathPart;
       }
     }
