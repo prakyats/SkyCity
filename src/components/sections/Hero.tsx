@@ -299,31 +299,8 @@ export const Hero = () => {
         <div className="flex flex-col justify-between py-[clamp(90px,10vh,130px)] items-end"
           style={{ width: 'clamp(220px, 30vw, 400px)' }}>
 
-          {/* — Top: Phase indicator — */}
-          <div className={`hero-right-detail flex flex-col items-end gap-3 ${phase >= 2 ? '' : 'opacity-0'}`}>
-            <div className="flex items-center gap-3">
-              <span style={{
-                fontFamily: 'var(--font-tenor), Arial, sans-serif',
-                fontSize: '9px',
-                letterSpacing: '0.32em',
-                textTransform: 'uppercase',
-                color: 'rgba(232,160,32,0.8)',
-              }}>
-                GF + 60 Floors
-              </span>
-              <div className="hero-hrule h-px w-6"
-                style={{ background: 'var(--gold)', opacity: 0.6 }} />
-            </div>
-            <span style={{
-              fontFamily: 'var(--font-tenor), Arial, sans-serif',
-              fontSize: '9px',
-              letterSpacing: '0.32em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.28)',
-            }}>
-              NH-66, Mangalore
-            </span>
-          </div>
+          {/* Top spacer to maintain layout balance */}
+          <div className="h-10" />
 
           {/* — Middle: "Sky City" — */}
           <div className="flex flex-col items-end gap-6">
