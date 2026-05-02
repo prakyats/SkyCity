@@ -225,7 +225,7 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           ref={logoRef}
-          src="/logos/yamuna_homes.png"
+          src="https://res.cloudinary.com/drzbbbncs/image/upload/v1777696301/yamuna_homes_z4hnie.png"
           alt="Yamuna Homes"
           style={{
             width: 'clamp(160px, 14vw, 220px)',
