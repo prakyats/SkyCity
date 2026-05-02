@@ -1090,3 +1090,53 @@ body:has(button:hover) #magnetic-cursor {
 .golden-space {
   height: clamp(48px, 8vw, 120px);
 }
+/* ─── VISUAL SHOWCASE ENHANCEMENTS ─────────────────────────────────────────── */
+
+/* Morph curtain — ensure it's above images but below text */
+.vs-morph-curtain {
+  z-index: 20;
+  will-change: transform;
+}
+
+/* Ensure sticky section fills viewport precisely on all mobile browsers */
+.vs-sticky {
+  height: 100dvh;
+  height: -webkit-fill-available;
+}
+
+/* ─── PRELOADER ──────────────────────────────────────────────────────────────── */
+
+/* Shimmer sweep on progress bar */
+@keyframes preloaderBarShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Slow outer ring rotation */
+@keyframes preloaderSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── GLOBAL MICRO-POLISH ────────────────────────────────────────────────────── */
+
+/* Smooth image rendering for large hero/showcase images */
+.showcase-img {
+  image-rendering: -webkit-optimize-contrast;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Selection colour matches brand */
+::selection {
+  background: rgba(232, 160, 32, 0.25);
+  color: #fff;
+}
+
+/* Focus ring — gold, not browser-default blue */
+:focus-visible {
+  outline: 2px solid rgba(232, 160, 32, 0.6);
+  outline-offset: 3px;
+}
+

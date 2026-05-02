@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useEffect, useRef, useState } from 'react';
 
 interface VideoBackgroundProps {
@@ -12,79 +11,97 @@ interface VideoBackgroundProps {
 }
 
 export const VideoBackground = ({
-  webmSrc,
-  mp4Src,
-  posterSrc,
-  className = '',
-  onReady,
-  onPlay,
+  webmSrc, mp4Src, posterSrc, className = '', onReady, onPlay,
 }: VideoBackgroundProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const videoRef  = useRef<HTMLVideoElement>(null);
+  const [isLoaded, setIsLoaded]   = useState(false);
   const [fadeVideo, setFadeVideo] = useState(false);
+  const [isActivated, setIsActivated] = useState(false);
 
   useEffect(() => {
-    // Mobile Strategy: Block video load entirely below 768px to save bandwidth
-    if (window.innerWidth < 768) return;
-
-    let timeoutId: NodeJS.Timeout;
-    const loadVideo = () => setIsLoaded(true);
-
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(loadVideo);
-      // Fallback if the main thread is slammed and never idles
-      timeoutId = setTimeout(loadVideo, 1200);
-    } else {
-      timeoutId = setTimeout(loadVideo, 1200);
-    }
-
-    return () => clearTimeout(timeoutId);
+    const onComplete = () => setIsActivated(true);
+    window.addEventListener('preloaderComplete', onComplete);
+    return () => window.removeEventListener('preloaderComplete', onComplete);
   }, []);
 
   useEffect(() => {
-    // If video becomes loaded and starts playing, we ensure play happens
-    if (isLoaded && videoRef.current) {
+    if (window.innerWidth < 768) return;
+    let id: ReturnType<typeof setTimeout>;
+    const load = () => setIsLoaded(true);
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(load);
+      id = setTimeout(load, 1200);
+    } else {
+      id = setTimeout(load, 1200);
+    }
+    return () => clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded && isActivated && videoRef.current) {
       videoRef.current.play().catch(console.warn);
     }
-  }, [isLoaded]);
+  }, [isLoaded, isActivated]);
 
   const handleLoadedData = () => {
     onReady?.();
-    // 100ms micro-delay for perceived smoothness before fading
-    setTimeout(() => {
-      setFadeVideo(true);
-    }, 100);
+    setTimeout(() => setFadeVideo(true), 100);
   };
 
   return (
     <div className={`absolute inset-0 w-full h-full overflow-hidden ${className}`}>
-      {/* 1. Poster Image (Loads instantly, blocks layout shift) */}
+      {/* Poster — shows instantly, valid Tailwind duration */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={posterSrc}
         alt=""
-        className={`absolute top-0 left-0 w-full h-full object-cover object-[center_45%] transform-gpu will-change-transform transition-opacity duration-600 ease-in-out ${fadeVideo ? 'opacity-0' : 'opacity-100'}`}
         aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover object-[center_45%] transform-gpu will-change-transform"
+        style={{
+          opacity: fadeVideo ? 0 : 1,
+          transition: 'opacity 700ms ease-in-out', // inline — no invalid Tailwind class
+        }}
       />
 
-      {/* 2. Video Component (Deferred load, crossfades in) */}
+      {/* Video — deferred, crossfades in */}
       {isLoaded && (
         <video
           ref={videoRef}
-          muted
-          playsInline
-          loop
-          preload="metadata"
+          muted playsInline loop preload="metadata"
           disablePictureInPicture
           onLoadedData={handleLoadedData}
           onPlay={() => onPlay?.()}
-          className={`absolute top-0 left-0 w-full h-full object-cover object-[center_45%] origin-center transform-gpu will-change-transform transition-opacity duration-600 ease-in-out ${fadeVideo ? 'opacity-100' : 'opacity-0'}`}
           aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-[center_45%] origin-center transform-gpu will-change-transform"
+          style={{
+            opacity: fadeVideo ? 1 : 0,
+            transition: 'opacity 700ms ease-in-out',
+          }}
         >
           <source src={webmSrc} type="video/webm" />
-          <source src={mp4Src} type="video/mp4" />
+          <source src={mp4Src}  type="video/mp4"  />
         </video>
       )}
+
+      {/* Cinematic vignette — dark edges, not just bottom */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 110% 100% at 50% 50%,
+              transparent 40%,
+              rgba(4,12,22,0.55) 100%
+            )
+          `,
+        }}
+      />
+      {/* Bottom fade — text legibility */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-48 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, rgba(4,12,22,0.7), transparent)' }}
+      />
     </div>
   );
 };
