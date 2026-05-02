@@ -7,7 +7,7 @@ import { cld } from '@/lib/cloudinary';
 const amenities = [
   {
     title: 'Podium Infinity Pool', cat: 'Serenity',
-    image: cld("v1777708500/amenity_pool.png", 800),
+    image: cld("v1777700841/amenity_pool_ikcpqy.jpg", 800),
     desc: 'An architectural marvel where the pool edge meets the Arabian Sea on the horizon.',
     index: '01',
   },
