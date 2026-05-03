@@ -89,6 +89,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${cormorant.variable} ${dmSerif.variable} ${dmSans.variable} ${tenorSans.variable}`}
+      suppressHydrationWarning
     >
       <head>
         {/* Preconnect to Cloudinary CDN early */}
@@ -98,17 +99,46 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto:eco,w_2000/v1777554903/hero-poster_emnfvb.jpg"
+          href="https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto:eco,w_1920/v1777554903/hero-poster_emnfvb.jpg"
           fetchPriority="high"
         />
         {/* Preload Yamuna logo for preloader */}
         <link
           rel="preload"
           as="image"
-          href="https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto:eco,w_400/v1777696301/yamuna_homes_z4hnie.png"
+          href="https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto:eco,w_220/v1777696301/yamuna_homes_z4hnie.png"
+        />
+
+        {/* Structured data for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            "name": "Yamuna Sky City",
+            "description": "South India's Tallest Sea View Residential Tower — 296 luxury apartments, GF+60 floors, NH-66 Mangalore",
+            "url": "https://sky-city-yamuna.vercel.app",
+            "image": "https://res.cloudinary.com/drzbbbncs/image/upload/f_auto,q_auto,w_1200/v1777554903/hero-poster_emnfvb.jpg",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "NH-66 Corridor, Surathkal",
+              "addressLocality": "Mangalore",
+              "addressRegion": "Karnataka",
+              "postalCode": "575014",
+              "addressCountry": "IN"
+            },
+            "numberOfRooms": "296",
+            "floorSize": {"@type": "QuantitativeValue", "value": 60, "unitText": "floors"},
+            "offers": {"@type": "Offer", "availability": "https://schema.org/InStock"},
+            "broker": {
+              "@type": "RealEstateAgent",
+              "name": "Yamuna Homes and Design Private Limited",
+              "telephone": "+91-88844-39155"
+            }
+          })}}
         />
       </head>
-      <body className="bg-section-dark overflow-x-hidden font-body antialiased">
+      <body className="bg-section-dark overflow-x-hidden font-body antialiased" suppressHydrationWarning>
         <LayoutClient>
           <SmoothScrollProvider>
             {children}

@@ -8,69 +8,65 @@ const plans = [
   {
     type: '2 BHK', floors: '3rd – 32nd Floor', size: '1,500 – 1,650',
     desc: 'Thoughtfully designed for families seeking panoramic sea views. All units sea-facing with private balconies and premium coastal finishes.',
-    image: cld("v1777700841/blueprint_xfe9ca.jpg", 1200),
+    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
   },
   {
     type: '3 BHK', floors: '5th – 45th Floor', size: '1,850 – 2,100',
     desc: 'Spacious family homes with split-level living, home office nook, and uninterrupted Arabian Sea views from every room.',
-    image: cld("v1777700841/blueprint_xfe9ca.jpg", 1200),
+    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
   },
   {
     type: '4 BHK', floors: '20th – 55th Floor', size: '2,400 – 2,850',
-    desc: 'Grand residences for those who demand more. Double-height living rooms, chef\'s kitchen, and sky-terrace balconies.',
-    image: cld("v1777700841/blueprint_xfe9ca.jpg", 1200),
+    desc: "Grand residences for those who demand more. Double-height living rooms, chef's kitchen, and sky-terrace balconies.",
+    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
   },
   {
     type: '5 BHK', floors: '45th – 60th Floor', size: '3,400 – 4,200',
     desc: 'Ultra-luxury penthouses with private plunge pools, panoramic wraparound decks, and bespoke interior finishes.',
-    image: cld("v1777700841/blueprint_xfe9ca.jpg", 1200),
+    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
   },
 ];
 
 export const FloorPlans = () => {
   const [active, setActive] = useState(0);
-  const sectionRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const hasEntered = useRef(false);
+  const sectionRef  = useRef<HTMLElement>(null);
+  const contentRef  = useRef<HTMLDivElement>(null);
+  const imageRef    = useRef<HTMLDivElement>(null);
+  const hasEntered  = useRef(false);
 
-  // Section entrance
+  // Section entrance animations
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      // Heading: barrel roll in
       gsap.fromTo('.fp-headline',
         { y: 70, rotateX: -30, opacity: 0 },
         {
           y: 0, rotateX: 0, opacity: 1, duration: 1.1, ease: 'power4.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true }
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true },
         }
       );
-      // Tabs: stagger up
       gsap.fromTo('.fp-tab',
         { y: 20, opacity: 0 },
         {
           y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: 'power2.out',
           scrollTrigger: {
             trigger: '.fp-tabs', start: 'top 84%', once: true,
-            onEnter: () => { hasEntered.current = true; }
-          }
+            onEnter: () => { hasEntered.current = true; },
+          },
         }
       );
-      // Image: clips in from left
       gsap.fromTo(imageRef.current,
         { clipPath: 'inset(0 100% 0 0)', opacity: 1 },
         {
           clipPath: 'inset(0 0% 0 0)', duration: 1.2, ease: 'power3.inOut',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true }
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
         }
       );
-      // Content: slides from right
       gsap.fromTo(contentRef.current,
         { x: 60, opacity: 0 },
         {
           x: 0, opacity: 1, duration: 1.0, delay: 0.3, ease: 'power3.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true }
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
         }
       );
     }, sectionRef);
@@ -80,11 +76,18 @@ export const FloorPlans = () => {
   // Tab switch animation
   useEffect(() => {
     if (!hasEntered.current) return;
-    if (contentRef.current) gsap.fromTo(contentRef.current,
-      { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.55, ease: 'power2.out' });
-    if (imageRef.current) gsap.fromTo(imageRef.current,
-      { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' });
+    if (contentRef.current) {
+      gsap.fromTo(contentRef.current,
+        { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.55, ease: 'power2.out' });
+    }
+    if (imageRef.current) {
+      gsap.fromTo(imageRef.current,
+        { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' });
+    }
   }, [active]);
+
+  // Safe reference — active index is always within bounds
+  const activePlan = plans[active] ?? plans[0]!;
 
   return (
     <section ref={sectionRef} className="bg-section-cream section-pad relative overflow-hidden" id="floorplans">
@@ -116,104 +119,117 @@ export const FloorPlans = () => {
           </h2>
         </div>
 
-        {/* Tabs */}
-        <div className="fp-tabs flex gap-0 border-b mb-16 overflow-x-auto no-scrollbar"
-          style={{ borderColor: 'var(--sand)' }}>
+        {/* Tabs — FIX 1: role/aria attributes appear exactly once per element */}
+        <div
+          role="tablist"
+          aria-label="Floor plan types"
+          className="fp-tabs flex gap-0 border-b mb-16 overflow-x-auto no-scrollbar"
+          style={{ borderColor: 'var(--sand)' }}
+        >
           {plans.map((p, i) => (
-            <button key={i} onClick={() => setActive(i)}
-              aria-label={`View ${p.type} plans`}
-              aria-selected={active === i}
+            <button
+              key={i}
               role="tab"
+              aria-selected={active === i}
+              aria-controls="fp-panel"
+              onClick={() => setActive(i)}
               className="fp-tab relative pb-5 px-8 transition-colors duration-300 whitespace-nowrap group"
               style={{
                 fontFamily: 'var(--font-tenor)', fontSize: '0.7rem',
                 letterSpacing: '0.22em', textTransform: 'uppercase',
                 color: active === i ? 'var(--near-black)' : 'var(--text-subtle)',
-              }}>
+              }}
+            >
               {p.type}
-              {/* Active bar */}
-              <span className="absolute bottom-0 left-0 h-[2px] bg-[var(--gold)] transition-transform duration-500 origin-left"
-                style={{ width: '100%', transform: active === i ? 'scaleX(1)' : 'scaleX(0)' }} />
+              {/* Active indicator bar */}
+              <span
+                className="absolute bottom-0 left-0 h-[2px] bg-[var(--gold)] transition-transform duration-500 origin-left"
+                style={{ width: '100%', transform: active === i ? 'scaleX(1)' : 'scaleX(0)' }}
+              />
             </button>
           ))}
         </div>
 
-        {/* Content */}
-        {(() => {
-          const activePlan = plans[active];
-          if (!activePlan) return null;
-          
-          return (
-            <div className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 md:gap-24 items-center">
-
-              {/* Floor plan image */}
-              <div ref={imageRef}
-                className="relative aspect-[4/3] bg-white flex items-center justify-center p-10 md:p-14 group"
-                style={{ borderRadius: 'var(--r-2xl)', border: '1px solid var(--sand)' }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={activePlan.image} alt={`${activePlan.type} Floor Plan`}
-                  className="w-full h-full object-contain opacity-80 transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                <div className="absolute bottom-5 left-6">
-                  <span className="label text-[var(--text-subtle)]" style={{ fontSize: '0.5rem' }}>
-                    Floor Plan · {activePlan.type} · {activePlan.floors}
-                  </span>
-                </div>
-                {/* Gold corner */}
-                <div className="absolute top-5 right-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-                  style={{ borderTop: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
-                <div className="absolute bottom-5 left-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-                  style={{ borderBottom: '1px solid var(--gold)', borderLeft: '1px solid var(--gold)' }} />
-              </div>
-
-              {/* Details */}
-              <div ref={contentRef} className="flex flex-col">
-                <span className="label text-[var(--text-subtle)] mb-3 block" style={{ fontSize: '0.6rem' }}>
-                  {activePlan.floors}
-                </span>
-                <div className="flex items-baseline gap-3 mb-6">
-                  <span className="font-display text-[var(--near-black)]"
-                    style={{ fontSize: 'clamp(2.8rem,5vw,5rem)', fontWeight: 300, lineHeight: 1 }}>
-                    {activePlan.size}
-                  </span>
-                  <span className="font-body text-[var(--text-subtle)]" style={{ fontSize: '1rem' }}>sq.ft</span>
-                </div>
-
-                {/* Gold divider */}
-                <div className="w-full h-px mb-8" style={{ background: 'var(--sand)' }} />
-
-                <p className="font-body text-[var(--text-muted)] leading-[1.85] mb-12"
-                  style={{ fontSize: 'clamp(0.9rem,1.1vw,1rem)', maxWidth: '38ch' }}>
-                  {activePlan.desc}
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="btn-gold">Download Brochure</button>
-                  <button className="btn-ghost-light">Schedule Site Visit</button>
-                </div>
-
-                {/* Type indicator dots */}
-                <div className="flex gap-2 mt-10" role="tablist">
-                  {plans.map((p, i) => (
-                    <button key={i} onClick={() => setActive(i)}
-                      aria-label={`Switch to ${p.type}`}
-                      aria-selected={active === i}
-                      role="tab"
-                      className="transition-all duration-300"
-                      style={{
-                        width: 24,
-                        height: 6,
-                        borderRadius: 3,
-                        background: active === i ? 'var(--gold)' : 'var(--sand)',
-                        transform: active === i ? 'scaleX(1)' : 'scaleX(0.25)',
-                        transformOrigin: 'left',
-                      }} />
-                  ))}
-                </div>
-              </div>
-
+        {/* Content — FIX 2: use activePlan (always defined) instead of plans[active] */}
+        <div
+          id="fp-panel"
+          role="tabpanel"
+          aria-label={`${activePlan.type} floor plan`}
+          className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 md:gap-24 items-center"
+        >
+          {/* Floor plan image */}
+          <div
+            ref={imageRef}
+            className="relative aspect-[4/3] bg-white flex items-center justify-center p-10 md:p-14 group"
+            style={{ borderRadius: 'var(--r-2xl)', border: '1px solid var(--sand)' }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={activePlan.image}
+              alt={`${activePlan.type} Floor Plan`}
+              width={800} height={600}
+              className="w-full h-full object-contain opacity-80 transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+            <div className="absolute bottom-5 left-6">
+              <span className="label text-[var(--text-subtle)]" style={{ fontSize: '0.5rem' }}>
+                Floor Plan · {activePlan.type} · {activePlan.floors}
+              </span>
             </div>
-          );
-        })()}
+            {/* Gold corners */}
+            <div className="absolute top-5 right-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
+              style={{ borderTop: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
+            <div className="absolute bottom-5 left-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
+              style={{ borderBottom: '1px solid var(--gold)', borderLeft: '1px solid var(--gold)' }} />
+          </div>
+
+          {/* Details */}
+          <div ref={contentRef} className="flex flex-col">
+            <span className="label text-[var(--text-subtle)] mb-3 block" style={{ fontSize: '0.6rem' }}>
+              {activePlan.floors}
+            </span>
+            <div className="flex items-baseline gap-3 mb-6">
+              <span className="font-display text-[var(--near-black)]"
+                style={{ fontSize: 'clamp(2.8rem,5vw,5rem)', fontWeight: 300, lineHeight: 1 }}>
+                {activePlan.size}
+              </span>
+              <span className="font-body text-[var(--text-subtle)]" style={{ fontSize: '1rem' }}>sq.ft</span>
+            </div>
+
+            {/* Divider */}
+            <div className="w-full h-px mb-8" style={{ background: 'var(--sand)' }} />
+
+            <p className="font-body text-[var(--text-muted)] leading-[1.85] mb-12"
+              style={{ fontSize: 'clamp(0.9rem,1.1vw,1rem)', maxWidth: '38ch' }}>
+              {activePlan.desc}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button className="btn-gold">Download Brochure</button>
+              <button className="btn-ghost-light">Schedule Site Visit</button>
+            </div>
+
+            {/* Dot indicators — separate tablist from the main one above */}
+            <div className="flex gap-2 mt-10" role="group" aria-label="Floor plan navigation dots">
+              {plans.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  aria-label={`Switch to ${p.type}`}
+                  aria-pressed={active === i}
+                  className="transition-all duration-300"
+                  style={{
+                    width: 24, height: 6, borderRadius: 3,
+                    background: active === i ? 'var(--gold)' : 'var(--sand)',
+                    transform: active === i ? 'scaleX(1)' : 'scaleX(0.5)',
+                    transformOrigin: 'left',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   );
