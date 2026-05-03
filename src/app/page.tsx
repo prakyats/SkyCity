@@ -13,20 +13,31 @@ import { Contact } from "@/components/sections/Contact";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[var(--navy-deep)]">
+    <>
+      {/* Skip link for keyboard/screen-reader users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[99999] focus:bg-[var(--gold)] focus:text-[var(--navy-deep)] focus:px-4 focus:py-2 focus:rounded focus:font-label focus:text-xs focus:tracking-widest focus:uppercase"
+      >
+        Skip to main content
+      </a>
+
+      {/* Hero is outside <main> intentionally — it's the full-screen billboard */}
       <Hero />
-      <ProjectIntro />
-      <Connectivity />
-      <Specifications />
-      <Amenities />
-      <VisualShowcase />
-      <FloorPlans />
-      <Location />
-      <Partners />
-      <Progress />
-      <Journey />
-      <Contact />
-      {/* Additional sections will go here */}
-    </main>
+
+      <main id="main-content" className="min-h-screen bg-[var(--navy-deep)]">
+        <ProjectIntro />
+        <Connectivity />
+        <Specifications />
+        <Amenities />
+        <VisualShowcase />
+        <FloorPlans />
+        <Location />
+        <Partners />
+        <Progress />
+        <Journey />
+        <Contact />
+      </main>
+    </>
   );
 }

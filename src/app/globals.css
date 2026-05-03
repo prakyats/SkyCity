@@ -30,11 +30,11 @@
   /* Text */
   --text-primary: #1c1213;
   --text-muted: rgba(28, 18, 19, 0.55);
-  --text-subtle: rgba(28, 18, 19, 0.35);
+  --text-subtle: rgba(28, 18, 19, 0.50);
   --text-white: #ffffff;
   --text-white-70: rgba(255, 255, 255, 0.70);
   --text-white-45: rgba(255, 255, 255, 0.45);
-  --text-white-28: rgba(255, 255, 255, 0.28);
+  --text-white-28: rgba(255, 255, 255, 0.42);
 
   /* Section backgrounds — alternating rhythm */
   --bg-white: #FAFAF8;
@@ -630,25 +630,32 @@ body:has(button:hover) #magnetic-cursor {
   opacity: 0.35;
 }
 
-/* Kinetic border */
-@keyframes borderRun {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+/* Kinetic border — uses transform:translateX on a ::before pseudo-element.
+   This is fully GPU-composited (no layout, no paint) unlike background-position. */
+@keyframes kineticSlide {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(200%); }
 }
 
 .kinetic-border {
-  background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--gold-dark), var(--gold));
-  background-size: 400%;
-  animation: borderRun 4s ease infinite;
+  position: relative;
+  overflow: hidden;
+  background: var(--gold-dark);
+}
+
+.kinetic-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--gold-bright) 40%,
+    var(--gold) 50%,
+    var(--gold-bright) 60%,
+    transparent 100%
+  );
+  animation: kineticSlide 2s linear infinite;
+  will-change: transform;
 }
 
 /* Preloader */
@@ -908,15 +915,10 @@ body:has(button:hover) #magnetic-cursor {
   mix-blend-mode: overlay;
 }
 
-/* Gold scan line on cards */
-@keyframes scanLine {
-  0% {
-    top: -100%;
-  }
-
-  100% {
-    top: 200%;
-  }
+/* Gold scan line on cards — translateY instead of top for GPU compositing */
+@keyframes scanLineY {
+  from { transform: translateY(-100vh); }
+  to   { transform: translateY(200vh); }
 }
 
 .scan-line-card {
@@ -927,13 +929,15 @@ body:has(button:hover) #magnetic-cursor {
 .scan-line-card::before {
   content: '';
   position: absolute;
+  top: 0;
   left: 0;
   right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(232, 160, 32, 0.4), transparent);
-  animation: scanLine 4s linear infinite;
+  animation: scanLineY 4s linear infinite;
   pointer-events: none;
   z-index: 10;
+  will-change: transform;
 }
 
 /* Wow section entrance: scale + blur from below */
@@ -1140,3 +1144,29 @@ body:has(button:hover) #magnetic-cursor {
   outline-offset: 3px;
 }
 
+
+/* ─── ACCESSIBILITY UTILITIES ───────────────────────────────────────────────── */
+/* Screen reader only — hides visually but keeps in accessibility tree */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Reduced motion — disable all animations for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

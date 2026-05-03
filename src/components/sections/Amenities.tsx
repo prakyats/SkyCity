@@ -61,11 +61,9 @@ export const Amenities = () => {
       // ── PREMIUM INFINITE CAROUSEL LOGIC ──
       const track = trackRef.current;
       if (track) {
-        const items = gsap.utils.toArray<HTMLElement>('.amen-card');
-        const firstItem = items[0];
-        if (!firstItem) return;
-        
-        const itemWidth = firstItem.getBoundingClientRect().width + 24; // width + gap
+        // Use CSS-defined card width + gap — avoids forced reflow from getBoundingClientRect
+        const isMobile = window.innerWidth < 768;
+        const itemWidth = (isMobile ? 300 : 400) + 24; // card width + gap (matches CSS)
         const totalWidth = itemWidth * amenities.length;
 
         // Create the seamless loop animation

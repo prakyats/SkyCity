@@ -10,25 +10,24 @@ gsap.registerPlugin(ScrollTrigger);
 export default function SmoothScrollProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.1,          // slightly snappier — 0.08 can feel sluggish on fast scrolls
+      lerp: 0.1,
       smoothWheel: true,
-      // @ts-expect-error - smoothTouch varies by Lenis version
-      smoothTouch: false, // never smooth touch — causes jank on iOS
+      // @ts-expect-error smoothTouch not in all type defs
+      smoothTouch: false,   // never smooth touch — causes iOS jank
       wheelMultiplier: 0.95,
     });
 
-    // Sync GSAP ScrollTrigger with Lenis position
+    // Keep GSAP ScrollTrigger in sync with Lenis scroll position
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Drive Lenis via GSAP ticker for perfect frame alignment
+    // Drive Lenis via GSAP ticker for frame-perfect sync
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
 
-    // NOTE: do NOT call gsap.ticker.lagSmoothing(0) — it disables GSAP's
-    // built-in frame-drop protection. Default (500ms, 33ms) is correct.
+    // NOTE: intentionally NOT calling gsap.ticker.lagSmoothing(0).
+    // Default lag smoothing (500ms threshold, 33ms cap) protects against
+    // janky frame-drop recovery. Disabling it hurts performance on slow CPUs.
 
-    // Set default scroller for all ScrollTrigger instances
-    // eslint-disable-next-line no-restricted-globals
     ScrollTrigger.defaults({ scroller: document.documentElement });
 
     return () => {
