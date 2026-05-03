@@ -1,423 +1,353 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { VideoBackground } from '@/components/ui/VideoBackground';
 import { initHeroAnimations } from '@/lib/animations/heroAnimation';
 import { cld } from '@/lib/cloudinary';
 
 export const Hero = () => {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef      = useRef<HTMLElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
+  const animStarted     = useRef(false);
+  const fallbackTimer   = useRef<ReturnType<typeof setTimeout>>();
 
-  const [isReady, setIsReady] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isActivated, setIsActivated] = useState(false);
-  const [phase, setPhase] = useState(0); // 0=hidden 1=titles 2=details
+  const leftTitleRef  = useRef<HTMLHeadingElement>(null);
+  const rightTitleRef = useRef<HTMLDivElement>(null);
+  const leftVlineRef  = useRef<HTMLDivElement>(null);
+  const rightVlineRef = useRef<HTMLDivElement>(null);
+  const eyebrowRef    = useRef<HTMLDivElement>(null);
+  const ctaRef        = useRef<HTMLDivElement>(null);
+  const taglineRef    = useRef<HTMLDivElement>(null);
+  const statLeftRef   = useRef<HTMLDivElement>(null);
+  const statRightRef  = useRef<HTMLDivElement>(null);
+  const bottomBarRef  = useRef<HTMLDivElement>(null);
 
-  const hasTriggered = useRef(false);
-  const fallbackRef = useRef<NodeJS.Timeout | null>(null);
+  const runEntrance = () => {
+    if (animStarted.current) return;
+    animStarted.current = true;
+    if (fallbackTimer.current) clearTimeout(fallbackTimer.current);
 
-  // ── Wait for preloader ────────────────────────────────────────────────
+    gsap.context(() => {
+      const tl = gsap.timeline();
+
+      tl.to(leftTitleRef.current,
+        { x: 0, opacity: 1, clipPath: 'inset(-20% 0% -20% 0%)', duration: 1.3, ease: 'power3.out' }, 0
+      );
+      tl.to(rightTitleRef.current,
+        { x: 0, opacity: 1, clipPath: 'inset(-20% 0% -20% 0%)', duration: 1.3, ease: 'power3.out' }, 0.08
+      );
+      tl.fromTo([leftVlineRef.current, rightVlineRef.current],
+        { scaleY: 0, transformOrigin: 'top' },
+        { scaleY: 1, duration: 1.0, stagger: 0.15, ease: 'power2.inOut' }, 0.3
+      );
+
+      // Cinematic hold
+      tl.to({}, { duration: 0.7 });
+
+      const d = 0.6, e = 'power2.out';
+      tl.fromTo(eyebrowRef.current,  { y: -10, opacity: 0 }, { y: 0, opacity: 1, duration: d, ease: e }, '>');
+      tl.fromTo(ctaRef.current,      { y:  16, opacity: 0 }, { y: 0, opacity: 1, duration: d, ease: e }, '<0.12');
+      tl.fromTo(taglineRef.current,  { y:  16, opacity: 0 }, { y: 0, opacity: 1, duration: d, ease: e }, '<0.1');
+
+      tl.fromTo([statLeftRef.current, statRightRef.current],
+        { y: 14, opacity: 0 },
+        { y: 0, opacity: 1, duration: d, stagger: 0.1, ease: e }, '<0.15');
+      tl.fromTo(bottomBarRef.current,
+        { opacity: 0 }, { opacity: 1, duration: 0.5 }, '<0.2');
+    }, sectionRef);
+  };
+
+  // Hide titles after first paint so GSAP can animate them in
+  // (LCP element is visible during HTML parse — hidden only after JS runs)
   useEffect(() => {
-    const onComplete = () => setIsActivated(true);
-    window.addEventListener('preloaderComplete', onComplete);
-    return () => window.removeEventListener('preloaderComplete', onComplete);
+    if (leftTitleRef.current) {
+      gsap.set(leftTitleRef.current,  { x: -60, opacity: 0, clipPath: 'inset(-20% 100% -20% 0%)' });
+    }
+    if (rightTitleRef.current) {
+      gsap.set(rightTitleRef.current, { x:  60, opacity: 0, clipPath: 'inset(-20% 0% -20% 100%)' });
+    }
   }, []);
 
-  // ── Fallback: guarantee content shows even if video never plays ────────
   useEffect(() => {
-    if (!isActivated) return;
-    if (window.innerWidth < 768) { setPhase(2); hasTriggered.current = true; return; }
-    fallbackRef.current = setTimeout(() => {
-      if (!hasTriggered.current) { setPhase(2); hasTriggered.current = true; }
-    }, 2400);
-    return () => { if (fallbackRef.current) clearTimeout(fallbackRef.current); };
-  }, [isActivated]);
+    const onPreloaderDone = () => {
+      if (typeof window === 'undefined') return;
+      if (window.innerWidth < 768) { runEntrance(); return; }
+      fallbackTimer.current = setTimeout(runEntrance, 2400);
+    };
+    window.addEventListener('preloaderComplete', onPreloaderDone, { once: true });
+    return () => {
+      window.removeEventListener('preloaderComplete', onPreloaderDone);
+      if (fallbackTimer.current) clearTimeout(fallbackTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // ── Cinematic phase timeline (video-driven) ────────────────────────────
-  useEffect(() => {
-    if (!isReady || !isPlaying || !isActivated || hasTriggered.current) return;
-    if (fallbackRef.current) clearTimeout(fallbackRef.current);
-    const t1 = setTimeout(() => setPhase(1), 2000);   // titles immediately
-    const t2 = setTimeout(() => setPhase(2), 3800);  // details after 2.4s
-    hasTriggered.current = true;
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [isReady, isPlaying, isActivated]);
-
-  // ── GSAP entrance animations per phase ────────────────────────────────
-  useEffect(() => {
-    if (phase < 1) return;
-    const ctx = gsap.context(() => {
-
-      if (phase === 1) {
-        // LEFT: "Yamuna" — slides in from left with clip reveal
-        gsap.fromTo('.hero-left-title',
-          { x: -60, opacity: 0, clipPath: 'inset(0 100% 0 0)' },
-          {
-            x: 0, opacity: 1, clipPath: 'inset(0 0% 0 0)',
-            duration: 1.4, ease: 'power3.out'
-          }
-        );
-        // RIGHT: "Sky City" — slides in from right with clip reveal
-        gsap.fromTo('.hero-right-title',
-          { x: 60, opacity: 0, clipPath: 'inset(0 0 0 100%)' },
-          {
-            x: 0, opacity: 1, clipPath: 'inset(0 0 0 0%)',
-            duration: 1.4, ease: 'power3.out'
-          }
-        );
-        // Left vertical line draws down
-        gsap.fromTo('.hero-left-vline',
-          { scaleY: 0, transformOrigin: 'top center' },
-          { scaleY: 1, duration: 1.0, ease: 'power2.inOut', delay: 0.3 }
-        );
-        // Right vertical line draws down
-        gsap.fromTo('.hero-right-vline',
-          { scaleY: 0, transformOrigin: 'top center' },
-          { scaleY: 1, duration: 1.0, ease: 'power2.inOut', delay: 0.5 }
-        );
-      }
-
-      if (phase === 2) {
-        const tl = gsap.timeline();
-
-        // Left column details stagger up
-        tl.fromTo('.hero-left-detail',
-          { y: 22, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.85, stagger: 0.15, ease: 'power3.out' }
-        );
-        // Right column details stagger up
-        tl.fromTo('.hero-right-detail',
-          { y: 22, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.85, stagger: 0.15, ease: 'power3.out' },
-          '-=0.6'
-        );
-        // Horizontal gold rules draw in from center
-        tl.fromTo('.hero-hrule',
-          { scaleX: 0, transformOrigin: 'center' },
-          { scaleX: 1, duration: 0.7, stagger: 0.1, ease: 'power2.out' },
-          '-=0.7'
-        );
-        // RERA + bottom items
-        tl.fromTo('.hero-bottom',
-          { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' },
-          '-=0.3'
-        );
-      }
-
-    }, sectionRef);
-    return () => ctx.revert();
-  }, [phase]);
-
-  // ── Global camera zoom on scroll ──────────────────────────────────────
   useEffect(() => {
     const anim = initHeroAnimations(null, null, videoWrapperRef);
     return () => { if (anim) anim.kill(); };
   }, []);
 
   const handleVideoReady = () => {
-    setIsReady(true);
     import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => ScrollTrigger.refresh());
   };
-  const handleVideoPlay = () => setIsPlaying(true);
+  const handleVideoPlay = () => setTimeout(runEntrance, 300);
+
+  const lbl = (extra?: React.CSSProperties): React.CSSProperties => ({
+    fontFamily: 'var(--font-tenor), Arial, sans-serif',
+    fontSize: 'clamp(9px, 0.7vw, 11px)',
+    letterSpacing: '0.36em',
+    textTransform: 'uppercase',
+    ...extra,
+  });
+
+  const PAD = 'clamp(28px, 5vw, 72px)';
+  const TOP  = 'clamp(28px, 3.5vw, 48px)';
 
   return (
     <section
       ref={sectionRef}
       className="relative w-full overflow-hidden"
       style={{ height: '100dvh' }}
-      aria-label="Hero"
+      aria-label="Yamuna Sky City — South India's Tallest Sea View Residential Tower"
     >
-      {/* ── VIDEO LAYER ─────────────────────────────────────────────────── */}
-      <div ref={videoWrapperRef} className="absolute inset-0 w-full h-full z-0">
+      {/* VIDEO */}
+      <div ref={videoWrapperRef} className="absolute inset-0 z-0">
         <VideoBackground
           webmSrc="https://res.cloudinary.com/drzbbbncs/video/upload/v1777554895/hero_b0imcd.webm"
           mp4Src="https://res.cloudinary.com/drzbbbncs/video/upload/v1777554838/hero_gxnqcd.mp4"
-          posterSrc={cld("v1777554903/hero-poster_emnfvb.jpg", 2000)}
+          posterSrc={cld('v1777554903/hero-poster_emnfvb.jpg', 1920)}
           onReady={handleVideoReady}
           onPlay={handleVideoPlay}
         />
       </div>
 
-      {/* ── CINEMATIC GRADIENT OVERLAYS ──────────────────────────────────── */}
-      {/* Left column fog — gives the left panel atmospheric depth */}
+      {/* Atmospheric fogs */}
       <div className="absolute inset-y-0 left-0 z-10 pointer-events-none"
-        style={{
-          width: '30%',
-          background: 'linear-gradient(to right, rgba(4, 10, 20, 0.55) 0%, rgba(4, 10, 20, 0.22) 65%, transparent 100%)',
-        }}
-      />
-      {/* Right column fog — mirrors left */}
+        style={{ width: '34%', background: 'linear-gradient(to right, rgba(3,8,18,0.59) 0%, rgba(3,8,18,0.32) 52%, transparent 100%)' }} />
       <div className="absolute inset-y-0 right-0 z-10 pointer-events-none"
-        style={{
-          width: '30%',
-          background: 'linear-gradient(to left, rgba(4,10,20,0.68) 0%, rgba(4,10,20,0.30) 65%, transparent 100%)',
-        }}
-      />
-      {/* Bottom legibility fade */}
-      <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none"
-        style={{ height: 60, background: 'linear-gradient(to top, rgba(4, 10, 20, 0.41) 0%, transparent 100%)' }}
-      />
-      {/* Top fade for logos */}
+        style={{ width: '34%', background: 'linear-gradient(to left, rgba(3,8,18,0.55) 0%, rgba(3,8,18,0.27) 52%, transparent 100%)' }} />
       <div className="absolute inset-x-0 top-0 z-10 pointer-events-none"
-        style={{ height: 120, background: 'linear-gradient(to bottom, rgba(4,10,20,0.55) 0%, transparent 100%)' }}
-      />
+        style={{ height: 180, background: 'linear-gradient(to bottom, rgba(3,8,18,0.50) 0%, transparent 100%)' }} />
+      <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none"
+        style={{ height: 220, background: 'linear-gradient(to top, rgba(3,8,18,0.52) 0%, transparent 100%)' }} />
 
-      {/* ── TOP: LOGOS ───────────────────────────────────────────────────── */}
-      {/* Sky City favicon — top left */}
+      {/* ── TOP LEFT: Sky City favicon ────────────────────────────────── */}
+      {/* Favicon sits alone at top-left — compact, not oversized */}
       <div className="absolute z-30 pointer-events-none"
-        style={{ top: 'clamp(22px,3vw,40px)', left: 'clamp(22px,4vw,56px)' }}>
+        style={{ top: TOP, left: PAD }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={cld("v1777699538/skyfavicon_1_tufy14.png", 200)} alt="Sky City" className="h-9 md:h-12 w-auto object-contain" />
+        <img
+          src={cld('v1777699538/skyfavicon_1_tufy14.png', 120)}
+          alt="Yamuna Sky City"
+          width={48} height={48}
+          style={{ height: 'clamp(40px, 4.2vw, 56px)', width: 'auto', display: 'block' }}
+        />
       </div>
-      {/* Yamuna Homes logo — top right */}
+
+      {/* ── TOP LEFT: Eyebrow text — independently positioned below favicon ── */}
+      {/* Separated from favicon so it can animate independently */}
+      <div
+        ref={eyebrowRef}
+        className="absolute z-30 hidden md:flex flex-col gap-[8px]"
+        style={{ top: 'clamp(88px, 9.5vw, 126px)', left: PAD, opacity: 0 }}
+      >
+        <span style={lbl({ color: 'rgba(255,255,255,0.45)' })}>
+          A New Landmark in South India
+        </span>
+        <div style={{ width: 28, height: 1, background: 'var(--gold)', opacity: 0.6 }} />
+      </div>
+
+      {/* ── TOP RIGHT: Yamuna Homes logo ─────────────────────────────── */}
       <div className="absolute z-30 pointer-events-none"
-        style={{ top: 'clamp(22px,3vw,40px)', right: 'clamp(22px,4vw,56px)' }}>
+        style={{ top: TOP, right: PAD }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={cld("v1777696301/yamuna_homes_z4hnie.png", 200)} alt="Yamuna Homes" className="h-12 md:h-16 w-auto object-contain" />
+        <img
+          src={cld('v1777696301/yamuna_homes_z4hnie.png', 220)}
+          alt="Yamuna Homes and Design Private Limited"
+          width={220} height={215}
+          style={{ height: 'clamp(56px, 5.8vw, 82px)', width: 'auto', display: 'block' }}
+        />
       </div>
 
-      {/* ── MAIN SPLIT LAYOUT ────────────────────────────────────────────── */}
-      <div className="absolute inset-0 z-20 flex items-stretch justify-between pointer-events-none"
-        style={{ padding: '0 clamp(24px, 5vw, 72px)' }}>
-
-        {/* ════════════════ LEFT COLUMN ════════════════ */}
-        <div className="flex flex-col justify-between py-[clamp(90px,10vh,130px)] items-start"
-          style={{ width: 'clamp(220px, 30vw, 400px)' }}>
-
-          {/* — Top: Eyebrow tag — */}
-          <div className={`hero-left-detail flex flex-col gap-3 ${phase >= 2 ? '' : 'opacity-0'}`}>
-            <span style={{
-              fontFamily: 'var(--font-tenor), Arial, sans-serif',
-              fontSize: 'clamp(9px, 0.75vw, 11px)',
-              letterSpacing: '0.38em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.5)',
-            }}>
-              A New Landmark in South India
-            </span>
-            {/* Gold rule */}
-            <div className="hero-hrule h-px w-10"
-              style={{ background: 'linear-gradient(90deg, var(--gold), transparent)' }} />
-          </div>
-
-          {/* — Middle: "Yamuna" — */}
-          <div className="flex flex-col items-start gap-6">
-            {/* Vertical accent line left of title */}
-            <div className="flex items-center gap-5">
-              <div className="hero-left-vline w-px"
-                style={{
-                  height: 'clamp(50px, 6vw, 80px)',
-                  background: 'linear-gradient(to bottom, transparent, var(--gold), transparent)',
-                  opacity: 0.7,
-                }} />
-              <h1 className="hero-left-title text-white text-left"
-                suppressHydrationWarning
-                style={{
-                  fontFamily: 'var(--font-dm-serif), Georgia, serif',
-                  fontSize: 'clamp(52px, 8.5vw, 136px)',
-                  fontWeight: 400,
-                  lineHeight: 0.92,
-                  letterSpacing: '-0.02em',
-                  opacity: phase >= 1 ? 1 : 0,
-                }}>Yamuna<span className="sr-only"> Sky City</span></h1>
-            </div>
-
-            {/* — CTA button — */}
-            <div className={`hero-left-detail pointer-events-auto ${phase >= 2 ? '' : 'opacity-0'}`}>
-              <button
-                onClick={() => {
-                  document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  padding: '14px 28px',
-                  border: '1px solid rgba(255,255,255,0.22)',
-                  borderRadius: 9999,
-                  background: 'rgba(4,10,20,0.35)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  cursor: 'pointer',
-                  transition: 'border-color 0.3s, background 0.3s',
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(232,160,32,0.6)';
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,160,32,0.08)';
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.22)';
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(4,10,20,0.35)';
-                }}
-              >
-                <span style={{
-                  fontFamily: 'var(--font-tenor), Arial, sans-serif',
-                  fontSize: 'clamp(9px, 0.75vw, 11px)',
-                  letterSpacing: '0.28em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.8)',
-                }}>
-                  Explore More
-                </span>
-                {/* Arrow */}
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                  style={{ opacity: 0.6, flexShrink: 0 }}>
-                  <path d="M2 7h10M8 3l4 4-4 4" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* — Bottom: Left stat strip — */}
-          <div className={`hero-left-detail flex flex-col gap-4 ${phase >= 2 ? '' : 'opacity-0'}`}>
-            <div className="hero-hrule h-px w-8"
-              style={{ background: 'rgba(232,160,32,0.5)' }} />
-            <div className="flex flex-col gap-1">
-              <span style={{
-                fontFamily: 'var(--font-cormorant), Georgia, serif',
-                fontSize: 'clamp(24px, 2.5vw, 36px)',
-                fontWeight: 300,
-                color: 'rgba(255,255,255,0.9)',
-                lineHeight: 1,
-              }}>
-                296
-              </span>
-              <span style={{
-                fontFamily: 'var(--font-tenor), Arial, sans-serif',
-                fontSize: '9px',
-                letterSpacing: '0.32em',
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.35)',
-              }}>
-                Sea-Facing Units
-              </span>
-            </div>
-          </div>
-
+      {/* ── CENTRE TITLES ─────────────────────────────────────────────── */}
+      <div
+        className="absolute inset-0 z-20 flex items-center justify-between pointer-events-none"
+        style={{ padding: `0 ${PAD}`, transform: 'translateY(-5vh)' }}
+      >
+        {/* LEFT: Yamuna */}
+        <div className="flex items-center gap-4 flex-shrink-0" style={{ maxWidth: '44%' }}>
+          <div ref={leftVlineRef} style={{
+            width: 1,
+            height: 'clamp(44px, 5.5vw, 74px)',
+            flexShrink: 0,
+            background: 'linear-gradient(to bottom, transparent, var(--gold) 35%, var(--gold) 65%, transparent)',
+            opacity: 0.8,
+          }} />
+          <h1
+            ref={leftTitleRef}
+            style={{
+              fontFamily: 'var(--font-dm-serif), Georgia, serif',
+              fontSize: 'clamp(54px, 9.2vw, 150px)',
+              fontWeight: 400,
+              lineHeight: 0.9,
+              letterSpacing: '-0.025em',
+              color: '#fff',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Yamuna
+          </h1>
         </div>
 
-        {/* ════════════════ RIGHT COLUMN ════════════════ */}
-        <div className="flex flex-col justify-between py-[clamp(90px,10vh,130px)] items-end"
-          style={{ width: 'clamp(220px, 30vw, 400px)' }}>
-
-          {/* Top spacer to maintain layout balance */}
-          <div className="h-10" />
-
-          {/* — Middle: "Sky City" — */}
-          <div className="flex flex-col items-end gap-6">
-            <div className="flex items-center gap-5">
-              <div className="hero-right-title text-white text-right"
-                role="presentation"
-                style={{
-                  fontFamily: 'var(--font-cormorant), Georgia, serif',
-                  fontSize: 'clamp(52px, 8.5vw, 136px)',
-                  fontWeight: 300,
-                  fontStyle: 'italic',
-                  lineHeight: 0.92,
-                  letterSpacing: '-0.01em',
-                  opacity: phase >= 1 ? 1 : 0,
-                }}>Sky City</div>
-              {/* Vertical accent line right of title */}
-              <div className="hero-right-vline w-px"
-                style={{
-                  height: 'clamp(50px, 6vw, 80px)',
-                  background: 'linear-gradient(to bottom, transparent, var(--gold), transparent)',
-                  opacity: 0.7,
-                }} />
-            </div>
-
-            {/* — Tagline — */}
-            <div className={`hero-right-detail text-right ${phase >= 2 ? '' : 'opacity-0'}`}
-              style={{ maxWidth: 260 }}>
-              <p style={{
-                fontFamily: 'var(--font-dm-sans), sans-serif',
-                fontSize: 'clamp(12px, 1.1vw, 15px)',
-                lineHeight: 1.65,
-                color: 'rgba(255,255,255,0.55)',
-                fontWeight: 300,
-                letterSpacing: '0.02em',
-              }}>
-                South India&apos;s Tallest<br />Sea View Residential Tower
-              </p>
-            </div>
+        {/* RIGHT: Sky City */}
+        <div className="flex items-center gap-4 flex-shrink-0 justify-end" style={{ maxWidth: '44%' }}>
+          <div
+            ref={rightTitleRef}
+            aria-hidden="true"
+            style={{
+              fontFamily: 'var(--font-cormorant), Georgia, serif',
+              fontSize: 'clamp(54px, 9.2vw, 150px)',
+              fontWeight: 300,
+              fontStyle: 'italic',
+              lineHeight: 0.9,
+              letterSpacing: '-0.01em',
+              color: '#fff',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Sky City
           </div>
-
-          {/* — Bottom: Right stat strip — */}
-          <div className={`hero-right-detail flex flex-col items-end gap-4 ${phase >= 2 ? '' : 'opacity-0'}`}>
-            <div className="flex flex-col items-end gap-1">
-              <span style={{
-                fontFamily: 'var(--font-cormorant), Georgia, serif',
-                fontSize: 'clamp(24px, 2.5vw, 36px)',
-                fontWeight: 300,
-                color: 'rgba(255,255,255,0.9)',
-                lineHeight: 1,
-              }}>
-                300m
-              </span>
-              <span style={{
-                fontFamily: 'var(--font-tenor), Arial, sans-serif',
-                fontSize: '9px',
-                letterSpacing: '0.32em',
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.35)',
-              }}>
-                From the Arabian Sea
-              </span>
-            </div>
-            <div className="hero-hrule h-px w-8"
-              style={{ background: 'rgba(232,160,32,0.5)' }} />
-          </div>
-
+          <div ref={rightVlineRef} style={{
+            width: 1,
+            height: 'clamp(44px, 5.5vw, 74px)',
+            flexShrink: 0,
+            background: 'linear-gradient(to bottom, transparent, var(--gold) 35%, var(--gold) 65%, transparent)',
+            opacity: 0.8,
+          }} />
         </div>
       </div>
 
-      {/* ── BOTTOM BAR: RERA + scroll indicator ─────────────────────────── */}
-      <div className={`hero-bottom absolute bottom-0 inset-x-0 z-30 pointer-events-none
-        flex items-end justify-between
-        pb-[clamp(20px,3vh,36px)] px-[clamp(22px,5vw,72px)]
-        ${phase >= 2 ? '' : 'opacity-0'}`}>
+      {/* ── CTA + Tagline ─────────────────────────────────────────────── */}
+      <div
+        className="absolute inset-x-0 z-30 flex items-start justify-between pointer-events-none"
+        style={{ top: '57%', padding: `0 ${PAD}` }}
+      >
+        <div ref={ctaRef} style={{ opacity: 0 }} className="pointer-events-auto">
+          <button
+            aria-label="Explore Yamuna Sky City project overview"
+            onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 14,
+              padding: '14px 26px',
+              border: '1px solid rgba(255,255,255,0.22)',
+              borderRadius: 9999,
+              background: 'rgba(3,8,18,0.42)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              cursor: 'pointer',
+              transition: 'border-color 0.28s, background 0.28s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = 'rgba(232,160,32,0.55)';
+              e.currentTarget.style.background  = 'rgba(232,160,32,0.08)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)';
+              e.currentTarget.style.background  = 'rgba(3,8,18,0.42)';
+            }}
+          >
+            <span style={lbl({ color: 'rgba(255,255,255,0.80)' })}>Explore More</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style={{ opacity: 0.5 }}>
+              <path d="M1 6h10M7 2l4 4-4 4" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
 
-        {/* RERA */}
-        <p style={{
-          fontFamily: 'var(--font-tenor), Arial, sans-serif',
-          fontSize: '9px',
-          letterSpacing: '0.28em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.22)',
-        }}>
+        <div
+          ref={taglineRef}
+          style={{ opacity: 0, textAlign: 'right', maxWidth: 248 }}
+          className="hidden md:block"
+        >
+          <p style={{
+            fontFamily: 'var(--font-dm-sans), sans-serif',
+            fontSize: 'clamp(12px, 1.05vw, 15px)',
+            lineHeight: 1.7,
+            color: 'rgba(255,255,255,0.48)',
+            fontWeight: 300,
+          }}>
+            South India&apos;s Tallest<br />Sea View Residential Tower
+          </p>
+        </div>
+      </div>
+
+
+      {/* ── Bottom stat strip ─────────────────────────────────────────── */}
+      <div
+        className="absolute inset-x-0 z-30 flex items-end justify-between pointer-events-none"
+        style={{ bottom: 'clamp(68px, 10vh, 108px)', padding: `0 ${PAD}` }}
+      >
+        <div ref={statLeftRef} style={{ opacity: 0 }} className="flex flex-col gap-[4px]">
+          <span style={{
+            fontFamily: 'var(--font-cormorant), Georgia, serif',
+            fontSize: 'clamp(28px, 2.8vw, 44px)',
+            fontWeight: 300, color: 'rgba(255,255,255,0.88)', lineHeight: 1,
+          }}>
+            296
+          </span>
+          <span style={lbl({ color: 'rgba(255,255,255,0.30)' })}>Sea-Facing Units</span>
+        </div>
+
+        <div ref={statRightRef} style={{ opacity: 0 }} className="flex flex-col items-end gap-[4px]">
+          <span style={{
+            fontFamily: 'var(--font-cormorant), Georgia, serif',
+            fontSize: 'clamp(28px, 2.8vw, 44px)',
+            fontWeight: 300, color: 'rgba(255,255,255,0.88)', lineHeight: 1,
+          }}>
+            300m
+          </span>
+          <span style={lbl({ color: 'rgba(255,255,255,0.30)' })}>From the Arabian Sea</span>
+        </div>
+      </div>
+
+      {/* ── Bottom bar: RERA + scroll cue ────────────────────────────── */}
+      <div
+        ref={bottomBarRef}
+        className="absolute inset-x-0 bottom-0 z-30 flex items-end justify-between pointer-events-none"
+        style={{ padding: `0 ${PAD} clamp(18px, 2.5vh, 30px)`, opacity: 0 }}
+      >
+        <p style={lbl({ color: 'rgba(255,255,255,0.18)', fontSize: '8.5px' })}>
           RERA: PRM/KA/RERA/1257/334/PR/171023/006331
         </p>
 
-        {/* Scroll cue */}
-        <div className="flex flex-col items-center gap-2">
-          <div style={{
-            width: 1, height: 36,
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.4), transparent)',
-            animation: 'heroScrollPulse 2.2s ease-in-out infinite',
-          }} />
-          <span style={{
-            fontFamily: 'var(--font-tenor), Arial, sans-serif',
-            fontSize: '8px',
-            letterSpacing: '0.35em',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.25)',
-          }}>
-            Scroll
-          </span>
+        {/* Scroll cue — centred */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-[10px]"
+          style={{ bottom: 'clamp(18px, 2.5vh, 30px)' }}
+        >
+          <div
+            className="relative overflow-hidden rounded-full"
+            style={{ width: 1, height: 48, background: 'rgba(255,255,255,0.08)' }}
+          >
+            <div style={{
+              width: 1, height: '40%',
+              background: 'linear-gradient(to bottom, transparent, var(--gold), transparent)',
+              animation: 'heroScrollDrop 2.2s cubic-bezier(0.76, 0, 0.24, 1) infinite',
+            }} />
+          </div>
+          <span style={lbl({ color: 'rgba(255,255,255,0.35)', fontSize: '8px', letterSpacing: '0.18em' })}>SCROLL</span>
         </div>
 
-        {/* Right pad: keeps RERA centred against scroll cue */}
-        <div style={{ width: 60 }} />
+        <div style={{ width: 80 }} />
       </div>
 
-
       <style>{`
-        @keyframes heroScrollPulse {
-          0%, 100% { opacity: 0.4; transform: scaleY(1); }
-          50%       { opacity: 0.9; transform: scaleY(1.15); }
+        @keyframes heroScrollDrop {
+          0%   { transform: translateY(-100%); opacity: 0; }
+          20%  { opacity: 1; }
+          70%  { opacity: 1; }
+          90%  { transform: translateY(250%); opacity: 0; }
+          100% { transform: translateY(250%); opacity: 0; }
         }
       `}</style>
     </section>
