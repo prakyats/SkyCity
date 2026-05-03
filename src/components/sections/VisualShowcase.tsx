@@ -74,17 +74,20 @@ export const VisualShowcase = () => {
             {/* State 1: The Inspiration */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={cld("v1777698110/wave-start_lp5h52.png", 2000)}
+              src={cld("v1777698110/wave-start_lp5h52.png", 1440)}
               alt="Organic wave inspiration"
+              width={1440} height={810}
               className="vs-state-1 absolute inset-0 w-full h-full object-cover object-center"
             />
 
             {/* State 2: The Plan */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={cld("v1777698109/balcony-plan_ob6gd2.jpg", 2000)}
+              src={cld("v1777698109/balcony-plan_ob6gd2.jpg", 1440)}
               alt="Technical architectural plan"
+              width={1440} height={810}
               className="vs-state-2 absolute inset-0 w-full h-full object-cover object-center opacity-0"
+              loading="lazy"
             />
 
             {/* Left-aligned Gradient Overlay for text legibility - Subtler Intensity */}

@@ -241,11 +241,11 @@ export const Contact = () => {
                     </div>
 
                     <div className="flex items-start gap-4 mt-1">
-                      <input type="checkbox" required className="mt-1 flex-shrink-0 accent-[#E8A020]" />
-                      <p className="font-body text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.28)' }}>
+                      <input type="checkbox" id="ctc-consent" required className="mt-1 flex-shrink-0 accent-[#E8A020]" />
+                      <label htmlFor="ctc-consent" className="font-body text-xs leading-relaxed cursor-pointer" style={{ color: 'rgba(255,255,255,0.28)' }}>
                         I agree to receive communications regarding Yamuna Sky City and acknowledge
                         the processing of my personal data as per the Privacy Policy.
-                      </p>
+                      </label>
                     </div>
 
                     <button type="submit" className="btn-gold w-full mt-3 relative overflow-hidden"

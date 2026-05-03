@@ -6,72 +6,64 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
-  const outerRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
-  const mousePos = useRef({ x: -200, y: -200 });
-  const cursorPos = useRef({ x: -200, y: -200 });
-  const rafRef = useRef<number>(0);
-  const isHovering = useRef(false);
-  const isVisible = useRef(true);
-  // Track which elements already have listeners — avoids re-attaching on every mutation
+  const outerRef    = useRef<HTMLDivElement>(null);
+  const dotRef      = useRef<HTMLDivElement>(null);
+  const mousePos    = useRef({ x: -200, y: -200 });
+  const cursorPos   = useRef({ x: -200, y: -200 });
+  const rafRef      = useRef<number>(0);
+  const hoverScale  = useRef(1);        // target scale — lerped separately
+  const curScale    = useRef(1);        // current scale (smoothed)
+  const isVisible   = useRef(true);
   const listenedEls = useRef(new WeakSet<Element>());
 
   const handleComplete = useCallback(() => {
     setIsLoading(false);
-    // eslint-disable-next-line no-restricted-globals
     window.dispatchEvent(new CustomEvent('preloaderComplete'));
-    // Single ScrollTrigger refresh after layout settles
     setTimeout(() => {
       import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => ScrollTrigger.refresh());
     }, 150);
   }, []);
 
-  // Lock scroll during preloader
   useEffect(() => {
-    // eslint-disable-next-line no-restricted-globals
     document.body.style.overflow = isLoading ? 'hidden' : '';
   }, [isLoading]);
 
-  // Custom cursor — desktop only, after preloader
   useEffect(() => {
-    // eslint-disable-next-line no-restricted-globals
     if (isLoading || typeof window === 'undefined') return;
-    // Skip on touch devices entirely
-    // eslint-disable-next-line no-restricted-globals
     if (window.matchMedia('(hover: none)').matches) return;
 
-    // eslint-disable-next-line no-restricted-globals
     const onVisibility = () => { isVisible.current = !document.hidden; };
-    // eslint-disable-next-line no-restricted-globals
     document.addEventListener('visibilitychange', onVisibility);
 
     const onMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
-      // Inner dot is instant — no lag
+      // Inner dot follows instantly
       if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%,-50%)`;
+        dotRef.current.style.transform =
+          `translate(${e.clientX}px, ${e.clientY}px) translate(-50%,-50%)`;
       }
     };
 
+    // ── Hover scale: set target, lerp applies it each frame ──────────────
+    // By keeping scale inside the same transform string as translate,
+    // there is no property conflict — no more cursor deflection.
     const onEnter = () => {
-      isHovering.current = true;
+      hoverScale.current = 1.55;
       if (outerRef.current) {
-        outerRef.current.style.scale = '1.55';
         outerRef.current.style.borderColor = 'rgba(232,160,32,0.8)';
       }
     };
     const onLeave = () => {
-      isHovering.current = false;
+      hoverScale.current = 1;
       if (outerRef.current) {
-        outerRef.current.style.scale = '1';
         outerRef.current.style.borderColor = 'rgba(232,160,32,0.5)';
       }
     };
 
-    // Attach hover listeners only to NEW elements not yet tracked
     const attachNew = () => {
-      // eslint-disable-next-line no-restricted-globals
-      document.querySelectorAll<HTMLElement>('a, button, [data-cursor], input, textarea, label').forEach(el => {
+      document.querySelectorAll<HTMLElement>(
+        'a, button, [data-cursor], input, textarea, label'
+      ).forEach(el => {
         if (!listenedEls.current.has(el)) {
           el.addEventListener('mouseenter', onEnter, { passive: true });
           el.addEventListener('mouseleave', onLeave, { passive: true });
@@ -81,50 +73,47 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     };
     attachNew();
 
-    // Observe only childList changes (not attribute/subtree text mutations)
     const observer = new MutationObserver(attachNew);
-    // eslint-disable-next-line no-restricted-globals
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Lerp the outer ring — paused when tab hidden
+    // ── Single rAF loop: lerp position AND scale together ────────────────
+    // Both are written into the same transform string every frame.
+    // This is the fix — previously scale was set via style.scale (a separate
+    // CSS property) while transform was set by the lerp, causing them to
+    // conflict and produce a deflection jump on hover.
     const lerp = () => {
       if (isVisible.current && outerRef.current) {
-        cursorPos.current.x += (mousePos.current.x - cursorPos.current.x) * 0.1;
-        cursorPos.current.y += (mousePos.current.y - cursorPos.current.y) * 0.1;
-        outerRef.current.style.transform = `translate(${cursorPos.current.x}px,${cursorPos.current.y}px) translate(-50%,-50%)`;
+        const lerpFactor = 0.1;
+        cursorPos.current.x += (mousePos.current.x - cursorPos.current.x) * lerpFactor;
+        cursorPos.current.y += (mousePos.current.y - cursorPos.current.y) * lerpFactor;
+        // Smooth the scale too so the expand/shrink feels fluid
+        curScale.current += (hoverScale.current - curScale.current) * 0.12;
+
+        outerRef.current.style.transform =
+          `translate(${cursorPos.current.x}px, ${cursorPos.current.y}px) ` +
+          `translate(-50%, -50%) ` +
+          `scale(${curScale.current.toFixed(3)})`;
       }
       rafRef.current = requestAnimationFrame(lerp);
     };
 
-    // eslint-disable-next-line no-restricted-globals
     window.addEventListener('mousemove', onMove, { passive: true });
     rafRef.current = requestAnimationFrame(lerp);
 
-    // eslint-disable-next-line no-restricted-globals
     const onError = (msg: string | Event, url?: string, line?: number, col?: number, error?: Error) => {
-      // eslint-disable-next-line no-console
       console.error('Global Error:', { msg, url, line, col, error });
     };
-    // eslint-disable-next-line no-restricted-globals
     const onRejection = (e: PromiseRejectionEvent) => {
-      // eslint-disable-next-line no-console
       console.error('Unhandled Rejection:', e.reason);
     };
-
-    // eslint-disable-next-line no-restricted-globals
     window.addEventListener('error', onError);
-    // eslint-disable-next-line no-restricted-globals
     window.addEventListener('unhandledrejection', onRejection);
 
     return () => {
-      // eslint-disable-next-line no-restricted-globals
       window.removeEventListener('mousemove', onMove);
-      // eslint-disable-next-line no-restricted-globals
-      document.removeEventListener('visibilitychange', onVisibility);
-      // eslint-disable-next-line no-restricted-globals
       window.removeEventListener('error', onError);
-      // eslint-disable-next-line no-restricted-globals
       window.removeEventListener('unhandledrejection', onRejection);
+      document.removeEventListener('visibilitychange', onVisibility);
       cancelAnimationFrame(rafRef.current);
       observer.disconnect();
     };
@@ -132,7 +121,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   const base: React.CSSProperties = {
     position: 'fixed', top: 0, left: 0,
-    pointerEvents: 'none', zIndex: 9990, willChange: 'transform',
+    pointerEvents: 'none', zIndex: 9990,
+    willChange: 'transform',
   };
 
   return (
@@ -140,7 +130,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       {isLoading && <Preloader onComplete={handleComplete} />}
       {!isLoading && <ScrollProgressBar />}
 
-      {/* Cursor — only rendered on non-touch desktop */}
+      {/* Outer ring — scale + position now live in ONE transform string */}
       {!isLoading && (
         <>
           <div ref={outerRef} style={{
@@ -148,7 +138,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             width: 34, height: 34,
             border: '1px solid rgba(232,160,32,0.5)',
             borderRadius: '50%',
-            transition: 'scale 0.25s ease, border-color 0.25s ease',
+            // Only transition border-color — transform is driven by rAF, no CSS transition needed
+            transition: 'border-color 0.25s ease',
           }} />
           <div ref={dotRef} style={{
             ...base,
