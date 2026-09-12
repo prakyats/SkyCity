@@ -48,6 +48,17 @@ const nextConfig = {
           source: '/fonts/(.*)',
           headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
         },
+        // 3D assets. These are large and content-addressed by filename, so a
+        // repeat visitor should never pay for them twice. Change the filename,
+        // not the file, when the model is re-exported.
+        {
+          source: '/models/(.*)',
+          headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+        },
+        {
+          source: '/draco/(.*)',
+          headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+        },
       ] : []),
     ];
   },

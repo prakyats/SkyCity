@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { Preloader } from '@/components/ui/Preloader';
 import { FloorRail } from '@/components/ui/FloorRail';
 import { Header } from '@/components/layout/Header';
@@ -8,6 +9,14 @@ import { lockScroll, emitPreloaderComplete, onUncaught } from '@/lib/browser';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
+
+  // The preloader and the floor rail are built around the homepage scroll:
+  // the rail counts storeys against the Hero, and the preloader hands off to
+  // it. On any other route they are decoration over content that does not have
+  // storeys, so they are scoped to the homepage. Behaviour at "/" is unchanged.
+  const pathname = usePathname();
+  const isHome = pathname === '/';
+  const showPreloader = isHome && isLoading;
 
   const handleComplete = useCallback(() => {
     setIsLoading(false);
@@ -18,7 +27,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     }, 150);
   }, []);
 
-  useEffect(() => { lockScroll(isLoading); }, [isLoading]);
+  useEffect(() => { lockScroll(showPreloader); }, [showPreloader]);
 
   useEffect(() => onUncaught(
     // eslint-disable-next-line no-console
@@ -29,7 +38,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   return (
     <>
-      {isLoading && <Preloader onComplete={handleComplete} />}
+      {showPreloader && <Preloader onComplete={handleComplete} />}
 
       {/* Skip link first in the DOM, so it is the first thing Tab reaches */}
       <a
@@ -40,8 +49,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         Skip to main content
       </a>
 
-      {!isLoading && <Header />}
-      {!isLoading && <FloorRail />}
+      {!showPreloader && <Header />}
+      {isHome && !isLoading && <FloorRail />}
       <ErrorBoundary>{children}</ErrorBoundary>
     </>
   );
