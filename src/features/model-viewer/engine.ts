@@ -20,6 +20,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import {
   CAMERA,
+  debugFraming,
   FOCUS_OVERRIDE,
   DPR_RANGE,
   DRACO_DECODER_PATH,
@@ -79,6 +80,10 @@ export class ViewerEngine {
   private radius = 1;
   /** Ground height in recentred space, so the disc sits under the whole site. */
   private groundY = 0;
+  /** Top of the tower, in recentred space. Anchors hotspots. */
+  private crown = new THREE.Vector3();
+  /** World bounds of the geometry using each material, by material name. */
+  private materialBoxes = new Map<string, THREE.Box3>();
 
   private frameRequest: number | null = null;
   private flying = false;
@@ -90,9 +95,12 @@ export class ViewerEngine {
   private currentPreset: CameraPreset | null = null;
   /** Set once the visitor moves the camera, so resizes stop re-framing. */
   private userDrove = false;
+  /** Fit distance at the last framing, so a reshape can be detected. */
   private lastAspectScale = 1;
   /** Set while the pointer is over a marker, so it stops sliding away. */
   private hoverPause = false;
+  /** Diagnostics, enabled by a query parameter on the page. */
+  private readonly debug = debugFraming(window.location.search);
 
   private hotspots: HotspotBinding[] = [];
   private readonly projection = new THREE.Vector3();
@@ -214,6 +222,63 @@ export class ViewerEngine {
    * a residential site plan is the towers, then pads outward so the podium and
    * immediate landscaping stay in shot.
    */
+  /**
+   * Works out where the buildings are, by looking at the geometry.
+   *
+   * Three things in this export defeat the obvious approaches. The exporter
+   * grouped geometry by material, so one mesh can hold every pane of glass on
+   * the site and its bounding box covers everything. Trees, people and other
+   * cutout entourage were merged into a handful of alpha-masked meshes whose
+   * boxes likewise span the whole site. And the model carries a long apron of
+   * roads and empty plots several times larger than the buildings.
+   *
+   * The way through is to sample actual vertices and ignore anything drawn
+   * with an alpha-cutout material, which is exactly the entourage. What is
+   * left is buildings and ground. The highest of those points is the top of
+   * the tower, and that is the anchor everything else hangs off.
+   */
+  private analyse(root: THREE.Object3D) {
+    const crown = new THREE.Vector3(0, -Infinity, 0);
+    const boxes = new Map<string, THREE.Box3>();
+
+    root.updateWorldMatrix(true, true);
+    root.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
+
+      // Per-mesh world boxes rather than raw vertex positions. Part of this
+      // model is drawn with GPU instancing, where the stored vertices are a
+      // single template placed many times by a separate transform. Reading
+      // those vertices directly reports the template's own coordinates, which
+      // are nowhere near where the object appears. Box3 applies the instance
+      // transforms; the vertex buffer does not.
+      const box = new THREE.Box3().setFromObject(child);
+      if (box.isEmpty() || !Number.isFinite(box.max.y)) return;
+      const centre = box.getCenter(new THREE.Vector3());
+
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      const first = materials[0];
+      // Alpha cutout here means entourage, the trees and figures, not
+      // architecture. The exporter merged them into a few meshes that each
+      // span the whole site, so they have to be kept out of the framing.
+      const isCutout = !!first && (first.alphaTest > 0 || first.transparent === true);
+
+      if (!isCutout && box.max.y > crown.y) {
+        crown.set(centre.x, box.max.y, centre.z);
+      }
+
+      const name = (first?.name ?? '').toLowerCase();
+      if (name) {
+        const existing = boxes.get(name);
+        if (existing) existing.union(box);
+        else boxes.set(name, box.clone());
+      }
+    });
+
+    this.materialBoxes = boxes;
+
+    return { crown: crown.clone(), valid: Number.isFinite(crown.y) };
+  }
+
   private findFocus(root: THREE.Object3D, full: THREE.Box3): THREE.Box3 {
     // An explicit frame always wins. Automatic framing is a starting point,
     // not a substitute for someone looking at the model and deciding.
@@ -224,41 +289,26 @@ export class ViewerEngine {
       );
     }
 
-    const height = full.max.y - full.min.y;
-    if (height <= 0) return full.clone();
+    const { crown, valid } = this.analyse(root);
+    if (!valid) return full.clone();
 
-    // Frame the built form, not the land.
-    //
-    // The export carries a long apron of roads and empty plots several times
-    // larger than the buildings, so framing the whole model leaves the towers
-    // as a detail in the corner. Geometry reaching the top of the height range
-    // is built form; everything below is ground.
-    //
-    // This is a heuristic and it is not perfect: the exporter grouped geometry
-    // by material rather than by building, so some meshes span the whole site,
-    // and the scene also holds tall, wide, paper-thin planes. Both pull the
-    // box wider than the towers alone. It frames the site well in practice;
-    // where a specific composition is wanted, set FOCUS_OVERRIDE.
-    const threshold = full.max.y - height * 0.3;
-    const focus = new THREE.Box3().makeEmpty();
-    const meshBox = new THREE.Box3();
+    this.crown = crown.clone();
+    // The site sits on flat ground in this export, so the model's own floor is
+    // the ground line. No percentile guessing needed.
+    const ground = full.min.y;
+    const towerHeight = Math.max(1, crown.y - ground);
 
-    root.traverse((child) => {
-      if (!(child instanceof THREE.Mesh)) return;
-      meshBox.setFromObject(child);
-      if (meshBox.max.y > threshold) focus.union(meshBox);
-    });
+    // Frame on the tower, letting the land run off the edges. The subject of a
+    // residential site plan is the building, and a frame wide enough to hold
+    // every empty plot reduces it to a detail in the corner. Three quarters of
+    // the tower's own height to each side keeps the podium and the landscaping
+    // immediately around it in shot.
+    const reach = towerHeight * 0.55;
 
-    if (focus.isEmpty()) return full.clone();
-
-    const size = focus.getSize(new THREE.Vector3());
-    const pad = Math.max(size.x, size.z) * 0.4;
-    focus.expandByVector(new THREE.Vector3(pad, 0, pad));
-    // Deliberately not extended down to the model floor. The terrain reaches
-    // far below the towers, and including it drags the orbit centre
-    // underground and strands the subject high in frame.
-    focus.max.y = Math.min(full.max.y, focus.max.y);
-    return focus;
+    return new THREE.Box3(
+      new THREE.Vector3(crown.x - reach, ground, crown.z - reach),
+      new THREE.Vector3(crown.x + reach, crown.y, crown.z + reach),
+    );
   }
 
   private adoptModel(root: THREE.Object3D) {
@@ -276,6 +326,11 @@ export class ViewerEngine {
     // swinging around an empty point. Recentre on the focus so every camera
     // and hotspot downstream works in a predictable space.
     root.position.sub(this.center);
+
+    // Anchors were measured before the shift, so move them with the model.
+    const shift = this.center.clone().negate();
+    this.crown.sub(this.center);
+    for (const box of this.materialBoxes.values()) box.translate(shift);
 
     const maxAniso = this.renderer.capabilities.getMaxAnisotropy();
     const aniso = Math.min(4, maxAniso);
@@ -302,6 +357,19 @@ export class ViewerEngine {
 
     this.model = root;
     this.scene.add(root);
+
+    if (this.debug) {
+      // eslint-disable-next-line no-console
+      console.log('[model-viewer] framing', JSON.stringify({
+        full: { min: full.min.toArray().map(Math.round), max: full.max.toArray().map(Math.round) },
+        focusCentre: this.center.toArray().map(Math.round),
+        focusSize: this.size.toArray().map(Math.round),
+        radius: Math.round(this.radius),
+        groundY: Math.round(this.groundY),
+        crownAfterShift: this.crown.toArray().map(Math.round),
+        materials: this.materialBoxes.size,
+      }));
+    }
 
     // Clip planes have to match a model several thousand units across.
     this.camera.near = Math.max(0.01, this.radius * CAMERA.nearFactor);
@@ -346,10 +414,36 @@ export class ViewerEngine {
    * same number crops the site down its sides. Pulling back in proportion to
    * the aspect ratio keeps the same horizontal coverage on every screen.
    */
-  private aspectScale() {
-    const reference = 1.6;
-    const aspect = this.camera.aspect || reference;
-    return THREE.MathUtils.clamp(reference / aspect, 1, 3.2);
+  /**
+   * The distance at which the framed box exactly fills the frame.
+   *
+   * Working from the box and the lens, rather than from a hand-tuned multiple
+   * of a radius, means a preset distance of 1 means the same thing on a wide
+   * desktop window and an upright phone: the subject fits. A tall narrow
+   * screen sees far less width at a given distance, so the horizontal term is
+   * usually the one that decides.
+   */
+  private fitDistance(elevationDegrees = 20) {
+    const vFov = THREE.MathUtils.degToRad(this.camera.fov);
+    const aspect = this.camera.aspect || 1.6;
+    const elevation = THREE.MathUtils.degToRad(
+      THREE.MathUtils.clamp(elevationDegrees, 0, 89),
+    );
+
+    // Worst case horizontal extent is the plan diagonal, because the camera
+    // can orbit to any bearing and a square box is widest corner to corner.
+    const halfPlan = Math.hypot(this.size.x, this.size.z) / 2;
+    const halfHeight = this.size.y / 2;
+
+    // Looking down at the model turns part of its depth into apparent height.
+    // Ignoring that is what crops the top off a tall building seen from above.
+    const projectedHalfHeight =
+      halfHeight * Math.cos(elevation) + halfPlan * Math.sin(elevation);
+
+    const forHeight = projectedHalfHeight / Math.tan(vFov / 2);
+    const forWidth = halfPlan / (Math.tan(vFov / 2) * aspect);
+    // A little air around the subject, so nothing touches the edges.
+    return Math.max(forHeight, forWidth) * 1.06;
   }
 
   private resolvePreset(preset: CameraPreset) {
@@ -364,7 +458,7 @@ export class ViewerEngine {
     );
     const position = new THREE.Vector3()
       .setFromSphericalCoords(
-        preset.distance * this.radius * this.aspectScale(),
+        preset.distance * this.fitDistance(preset.elevation),
         phi,
         theta,
       )
@@ -376,7 +470,7 @@ export class ViewerEngine {
   flyTo(preset: CameraPreset, immediate = false) {
     this.currentPreset = preset;
     this.userDrove = false;
-    this.lastAspectScale = this.aspectScale();
+    this.lastAspectScale = this.fitDistance(preset.elevation);
     const { position, target } = this.resolvePreset(preset);
     this.activeTween?.kill();
 
@@ -485,17 +579,83 @@ export class ViewerEngine {
    * frame rather than through React state, because re-rendering a component
    * tree sixty times a second to move four dots would be absurd.
    */
+  /** Turns an anchor into a world position, or null if it cannot be resolved. */
+  private resolveAnchor(hotspot: Hotspot): THREE.Vector3 | null {
+    const anchor = hotspot.anchor;
+
+    if (anchor.kind === 'crown') {
+      const fraction = anchor.heightFraction ?? 1;
+      // Measured from ground up, so the label rides the tower rather than
+      // floating at a fraction of the whole scene's height.
+      const height = this.crown.y - this.groundY;
+      return new THREE.Vector3(
+        this.crown.x,
+        this.groundY + height * fraction,
+        this.crown.z,
+      );
+    }
+
+    if (anchor.kind === 'material') {
+      const needle = anchor.match.toLowerCase();
+      for (const [name, box] of this.materialBoxes) {
+        if (!name.includes(needle)) continue;
+        // The base of the material's bounds, not its middle. Geometry is
+        // grouped by material, so one mesh can hold every surface of a finish
+        // across the site; its box can be storeys tall and its centre floats
+        // in mid air. The bottom of that box is the deck the pool sits on.
+        const centre = box.getCenter(new THREE.Vector3());
+        return new THREE.Vector3(centre.x, box.min.y, centre.z);
+      }
+      return null;
+    }
+
+    const [nx, ny, nz] = anchor.position;
+    return new THREE.Vector3(
+      nx * (this.size.x / 2),
+      ny * (this.size.y / 2),
+      nz * (this.size.z / 2),
+    );
+  }
+
+  /**
+   * Binds hotspot markers to the scene.
+   *
+   * The elements are moved directly each frame rather than through React
+   * state, because re-rendering a component tree sixty times a second to shift
+   * a couple of dots would be absurd. An anchor that cannot be resolved, for
+   * instance a material a future export renames, is dropped rather than placed
+   * somewhere arbitrary.
+   */
   setHotspots(entries: { hotspot: Hotspot; element: HTMLElement }[]) {
-    this.hotspots = entries.map(({ hotspot, element }) => ({
-      hotspot,
-      element,
-      world: new THREE.Vector3(
-        hotspot.position[0] * (this.size.x / 2),
-        hotspot.position[1] * (this.size.y / 2),
-        hotspot.position[2] * (this.size.z / 2),
-      ),
-    }));
+    this.hotspots = [];
+    for (const { hotspot, element } of entries) {
+      const world = this.resolveAnchor(hotspot);
+      if (!world) {
+        element.style.visibility = 'hidden';
+        continue;
+      }
+      this.hotspots.push({ hotspot, element, world });
+    }
+
+    if (this.debug) {
+      // eslint-disable-next-line no-console
+      console.log('[model-viewer] anchors', JSON.stringify({
+        placed: this.hotspots.map((b) => ({
+          id: b.hotspot.id,
+          at: b.world.toArray().map((n) => Math.round(n)),
+        })),
+        waterMaterials: [...this.materialBoxes.keys()].filter((n) =>
+          n.includes('water'),
+        ),
+      }));
+    }
+
     this.requestFrame();
+  }
+
+  /** Which labels actually found a place. Read by the tests. */
+  get resolvedHotspotIds() {
+    return this.hotspots.map((binding) => binding.hotspot.id);
   }
 
   private updateHotspots() {
@@ -560,7 +720,7 @@ export class ViewerEngine {
     // A rotated phone changes the shape of the frame enough to crop the site.
     // Re-frame for it, but never yank the camera away from a visitor who has
     // moved it themselves.
-    const scale = this.aspectScale();
+    const scale = this.fitDistance(this.currentPreset?.elevation);
     const changed = Math.abs(scale - this.lastAspectScale) / this.lastAspectScale;
     if (this.currentPreset && !this.userDrove && changed > 0.08) {
       this.lastAspectScale = scale;

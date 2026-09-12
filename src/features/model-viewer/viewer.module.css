@@ -289,6 +289,12 @@
   will-change: transform;
 }
 
+/* A class setting display would otherwise beat the browser's own rule for the
+   hidden attribute, leaving an unplaced marker visible in the corner. */
+.hotspot[hidden] {
+  display: none;
+}
+
 .hotspotDot {
   position: relative;
   width: 16px;

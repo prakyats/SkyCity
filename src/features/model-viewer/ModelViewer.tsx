@@ -50,6 +50,8 @@ export function ModelViewer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [placementMode, setPlacementMode] = useState(false);
   const [placed, setPlaced] = useState<string | null>(null);
+  /** Labels whose anchor the engine managed to find on the model. */
+  const [resolvedIds, setResolvedIds] = useState<string[]>([]);
 
   const preset = useMemo(
     () => CAMERA_PRESETS.find((item) => item.id === presetId) ?? OVERVIEW_PRESET,
@@ -143,6 +145,10 @@ export function ModelViewer({
       return element ? [{ hotspot, element }] : [];
     });
     engine.setHotspots(entries);
+    // A label whose anchor the engine could not find stays in the DOM so its
+    // ref survives, but is hidden outright rather than left as an invisible
+    // button a screen reader would still announce.
+    setResolvedIds(engine.resolvedHotspotIds);
   }, [loaded, hotspotsVisible]);
 
   useEffect(() => {
@@ -213,11 +219,15 @@ export function ModelViewer({
         <div className={styles.hotspotLayer}>
           {HOTSPOTS.map((hotspot) => {
             const open = openHotspotId === hotspot.id;
+            // Before the first resolution pass nothing is placed yet, so the
+            // markers render and stay hidden until the engine positions them.
+            const placedOnModel = resolvedIds.includes(hotspot.id);
             return (
               <div
                 key={hotspot.id}
                 className={styles.hotspot}
                 data-open={open || undefined}
+                hidden={!placedOnModel}
                 ref={(node) => {
                   if (node) hotspotRefs.current.set(hotspot.id, node);
                   else hotspotRefs.current.delete(hotspot.id);

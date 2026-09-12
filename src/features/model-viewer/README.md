@@ -35,30 +35,49 @@ costs nothing, which matters on a phone.
 
 ## Common changes
 
-**Move the hotspots.** Open `/explore?place` and click the model. The point
-under the cursor is printed on screen and to the console, normalised to the
-model's bounding box. Paste it into `HOTSPOTS` in `config.ts`.
+**Move or add a label.** Labels are anchored to geometry, not to typed-in
+coordinates. `crown` rides the highest solid point, which is the top of the
+tower. `material` sits at the base of everything painted with a matching
+material, which is how the pool is found without any mesh being named. `fixed`
+takes a literal position: open `/explore?place`, click the model, and paste the
+printed coordinate. All three live in `HOTSPOTS` in `config.ts`.
 
-**Pin the framing.** Automatic framing is a heuristic and it is approximate:
-the exporter grouped geometry by material rather than by building, and the
-scene holds tall, wide, paper-thin planes, both of which pull the framing box
-wider than the towers. Set `FOCUS_OVERRIDE` in `config.ts` to fix a
-composition exactly.
+**Pin the framing.** The viewer frames the tower automatically and that is
+usually right. Set `FOCUS_OVERRIDE` in `config.ts` to fix a composition
+exactly. Add `?framing` to the URL to log how the current frame was chosen and
+where each label landed.
 
 **Add a camera preset.** Add an entry to `CAMERA_PRESETS`. Angles are a compass
-bearing and a height above the horizon; distance is a multiple of the framed
-radius, adjusted automatically for the shape of the screen.
+bearing and a height above the horizon. Distance is a multiple of the fitting
+distance, where 1.0 means the subject exactly fills the frame; screen shape and
+viewing angle are both accounted for, so one number composes the same way on a
+desktop window and an upright phone.
 
 **Re-export the model.** Run `node scripts/optimise-model.mjs <path-to.glb>`.
 Publish under a new filename rather than overwriting: these files are served
 with a one year immutable cache.
 
-## What it cannot do
+## What the export makes hard
 
-Select or highlight an individual building. The export has no named geometry,
-only labels like `3DGeom-1176`, and meshes are grouped by material, so nothing
-identifies which triangles belong to which tower. That needs the parts grouped
-and named in SketchUp and a re-export.
+Three things in this model defeat the obvious approaches, and the framing code
+is shaped around all three.
+
+Geometry is grouped by material rather than by building, so a single mesh can
+hold every pane of glass on the site and its bounding box covers everything.
+
+Trees and figures were merged into a handful of alpha-cutout meshes whose boxes
+also span the whole site. Framing ignores anything drawn with a cutout
+material for exactly this reason.
+
+Part of the model is drawn with GPU instancing, where the stored vertices are
+one template placed many times by a separate transform. Reading those vertices
+directly reports coordinates nowhere near where the object appears, so the
+analysis works from per-mesh bounding boxes, which apply the instance
+transforms, rather than from raw vertex positions.
+
+What none of this can give you is selecting or highlighting an individual
+building. Nothing in the file identifies which triangles belong to which tower.
+That needs the parts grouped and named in SketchUp and a re-export.
 
 ## Testing
 

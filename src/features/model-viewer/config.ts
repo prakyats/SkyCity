@@ -16,8 +16,10 @@ export interface CameraPreset {
   /** Angle above the horizon in degrees. 0 is eye level, 90 is straight down. */
   elevation: number;
   /**
-   * Distance from the model centre as a multiple of the bounding sphere
-   * radius. 1.0 roughly frames the whole site, lower values move in.
+   * Distance as a multiple of the fitting distance, the range at which the
+   * framed subject exactly fills the frame. 1.0 fits it, lower moves in,
+   * higher pulls back. Screen shape is accounted for, so the same number
+   * composes the same way on a desktop window and an upright phone.
    */
   distance: number;
   /**
@@ -28,19 +30,25 @@ export interface CameraPreset {
 }
 
 /**
- * A labelled point of interest.
+ * How a label finds its place on the model.
  *
- * Positions are normalised to the model bounding box so they survive any
- * future re-export at a different scale: -1 to 1 on each axis, where 0 is the
- * centre of the box. Use the placement tool (see PLACEMENT_QUERY_PARAM) to
- * read coordinates off the model instead of guessing them.
+ * `crown` sits on the tower, at a fraction of its height. `material` sits at
+ * the average position of every surface painted with a matching material,
+ * which is how the pool and the water features can be found by name even
+ * though no mesh is named. `fixed` is a literal position, normalised to the
+ * framed box, for anything placed by hand with the placement tool.
  */
+export type HotspotAnchor =
+  | { kind: 'crown'; heightFraction?: number }
+  | { kind: 'material'; match: string }
+  | { kind: 'fixed'; position: [number, number, number] };
+
+/** A labelled point of interest. */
 export interface Hotspot {
   id: string;
   label: string;
   detail?: string;
-  /** Normalised position within the model bounding box, each axis -1 to 1. */
-  position: [number, number, number];
+  anchor: HotspotAnchor;
 }
 
 export interface LightingMode {
@@ -78,6 +86,16 @@ export const DRACO_DECODER_PATH = '/draco/';
  * Clicking the model then logs a ready to paste coordinate triple.
  */
 export const PLACEMENT_QUERY_PARAM = 'place';
+
+/**
+ * Whether to log how the viewer decided to frame the model and place its
+ * labels. Useful when a re-export lands somewhere unexpected and the default
+ * view looks wrong. Read at call time rather than at import, so this module
+ * stays free of browser access.
+ */
+export function debugFraming(search: string) {
+  return new URLSearchParams(search).has('framing');
+}
 
 /** Orbit limits. Keeping the camera above the horizon stops it going underground. */
 export const ORBIT = {
@@ -130,33 +148,45 @@ export const OVERVIEW_PRESET: CameraPreset = {
   label: 'Overview',
   azimuth: 38,
   elevation: 26,
-  distance: 0.82,
+  distance: 1.0,
 };
 
 export const CAMERA_PRESETS: CameraPreset[] = [
   OVERVIEW_PRESET,
-  { id: 'aerial', label: 'Aerial', azimuth: 20, elevation: 62, distance: 0.8 },
-  { id: 'approach', label: 'Approach', azimuth: 140, elevation: 9, distance: 0.6, targetHeight: -0.25 },
-  { id: 'east', label: 'East face', azimuth: 90, elevation: 16, distance: 0.68 },
-  { id: 'west', label: 'West face', azimuth: 270, elevation: 16, distance: 0.68 },
-  { id: 'skyline', label: 'Skyline', azimuth: 215, elevation: 5, distance: 0.95, targetHeight: 0.05 },
+  { id: 'aerial', label: 'Aerial', azimuth: 20, elevation: 62, distance: 0.95 },
+  { id: 'approach', label: 'Approach', azimuth: 140, elevation: 9, distance: 0.78, targetHeight: -0.3 },
+  { id: 'east', label: 'East face', azimuth: 90, elevation: 16, distance: 0.92 },
+  { id: 'west', label: 'West face', azimuth: 270, elevation: 16, distance: 0.92 },
+  { id: 'skyline', label: 'Skyline', azimuth: 215, elevation: 5, distance: 1.15, targetHeight: 0.05 },
 ];
 
 export const DEFAULT_PRESET_ID = OVERVIEW_PRESET.id;
 
 /**
- * Placeholder hotspots.
+ * Labelled points on the model.
  *
- * The source model came out of SketchUp with unnamed geometry, so there is no
- * reliable way to attach these to specific buildings automatically. They sit
- * at plausible spots across the site and are meant to be repositioned with the
- * placement tool once someone can see the model.
+ * These are anchored to geometry rather than to guessed coordinates, because
+ * the SketchUp export has no named meshes to attach them to. The tower label
+ * rides the highest solid point in the model, and the amenity label sits on
+ * the average position of the pool water material. Both therefore stay correct
+ * if the model is re-exported at a different scale or origin.
+ *
+ * To add more, open the viewer with ?place, click the model, and paste the
+ * printed coordinate as a `fixed` anchor.
  */
 export const HOTSPOTS: Hotspot[] = [
-  { id: 'arrival', label: 'Arrival Plaza', detail: 'Main entrance and drop off', position: [-0.45, -0.32, 0.4] },
-  { id: 'clubhouse', label: 'Clubhouse', detail: 'Amenity deck and pool', position: [0.05, -0.18, -0.05] },
-  { id: 'towers', label: 'Residential Towers', detail: 'Sky City residences', position: [0.3, 0.45, -0.3] },
-  { id: 'green', label: 'Central Green', detail: 'Landscaped open space', position: [-0.1, -0.34, -0.45] },
+  {
+    id: 'tower',
+    label: 'Sky City Tower',
+    detail: 'GF+60 floors, every apartment sea facing',
+    anchor: { kind: 'crown', heightFraction: 0.92 },
+  },
+  {
+    id: 'amenities',
+    label: 'Amenity Deck',
+    detail: 'Pool and clubhouse at podium level',
+    anchor: { kind: 'material', match: 'water pool' },
+  },
 ];
 
 export const DAY_LIGHTING: LightingMode = {
