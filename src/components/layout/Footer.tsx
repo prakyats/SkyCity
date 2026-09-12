@@ -1,168 +1,81 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { cld } from '@/lib/cloudinary';
-
-const navLinks = [
-  { label: 'Overview', href: '#overview' },
-  { label: 'Location', href: '#location' },
-  { label: 'Floor Plans', href: '#floorplans' },
-  { label: 'Amenities', href: '#amenities' },
-  { label: 'Progress', href: '#progress' },
-];
-
-const socials = [
-  { label: 'FB', href: '#', full: 'Facebook' },
-  { label: 'IN', href: '#', full: 'Instagram' },
-  { label: 'LI', href: '#', full: 'LinkedIn' },
-  { label: 'YT', href: '#', full: 'YouTube' },
-];
+import React from 'react';
+import { scrollToTarget } from '@/lib/browser';
+import { project, media, legacy, navLinks, socials } from '@/content/project';
 
 export const Footer = () => {
-  const footerRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      // Footer content staggered reveal
-      gsap.fromTo('.footer-col',
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1, y: 0, duration: 0.9, stagger: 0.12, ease: 'power3.out',
-          scrollTrigger: { trigger: footerRef.current, start: 'top 90%', once: true }
-        }
-      );
-      // Tagline big text
-      gsap.fromTo('.footer-tagline',
-        { clipPath: 'inset(0 100% 0 0)', opacity: 1 },
-        {
-          clipPath: 'inset(0 0% 0 0)', duration: 1.4, ease: 'power3.inOut',
-          scrollTrigger: { trigger: '.footer-tagline', start: 'top 92%', once: true }
-        }
-      );
-    }, footerRef);
-    return () => ctx.revert();
-  }, []);
-
-  const go = (href: string) => {
-    // eslint-disable-next-line no-restricted-globals
-    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const go = (href: string) => scrollToTarget(href);
 
   return (
-    <footer ref={footerRef}
-      className="relative overflow-hidden"
-      style={{ background: 'var(--navy-deep)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-
-      {/* Top gold line */}
-      <div className="absolute top-0 inset-x-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(232,160,32,0.4), transparent)' }} />
-
-      {/* Big display tagline */}
-      <div className="overflow-hidden border-b"
-        style={{ borderColor: 'rgba(255,255,255,0.04)', paddingTop: 'clamp(40px,5vw,60px)', paddingBottom: 'clamp(30px,4vw,50px)' }}>
-        <div className="section-inner">
-          <p className="footer-tagline font-display text-white/10 select-none whitespace-nowrap"
-            style={{ fontSize: 'clamp(34px,6vw,80px)', fontWeight: 300, lineHeight: 1, letterSpacing: '-0.02em' }}>
-            Building Trust, Quality, Dreams, Success &amp; Excellence.
-          </p>
+    <footer data-stop="bone-warm">
+      {/* The one kinetic moment on the page: the promise travelling past,
+          full bleed, edge to edge, with no container to sit inside. */}
+      <div
+        className="overflow-hidden select-none"
+        style={{ paddingBlock: 'clamp(40px, 6vw, 88px)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}
+        aria-hidden="true"
+      >
+        <div className="marquee">
+          {[0, 1].map((k) => (
+            <span key={k} className="t-display whitespace-nowrap" style={{ color: 'var(--text-3)' }}>
+              {legacy.footerLine}
+              <span style={{ color: 'var(--brand)', padding: '0 0.4em' }}>·</span>
+            </span>
+          ))}
         </div>
       </div>
+      {/* The same words, once, for anyone not watching it move. */}
+      <p className="sr-only">{legacy.footerLine}</p>
 
-      {/* Main grid */}
-      <div className="section-inner py-14 md:py-18">
-        <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr_1fr_1fr] gap-12 md:gap-8">
-
-          {/* Brand col */}
-          <div className="footer-col flex flex-col">
-            <div className="flex items-center gap-6 mb-12">
+      <div className="wrap" style={{ paddingTop: 'clamp(56px, 7vw, 104px)', paddingBottom: 'clamp(40px, 5vw, 64px)' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-12 rule-strong pt-12">
+          <div className="sm:col-span-2 lg:col-span-5">
+            <div className="flex items-center gap-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cld("v1777699538/skyfavicon_1_tufy14.png", 200)} alt="Sky City" width={200} height={200} className="h-24 w-auto object-contain" loading="lazy" />
+              <img src={media.skyMark} alt="Sky City" width={160} height={160} className="h-14 w-auto object-contain" loading="lazy" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cld("v1777696301/yamuna_homes_z4hnie.png", 200)} alt="Yamuna Homes" width={200} height={195} className="h-24 w-auto object-contain opacity-80" loading="lazy" />
+              <img src={media.yamunaMark} alt="Yamuna Homes" width={240} height={234} className="h-14 w-auto object-contain" loading="lazy" />
             </div>
-            <p className="font-body text-[var(--text-white-45)] leading-relaxed mb-6"
-              style={{ fontSize: '0.85rem', maxWidth: '30ch' }}>
-              Yamuna Homes and Design Pvt. Ltd. — shaping skylines across
-              Karnataka since 1993 with trust, quality, and architectural ambition.
-            </p>
-            {/* Socials */}
-            <div className="flex gap-3 mt-auto">
-              {socials.map((s, i) => (
-                <a key={i} href={s.href} aria-label={s.full}
-                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:border-[var(--gold)] hover:text-[var(--gold)]"
-                  style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.35)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>
-                  {s.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Location col */}
-          <div className="footer-col flex flex-col">
-            <span className="label text-[var(--gold)] mb-5 block" style={{ fontSize: '0.58rem' }}>Location</span>
-            <div className="flex flex-col gap-2 font-body text-[var(--text-white-45)]" style={{ fontSize: '0.875rem', lineHeight: 1.8 }}>
-              <span>1st Floor, Nalapad Building,</span>
-              <span>Mallikatta, Kadri,</span>
-              <span>Mangalore – 575003</span>
-            </div>
-          </div>
-
-          {/* Contact col */}
-          <div className="footer-col flex flex-col">
-            <span className="label text-[var(--gold)] mb-5 block" style={{ fontSize: '0.58rem' }}>Contact</span>
-            <div className="flex flex-col gap-4">
-              <div>
-                <span className="label text-[var(--text-white-28)] block mb-1" style={{ fontSize: '0.5rem' }}>Phone</span>
-                <a href="tel:+918884439155"
-                  className="hover-gold-line font-body text-[var(--text-white-45)] hover:text-white transition-colors"
-                  style={{ fontSize: '0.875rem' }}>
-                  +91 88844 39155
-                </a>
-              </div>
-              <div>
-                <span className="label text-[var(--text-white-28)] block mb-1" style={{ fontSize: '0.5rem' }}>Email</span>
-                <a href="mailto:yamunahomes16@gmail.com"
-                  className="hover-gold-line font-body text-[var(--text-white-45)] hover:text-white transition-colors"
-                  style={{ fontSize: '0.875rem' }}>
-                  yamunahomes16@gmail.com
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Nav col */}
-          <div className="footer-col flex flex-col">
-            <span className="label text-[var(--gold)] mb-5 block" style={{ fontSize: '0.58rem' }}>Explore</span>
-            <ul className="flex flex-col gap-3">
-              {navLinks.map((l, i) => (
-                <li key={i}>
-                  <button onClick={() => go(l.href)}
-                    className="hover-gold-line font-body text-[var(--text-white-45)] hover:text-white transition-colors text-left"
-                    style={{ fontSize: '0.875rem' }}>
-                    {l.label}
-                  </button>
-                </li>
+            <p className="t-body-sm mt-8" style={{ color: 'var(--text-2)', maxWidth: '34ch' }}>{legacy.footerBody}</p>
+            <ul className="flex flex-wrap gap-x-6 gap-y-2 mt-7">
+              {socials.map((s) => (
+                <li key={s.label}><a href={s.href} className="t-ui link-u" style={{ color: 'var(--text-2)' }}>{s.label}</a></li>
               ))}
             </ul>
           </div>
 
+          <div className="lg:col-span-3 lg:col-start-7">
+            <p className="t-ui-sm" style={{ color: 'var(--text-3)' }}>Location</p>
+            <p className="t-ui mt-3" style={{ color: 'var(--text-2)', lineHeight: 1.7 }}>
+              {project.addressLines.map((l) => <React.Fragment key={l}>{l}<br /></React.Fragment>)}
+            </p>
+          </div>
+
+          <div className="lg:col-span-2">
+            <p className="t-ui-sm" style={{ color: 'var(--text-3)' }}>Contact</p>
+            <p className="t-ui mt-3" style={{ lineHeight: 1.7 }}>
+              <a href={project.phoneHref} className="link-u" style={{ color: 'var(--text-2)' }}>{project.phone}</a><br />
+              <a href={`mailto:${project.email}`} className="link-u" style={{ color: 'var(--text-2)', overflowWrap: 'anywhere' }}>{project.email}</a>
+            </p>
+          </div>
+
+          <nav className="lg:col-span-2" aria-label="Sections">
+            <p className="t-ui-sm" style={{ color: 'var(--text-3)' }}>Explore</p>
+            <ul className="mt-3 grid gap-1">
+              {navLinks.map((l) => (
+                <li key={l.href}>
+                  <button onClick={() => go(l.href)} className="t-ui link-u text-left" style={{ color: 'var(--text-2)' }}>{l.label}</button>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-        <div className="section-inner py-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="label text-[var(--text-white-28)]" style={{ fontSize: '0.52rem' }}>
-            © 2026 Yamuna Homes and Design Pvt. Ltd. All Rights Reserved.
-          </p>
-          <p className="label text-[var(--text-white-28)]" style={{ fontSize: '0.52rem' }}>
-            RERA NO.: PRM/KA/RERA/1257/334/PR/171023/006331
-          </p>
-        </div>
+      <div className="wrap rule flex flex-col md:flex-row md:items-center md:justify-between gap-2 py-5">
+        <p className="t-ui-sm" style={{ color: 'var(--text-3)' }}>© 2026 {project.developer} All rights reserved.</p>
+        <p className="t-ui-sm" style={{ color: 'var(--text-3)' }}>RERA NO.: {project.rera} · Ground floor</p>
       </div>
-
     </footer>
   );
 };

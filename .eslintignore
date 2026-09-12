@@ -1,0 +1,7 @@
+node_modules
+.next
+playwright-report
+test-results
+
+# Reference copy of the production site. Read-only: never linted, never built.
+YSC_2.0_Copy

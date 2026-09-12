@@ -1,222 +1,134 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { cld } from '@/lib/cloudinary';
+import { reducedMotion, isTouch, viewportWidth } from '@/lib/browser';
+import { amenities } from '@/content/project';
 
-const amenities = [
-  { title: 'Podium Infinity Pool',     cat: 'Serenity',     image: cld('v1777700841/amenity_pool_ikcpqy.jpg', 800),    desc: 'An architectural marvel where the pool edge meets the Arabian Sea on the horizon.',       index: '01' },
-  { title: 'Private Mini Theatre',     cat: 'Entertainment',image: cld('v1777672872/Theater_s9f5ws.jpg', 800),          desc: 'A bespoke cinematic experience with state-of-the-art acoustics and plush reclining seats.', index: '02' },
-  { title: 'Grand Banquet Hall',       cat: 'Events',       image: cld('v1777672873/Banquet_ek3fc8.jpg', 800),          desc: 'A majestic venue for grand celebrations, weddings, and elite corporate gatherings.',        index: '03' },
-  { title: 'Royal Wellness Spa',       cat: 'Wellness',     image: cld('v1777672872/Spa_lkqfyf.jpg', 800),              desc: 'Deep rejuvenation through traditional and modern therapies in a tranquil, ocean-side setting.', index: '04' },
-  { title: 'Yoga & Meditation Studio', cat: 'Energy',       image: cld('v1777672710/Yoga_jxg4ne.jpg', 800),             desc: 'A serene, light-filled space designed for mindfulness, breathwork, and spiritual balance.',   index: '05' },
-  { title: 'Arcade & Game Room',       cat: 'Recreation',   image: cld('v1777672705/Gameroom_u43si8.jpg', 800),         desc: 'A vibrant social hub featuring high-end gaming consoles, billiards, and interactive entertainment.', index: '06' },
-  { title: 'Elite Fitness Center',     cat: 'Performance',  image: cld('v1777672704/Gym_n6nqft.jpg', 800),              desc: 'A world-class gym equipped with the latest strength and cardio technology for peak health.',   index: '07' },
-];
-
+/**
+ * The podium walk.
+ *
+ * On a pointer device the vertical scroll is turned sideways: the section
+ * pins and the rooms travel past you, so you are walking the podium rather
+ * than paging through a carousel. Each frame counter-drifts slightly
+ * against the travel, which reads as depth, and the caption for the room
+ * nearest the centre is the one that lifts.
+ *
+ * Touch keeps its own scrolling. Turning a finger swipe into a pinned
+ * horizontal rig fights the platform and always feels broken, so there it
+ * is simply a swipeable rail with snap.
+ */
 export const Amenities = () => {
-  const sectionRef   = useRef<HTMLElement>(null);
-  const trackRef     = useRef<HTMLDivElement>(null);
-  const bgTextRef    = useRef<HTMLDivElement>(null);
-  const [activeIdx, setActiveIdx] = useState(-1);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const wrap = wrapRef.current;
+    const track = trackRef.current;
+    if (!wrap || !track) return;
+    if (reducedMotion() || isTouch()) return;
+
     gsap.registerPlugin(ScrollTrigger);
+
     const ctx = gsap.context(() => {
+      const distance = () => track.scrollWidth - viewportWidth();
 
-      // ── BIG BACKGROUND TEXT: parallax ──
-      if (bgTextRef.current) {
-        gsap.fromTo(bgTextRef.current,
-          { xPercent: 5 },
-          { xPercent: -5, ease: 'none',
-            scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 2 }
-          }
-        );
-      }
-
-      // ── HEADER: split chars fly in from random angles ──
-      gsap.fromTo('.amen-title-char',
-        { opacity: 0, y: () => gsap.utils.random(-60, 60), x: () => gsap.utils.random(-40, 40), rotate: () => gsap.utils.random(-15, 15) },
-        {
-          opacity: 1, y: 0, x: 0, rotate: 0,
-          duration: 0.8, stagger: 0.03, ease: 'power3.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true }
-        }
-      );
-
-      // ── CARDS: pinwheel/fan entrance ──
-      const cards = gsap.utils.toArray<HTMLElement>('.amen-card');
-      cards.forEach((card, i) => {
-        gsap.fromTo(card,
-          { opacity: 0, y: 120, rotate: i % 2 === 0 ? -3 : 3, scale: 0.85 },
-          {
-            opacity: 1, y: 0, rotate: 0, scale: 1,
-            duration: 1.1, delay: i * 0.1,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: '.amen-track-wrapper', start: 'top 85%', once: true }
-          }
-        );
+      gsap.to(track, {
+        x: () => -distance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: wrap,
+          start: 'top top',
+          // The scroll length is the travel, so the walk runs at the same
+          // speed as the page rather than being slowed or rushed.
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: 0.5,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
+          // Measured before the stage, since pinning changes the page height.
+          refreshPriority: 1,
+        },
       });
 
-      // ── PREMIUM INFINITE CAROUSEL LOGIC ──
-      const track = trackRef.current;
-      if (track) {
-        // Use CSS-defined card width + gap — avoids forced reflow from getBoundingClientRect
-        const isMobile = window.innerWidth < 768;
-        const itemWidth = (isMobile ? 300 : 400) + 24; // card width + gap (matches CSS)
-        const totalWidth = itemWidth * amenities.length;
+      // Depth: the image inside each frame drifts against the travel.
+      track.querySelectorAll<HTMLElement>('[data-drift]').forEach((img) => {
+        gsap.fromTo(img,
+          { xPercent: -6 },
+          {
+            xPercent: 6,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: wrap,
+              start: 'top top',
+              end: () => `+=${distance()}`,
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
+          });
+      });
+    }, wrap);
 
-        // Create the seamless loop animation
-        const loop = gsap.to(track, {
-          x: -totalWidth,
-          duration: 35,
-          ease: 'none',
-          repeat: -1,
-          paused: true,
-          force3D: true, 
-        });
-
-        const slowDown = () => gsap.to(loop, { timeScale: 0.20, duration: 1, ease: 'power2.out' });
-        const speedUp = () => gsap.to(loop, { timeScale: 1, duration: 1.5, ease: 'power2.inOut' });
-
-        track.addEventListener('mouseenter', slowDown);
-        track.addEventListener('mouseleave', speedUp);
-
-        // ── MANUAL INTERACTION: React to horizontal wheel ──
-        const onWheel = (e: WheelEvent) => {
-          if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-            e.preventDefault();
-            gsap.to(loop, { 
-              time: loop.time() + (e.deltaX * 0.02), 
-              duration: 0.5, 
-              overwrite: 'auto', 
-              ease: 'power2.out'
-            });
-          }
-        };
-
-        track.addEventListener('wheel', onWheel as EventListener, { passive: false });
-
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: 'top 80%',
-          onEnter: () => loop.play(),
-          onLeave: () => loop.pause(),
-          onEnterBack: () => loop.play(),
-          onLeaveBack: () => loop.pause(),
-        });
-      }
-
-    }, sectionRef);
     return () => ctx.revert();
   }, []);
 
-  const titleChars = 'Unmatched'.split('');
-  const titleChars2 = 'Amenities'.split('');
-
   return (
-    <section ref={sectionRef} className="bg-section-dark section-pad overflow-hidden relative" id="amenities">
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(232,160,32,0.04) 0%, transparent 70%)' }} />
-
-      <div ref={bgTextRef} className="absolute bottom-0 left-0 overflow-hidden pointer-events-none select-none" style={{ zIndex: 0 }}>
-        <span className="font-display text-white whitespace-nowrap"
-          style={{ fontSize: 'clamp(80px,14vw,200px)', fontWeight: 700, opacity: 0.02, lineHeight: 1 }}>
-          ELITE LIVING
-        </span>
-      </div>
-
-      <div className="absolute top-0 left-0 right-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(232,160,32,0.15), transparent)' }} />
-
-      <div className="section-inner relative z-10">
-        <div className="amen-header flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-20">
-          <div>
-            <span className="gold-rule" />
-            <span className="label text-[var(--gold)] mb-5 block">Crafted for an Elite Lifestyle</span>
-            <h2 className="section-heading text-white" style={{ fontSize: 'clamp(1.8rem,4vw,4rem)', lineHeight: 1 }}>
-              <span>
-                {titleChars.map((c, i) => (
-                  <span key={i} className="amen-title-char inline-block"
-                    style={{ whiteSpace: c === ' ' ? 'pre' : 'normal' }}>{c}</span>
-                ))}
-              </span>
-              <em className="block font-display font-light italic text-white/60"
-                style={{ fontSize: 'clamp(2.2rem,5vw,5rem)', lineHeight: 0.88 }}>
-                {titleChars2.map((c, i) => (
-                  <span key={i} className="amen-title-char inline-block">{c}</span>
-                ))}
-              </em>
-            </h2>
+    <div ref={wrapRef} data-stop="bone" id="amenities" className="relative">
+      <section className="relative overflow-hidden" style={{ minHeight: '100dvh' }} aria-label="Amenities">
+        <div className="wrap pt-[clamp(72px,10vw,140px)] pb-[clamp(32px,4vw,56px)]">
+          <div className="flex flex-wrap items-end justify-between gap-8">
+            <div>
+              <p className="t-eyebrow">Crafted for an elite lifestyle</p>
+              <h2 className="t-display mt-4" style={{ maxWidth: '14ch' }}>
+                Ten floors of <span className="t-italic">everything else</span>
+              </h2>
+            </div>
+            <p className="t-ui-sm muted-2 hidden lg:block">
+              {String(amenities.length).padStart(2, '0')} of 10+ shown
+            </p>
           </div>
-          <button className="btn-ghost-dark self-start md:self-auto">View All 10+ Amenities</button>
         </div>
 
-        <div className="amen-track-wrapper relative -mx-[clamp(24px,6vw,80px)] overflow-hidden">
-          <div ref={trackRef} className="flex gap-6 pb-12 w-max will-change-transform">
-            {[...amenities, ...amenities].map((item, i) => (
-              <div key={i}
-                role="button"
-                aria-label={`View details for ${item.title}`}
-                tabIndex={0}
-                className="amen-card group relative w-[300px] md:w-[400px] aspect-[3/4] overflow-hidden cursor-pointer flex-shrink-0"
-                style={{ borderRadius: 'var(--r-2xl)', willChange: 'transform' }}
-                onMouseEnter={() => setActiveIdx(i % amenities.length)}
-                onMouseLeave={() => setActiveIdx(-1)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setActiveIdx(i % amenities.length);
-                  }
-                }}>
-
-                <div className="absolute inset-0 transition-transform duration-[1400ms] ease-out group-hover:scale-110">
-                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
+        {/* The rail. Pinned and dragged sideways on pointer devices;
+            a native snap scroller on touch. */}
+        <div
+          ref={trackRef}
+          className="no-scrollbar flex items-stretch gap-[clamp(16px,2.4vw,40px)] pb-[clamp(48px,7vw,110px)] overflow-x-auto md:overflow-visible"
+          style={{
+            width: 'max-content',
+            paddingLeft: 'calc(var(--gutter) + var(--rail))',
+            paddingRight: 'calc(var(--gutter) + 24vw)',
+            scrollSnapType: 'x mandatory',
+            willChange: 'transform',
+          }}
+          data-lenis-prevent
+        >
+          {amenities.map((item, i) => (
+            <figure
+              key={item.title}
+              className="flex-shrink-0"
+              style={{ width: 'clamp(272px, 33vw, 470px)', scrollSnapAlign: 'start' }}
+            >
+              <div className="relative overflow-hidden" style={{ aspectRatio: '4 / 5', background: 'var(--sea)' }}>
+                <div data-drift className="absolute" style={{ inset: '0 -7%', willChange: 'transform' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.image} alt={item.title} width={900} height={1125} loading="lazy"
+                    className="w-full h-full object-cover" />
                 </div>
-
-                <div className="absolute inset-0"
-                  style={{ background: 'linear-gradient(to top, rgba(4,12,22,0.95) 0%, rgba(4,12,22,0.2) 50%, transparent 100%)' }} />
-
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                  style={{ background: 'linear-gradient(135deg, rgba(232,160,32,0.04) 0%, transparent 60%)' }} />
-
-                <div className="absolute top-6 left-6 font-display text-white/10 group-hover:text-white/20 transition-colors duration-500 select-none pointer-events-none"
-                  style={{ fontSize: '5rem', fontWeight: 300, lineHeight: 1 }}>
-                  {item.index}
-                </div>
-
-                <div className="absolute top-6 right-6 pointer-events-none overflow-hidden" style={{ width: 32, height: 32 }}>
-                  <div style={{
-                    width: 32, height: 32,
-                    borderTop: '1px solid var(--gold)', borderRight: '1px solid var(--gold)',
-                    opacity: activeIdx === (i % amenities.length) ? 1 : 0,
-                    transform: activeIdx === (i % amenities.length) ? 'scale(1)' : 'scale(0.5)',
-                    transition: 'all 0.4s ease',
-                  }} />
-                </div>
-
-                <div className="absolute inset-0 p-10 flex flex-col justify-end">
-                  <span className="label text-[var(--gold)] mb-3 block opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-3 group-hover:translate-y-0"
-                    style={{ fontSize: '0.58rem' }}>
-                    {item.cat}
-                  </span>
-                  <h3 className="section-heading text-white mb-4 group-hover:translate-y-0 translate-y-1 transition-transform duration-500"
-                    style={{ fontSize: 'clamp(1.2rem,2vw,1.6rem)' }}>
-                    {item.title}
-                  </h3>
-                  <div className="opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 delay-75">
-                    <p className="font-body text-[var(--text-white-45)] text-sm leading-relaxed">{item.desc}</p>
-                  </div>
-                  <div className="h-px w-0 group-hover:w-full transition-all duration-700 delay-100 kinetic-border mt-2" />
-                </div>
-
-                <div className="absolute inset-0 pointer-events-none border border-white/10 group-hover:border-[var(--gold)]/30 transition-colors duration-500"
-                  style={{ borderRadius: 'var(--r-2xl)' }} />
+                <span className="t-num-sans absolute left-4 top-4" style={{ fontSize: '0.8125rem', color: 'var(--bone)', mixBlendMode: 'difference' }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
               </div>
-            ))}
-          </div>
+
+              <figcaption className="pt-5 mt-5 rule">
+                <h3 className="t-h3">{item.title}</h3>
+                <p className="t-ui-sm mt-1" style={{ color: 'var(--text-3)' }}>{item.cat}</p>
+                <p className="t-body-sm muted mt-3" style={{ maxWidth: '34ch' }}>{item.desc}</p>
+              </figcaption>
+            </figure>
+          ))}
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 };

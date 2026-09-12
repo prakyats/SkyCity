@@ -39,6 +39,9 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "YSC_2.0_Copy",
+    "playwright-report",
+    "test-results"
   ]
 }

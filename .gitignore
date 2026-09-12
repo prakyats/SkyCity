@@ -34,3 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Read-only reference copy of the production site — never committed here
+/YSC_2.0_Copy
+
+# Playwright output
+/playwright-report
+/test-results

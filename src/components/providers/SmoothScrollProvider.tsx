@@ -1,34 +1,37 @@
 'use client';
 
 import { useEffect, ReactNode } from 'react';
-import Lenis from '@studio-freight/lenis';
+import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { reducedMotion, scrollRoot } from '@/lib/browser';
 
 gsap.registerPlugin(ScrollTrigger);
 
+/**
+ * Smooth scroll is an enhancement, not the transport. Lenis only damps the
+ * wheel; touch keeps the platform's own inertia, anchors and keyboard paging
+ * still work, and anyone who asked for reduced motion gets native scrolling.
+ */
 export default function SmoothScrollProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
+    ScrollTrigger.defaults({ scroller: scrollRoot() });
+
+    if (reducedMotion()) return;
+
     const lenis = new Lenis({
-      lerp: 0.1,
+      // Light damping. Heavier values read as lag, not smoothness.
+      lerp: 0.11,
       smoothWheel: true,
-      // @ts-expect-error smoothTouch not in all type defs
-      smoothTouch: false,   // never smooth touch — causes iOS jank
-      wheelMultiplier: 0.95,
+      syncTouch: false,
+      wheelMultiplier: 1,
+      // Don't swallow modifier-key and page-key scrolling.
+      allowNestedScroll: true,
     });
 
-    // Keep GSAP ScrollTrigger in sync with Lenis scroll position
     lenis.on('scroll', ScrollTrigger.update);
-
-    // Drive Lenis via GSAP ticker for frame-perfect sync
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
-
-    // NOTE: intentionally NOT calling gsap.ticker.lagSmoothing(0).
-    // Default lag smoothing (500ms threshold, 33ms cap) protects against
-    // janky frame-drop recovery. Disabling it hurts performance on slow CPUs.
-
-    ScrollTrigger.defaults({ scroller: document.documentElement });
 
     return () => {
       lenis.destroy();

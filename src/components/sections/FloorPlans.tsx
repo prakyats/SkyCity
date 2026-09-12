@@ -1,236 +1,156 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { cld } from '@/lib/cloudinary';
+import { reducedMotion, scrollToTarget } from '@/lib/browser';
+import { plans, media, brochureHref } from '@/content/project';
 
-const plans = [
-  {
-    type: '2 BHK', floors: '3rd – 32nd Floor', size: '1,500 – 1,650',
-    desc: 'Thoughtfully designed for families seeking panoramic sea views. All units sea-facing with private balconies and premium coastal finishes.',
-    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
-  },
-  {
-    type: '3 BHK', floors: '5th – 45th Floor', size: '1,850 – 2,100',
-    desc: 'Spacious family homes with split-level living, home office nook, and uninterrupted Arabian Sea views from every room.',
-    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
-  },
-  {
-    type: '4 BHK', floors: '20th – 55th Floor', size: '2,400 – 2,850',
-    desc: "Grand residences for those who demand more. Double-height living rooms, chef's kitchen, and sky-terrace balconies.",
-    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
-  },
-  {
-    type: '5 BHK', floors: '45th – 60th Floor', size: '3,400 – 4,200',
-    desc: 'Ultra-luxury penthouses with private plunge pools, panoramic wraparound decks, and bespoke interior finishes.',
-    image: cld('v1777700841/blueprint_xfe9ca.jpg', 1200),
-  },
-];
+const FLOORS = 60;
 
+/**
+ * Choosing a home by going up to it.
+ *
+ * The section pins and the scroll becomes a lift: a marker climbs the
+ * elevation floor by floor, and the residence on show is whichever one
+ * occupies the floor you are standing on. You do not pick from a tab
+ * strip, you arrive at a level and find what is built there.
+ *
+ * The tabs stay, because a scroll rig is no substitute for jumping
+ * straight to the penthouse, and because keyboard users need a real
+ * control. Using one stops the scroll from overriding the choice.
+ */
 export const FloorPlans = () => {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<HTMLDivElement>(null);
+  const floorRef = useRef<HTMLSpanElement>(null);
   const [active, setActive] = useState(0);
-  const sectionRef  = useRef<HTMLElement>(null);
-  const contentRef  = useRef<HTMLDivElement>(null);
-  const imageRef    = useRef<HTMLDivElement>(null);
-  const hasEntered  = useRef(false);
+  const pinned = useRef(false);
 
-  // Section entrance animations
+  const plan = plans[active] ?? plans[0]!;
+
   useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || reducedMotion()) return;
+
     gsap.registerPlugin(ScrollTrigger);
+
     const ctx = gsap.context(() => {
-      gsap.fromTo('.fp-headline',
-        { y: 70, rotateX: -30, opacity: 0 },
-        {
-          y: 0, rotateX: 0, opacity: 1, duration: 1.1, ease: 'power4.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true },
-        }
-      );
-      gsap.fromTo('.fp-tab',
-        { y: 20, opacity: 0 },
-        {
-          y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: 'power2.out',
-          scrollTrigger: {
-            trigger: '.fp-tabs', start: 'top 84%', once: true,
-            onEnter: () => { hasEntered.current = true; },
-          },
-        }
-      );
-      gsap.fromTo(imageRef.current,
-        { clipPath: 'inset(0 100% 0 0)', opacity: 1 },
-        {
-          clipPath: 'inset(0 0% 0 0)', duration: 1.2, ease: 'power3.inOut',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
-        }
-      );
-      gsap.fromTo(contentRef.current,
-        { x: 60, opacity: 0 },
-        {
-          x: 0, opacity: 1, duration: 1.0, delay: 0.3, ease: 'power3.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
-        }
-      );
-    }, sectionRef);
+      const lift = { v: 0 };
+      gsap.to(lift, {
+        v: 1,
+        ease: 'none',
+        scrollTrigger: { trigger: wrap, start: 'top top', end: 'bottom bottom', scrub: 0.5 },
+        onUpdate: () => {
+          const floor = Math.max(1, Math.round(lift.v * FLOORS));
+          if (floorRef.current) floorRef.current.textContent = String(floor);
+          markerRef.current?.style.setProperty('--at', `${(1 - lift.v) * 100}%`);
+          if (pinned.current) return;
+          // The highest residence whose band contains this floor.
+          let next = 0;
+          plans.forEach((p, i) => { if (floor >= p.from) next = i; });
+          setActive((cur) => (cur === next ? cur : next));
+        },
+      });
+    }, wrap);
+
     return () => ctx.revert();
   }, []);
 
-  // Tab switch animation
-  useEffect(() => {
-    if (!hasEntered.current) return;
-    if (contentRef.current) {
-      gsap.fromTo(contentRef.current,
-        { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.55, ease: 'power2.out' });
-    }
-    if (imageRef.current) {
-      gsap.fromTo(imageRef.current,
-        { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' });
-    }
-  }, [active]);
-
-  // Safe reference — active index is always within bounds
-  const activePlan = plans[active] ?? plans[0]!;
+  const choose = (i: number) => { pinned.current = true; setActive(i); };
 
   return (
-    <section ref={sectionRef} className="bg-section-cream section-pad relative overflow-hidden" id="floorplans">
+    <div ref={wrapRef} data-stop="bone" id="floorplans" className="relative" style={{ height: '280vh' }}>
+      <section className="sticky top-0 overflow-hidden flex items-center" style={{ height: '100dvh' }}
+        aria-label="Floor plans">
+        <div className="wrap w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-12 items-center">
 
-      {/* Top connector */}
-      <div className="absolute top-0 inset-x-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(28,18,19,0.12), transparent)' }} />
-
-      {/* Watermark */}
-      <div className="absolute inset-0 flex items-end justify-end overflow-hidden pointer-events-none select-none pr-8 pb-8" style={{ zIndex: 0 }}>
-        <span className="font-display text-[var(--near-black)] whitespace-nowrap"
-          style={{ fontSize: 'clamp(80px,14vw,200px)', fontWeight: 700, opacity: 0.025, lineHeight: 1 }}>
-          FLOOR PLANS
-        </span>
-      </div>
-
-      <div className="section-inner relative z-10">
-
-        <div className="mb-14 overflow-hidden" style={{ perspective: '600px' }}>
-          <span className="gold-rule" />
-          <span className="label text-[var(--gold)] mb-5 block">Residency Options</span>
-          <h2 className="fp-headline section-heading text-[var(--near-black)]"
-            style={{ fontSize: 'clamp(1.8rem,4vw,4rem)', transformStyle: 'preserve-3d' }}>
-            Floor Plans
-            <em className="block font-display font-light italic text-[var(--text-subtle)]"
-              style={{ fontSize: 'clamp(1.4rem,3vw,3rem)', lineHeight: 0.9 }}>
-              Choose Your Residence
-            </em>
-          </h2>
-        </div>
-
-        {/* Tabs — FIX 1: role/aria attributes appear exactly once per element */}
-        <div
-          role="tablist"
-          aria-label="Floor plan types"
-          className="fp-tabs flex gap-0 border-b mb-16 overflow-x-auto no-scrollbar"
-          style={{ borderColor: 'var(--sand)' }}
-        >
-          {plans.map((p, i) => (
-            <button
-              key={i}
-              role="tab"
-              aria-selected={active === i}
-              aria-controls="fp-panel"
-              onClick={() => setActive(i)}
-              className="fp-tab relative pb-5 px-8 transition-colors duration-300 whitespace-nowrap group"
-              style={{
-                fontFamily: 'var(--font-tenor)', fontSize: '0.7rem',
-                letterSpacing: '0.22em', textTransform: 'uppercase',
-                color: active === i ? 'var(--near-black)' : 'var(--text-subtle)',
-              }}
-            >
-              {p.type}
-              {/* Active indicator bar */}
-              <span
-                className="absolute bottom-0 left-0 h-[2px] bg-[var(--gold)] transition-transform duration-500 origin-left"
-                style={{ width: '100%', transform: active === i ? 'scaleX(1)' : 'scaleX(0)' }}
-              />
-            </button>
-          ))}
-        </div>
-
-        {/* Content — FIX 2: use activePlan (always defined) instead of plans[active] */}
-        <div
-          id="fp-panel"
-          role="tabpanel"
-          aria-label={`${activePlan.type} floor plan`}
-          className="grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 md:gap-24 items-center"
-        >
-          {/* Floor plan image */}
-          <div
-            ref={imageRef}
-            className="relative aspect-[4/3] bg-white flex items-center justify-center p-10 md:p-14 group"
-            style={{ borderRadius: 'var(--r-2xl)', border: '1px solid var(--sand)' }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={activePlan.image}
-              alt={`${activePlan.type} Floor Plan`}
-              width={800} height={600}
-              className="w-full h-full object-contain opacity-80 transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute bottom-5 left-6">
-              <span className="label text-[var(--text-subtle)]" style={{ fontSize: '0.5rem' }}>
-                Floor Plan · {activePlan.type} · {activePlan.floors}
-              </span>
-            </div>
-            {/* Gold corners */}
-            <div className="absolute top-5 right-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-              style={{ borderTop: '1px solid var(--gold)', borderRight: '1px solid var(--gold)' }} />
-            <div className="absolute bottom-5 left-5 w-8 h-8 pointer-events-none opacity-40 group-hover:opacity-80 transition-opacity"
-              style={{ borderBottom: '1px solid var(--gold)', borderLeft: '1px solid var(--gold)' }} />
-          </div>
-
-          {/* Details */}
-          <div ref={contentRef} className="flex flex-col">
-            <span className="label text-[var(--text-subtle)] mb-3 block" style={{ fontSize: '0.6rem' }}>
-              {activePlan.floors}
-            </span>
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="font-display text-[var(--near-black)]"
-                style={{ fontSize: 'clamp(2.8rem,5vw,5rem)', fontWeight: 300, lineHeight: 1 }}>
-                {activePlan.size}
-              </span>
-              <span className="font-body text-[var(--text-subtle)]" style={{ fontSize: '1rem' }}>sq.ft</span>
-            </div>
-
-            {/* Divider */}
-            <div className="w-full h-px mb-8" style={{ background: 'var(--sand)' }} />
-
-            <p className="font-body text-[var(--text-muted)] leading-[1.85] mb-12"
-              style={{ fontSize: 'clamp(0.9rem,1.1vw,1rem)', maxWidth: '38ch' }}>
-              {activePlan.desc}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button className="btn-gold">Download Brochure</button>
-              <button className="btn-ghost-light">Schedule Site Visit</button>
-            </div>
-
-            {/* Dot indicators — separate tablist from the main one above */}
-            <div className="flex gap-2 mt-10" role="group" aria-label="Floor plan navigation dots">
-              {plans.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActive(i)}
-                  aria-label={`Switch to ${p.type}`}
-                  aria-pressed={active === i}
-                  className="transition-all duration-300"
+            {/* The lift: a marker climbing the elevation */}
+            <div className="lg:col-span-2 hidden lg:block" style={{ height: '64vh' }} aria-hidden="true">
+              <div className="relative h-full ml-10" style={{ width: 1, background: 'var(--line)' }}>
+                {[10, 20, 30, 40, 50, 60].map((f) => (
+                  <span key={f} className="absolute t-ui-sm muted-2"
+                    style={{ top: `${(1 - f / FLOORS) * 100}%`, left: 10, transform: 'translateY(-50%)' }}>
+                    {f}
+                  </span>
+                ))}
+                {/* The band this residence occupies */}
+                <span
+                  className="absolute"
                   style={{
-                    width: 24, height: 6, borderRadius: 3,
-                    background: active === i ? 'var(--gold)' : 'var(--sand)',
-                    transform: active === i ? 'scaleX(1)' : 'scaleX(0.5)',
-                    transformOrigin: 'left',
+                    left: -3, width: 7,
+                    top: `${(1 - plan.to / FLOORS) * 100}%`,
+                    height: `${((plan.to - plan.from) / FLOORS) * 100}%`,
+                    background: 'var(--brand)',
+                    transition: 'top var(--motion-standard) var(--ease-settle), height var(--motion-standard) var(--ease-settle)',
                   }}
                 />
-              ))}
+                {/* Where you are standing */}
+                <div ref={markerRef} className="absolute"
+                  style={{ top: 'var(--at, 100%)', left: -26, width: 46, height: 1, background: 'var(--text)' }}>
+                  <span className="t-num-sans absolute" style={{ right: 52, top: -7, fontSize: '0.875rem' }}>
+                    <span ref={floorRef}>1</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* The plan */}
+            <div className="lg:col-span-6">
+              <div className="relative overflow-hidden" style={{ aspectRatio: '4 / 3', border: '1px solid var(--line)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img key={plan.type} src={media.blueprint} alt={`${plan.type} floor plan`}
+                  width={1200} height={900} loading="lazy"
+                  className="w-full h-full object-contain p-6 md:p-10"
+                  style={{ animation: 'planIn var(--motion-slow) var(--ease-settle)' }} />
+                <span className="t-ui-sm absolute left-4 bottom-3 muted-2">
+                  {plan.type} · {plan.floors}
+                </span>
+              </div>
+            </div>
+
+            {/* What is built at this level */}
+            <div className="lg:col-span-4">
+              <p className="t-eyebrow">Residences</p>
+
+              <h2 className="t-display mt-4" style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)' }}>{plan.type}</h2>
+              <p className="t-ui muted mt-1">{plan.floors}</p>
+
+              <div className="flex items-baseline gap-3 mt-8">
+                <span className="t-num" style={{ fontSize: 'clamp(2rem, 3.4vw, 3rem)' }}>{plan.size}</span>
+                <span className="t-ui-sm muted">sq ft</span>
+              </div>
+
+              <p className="t-body-sm muted mt-5" style={{ maxWidth: '38ch' }}>{plan.desc}</p>
+
+              <div role="tablist" aria-label="Residence types" className="flex flex-wrap gap-2 mt-9">
+                {plans.map((p, i) => (
+                  <button
+                    key={p.type}
+                    role="tab"
+                    aria-selected={i === active}
+                    onClick={() => choose(i)}
+                    className="t-ui-sm px-4 py-2"
+                    style={{
+                      border: '1px solid',
+                      borderColor: i === active ? 'var(--brand)' : 'var(--line-strong)',
+                      color: i === active ? 'var(--brand)' : 'var(--text-2)',
+                      transition: 'color var(--motion-fast) var(--ease-glide), border-color var(--motion-fast) var(--ease-glide)',
+                    }}
+                  >
+                    {p.type}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-3 mt-7">
+                <a className="btn btn-primary" href={brochureHref} download>Download brochure</a>
+                <button className="btn" onClick={() => scrollToTarget('#contact')}>Schedule a visit</button>
+              </div>
             </div>
           </div>
         </div>
-
-      </div>
-    </section>
+      </section>
+    </div>
   );
 };
