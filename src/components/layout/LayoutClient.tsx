@@ -1,21 +1,41 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Preloader } from '@/components/ui/Preloader';
 import { FloorRail } from '@/components/ui/FloorRail';
 import { Header } from '@/components/layout/Header';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { lockScroll, emitPreloaderComplete, onUncaught } from '@/lib/browser';
+import {
+  lockScroll, emitPreloaderComplete, onUncaught,
+  takeScrollRestoration, rememberedScroll, jumpScrollTo, trackScrollPosition,
+} from '@/lib/browser';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
+  /** Where the reader was before this load, read before anything moves. */
+  const restoreTo = useRef(0);
+  const stopTracking = useRef<(() => void) | null>(null);
 
   const handleComplete = useCallback(() => {
     setIsLoading(false);
     emitPreloaderComplete();
     // The preloader changed the page height; let ScrollTrigger re-measure.
+    // Only once it has can a saved offset mean anything, because the
+    // pinned passages are what make the page the length it is.
     setTimeout(() => {
-      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => ScrollTrigger.refresh());
+      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+        ScrollTrigger.refresh();
+        if (restoreTo.current > 0) jumpScrollTo(restoreTo.current);
+        // Only now start recording, so the locked position during the
+        // title sequence does not overwrite the place we are restoring.
+        stopTracking.current = trackScrollPosition();
+      });
     }, 150);
+  }, []);
+
+  useEffect(() => {
+    takeScrollRestoration();
+    restoreTo.current = rememberedScroll();
+    return () => stopTracking.current?.();
   }, []);
 
   useEffect(() => { lockScroll(isLoading); }, [isLoading]);

@@ -89,6 +89,82 @@ export const scrollToTarget = (selector: string) => {
   document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
 };
 
+/* ── Scroll restoration ─────────────────────────────────────────────────── */
+
+const SCROLL_KEY = 'ysc:scroll';
+
+/**
+ * Take scroll restoration away from the browser.
+ *
+ * The browser puts the reader back at their previous offset the instant
+ * the document loads — before the pinned passages have added their
+ * scroll length, and before the title sequence has lifted. An offset
+ * measured in pixels against the old, fully measured page points
+ * somewhere else entirely on a page that has not finished growing, which
+ * is why a refresh landed in a different section every time. The page
+ * restores the offset itself instead, once everything has been measured.
+ */
+export const takeScrollRestoration = () => {
+  if (!canUseDOM() || !('scrollRestoration' in history)) return;
+  history.scrollRestoration = 'manual';
+};
+
+/** Remember where the reader is, so a reload can put them back. */
+export const rememberScroll = (y: number) => {
+  if (!canUseDOM()) return;
+  try {
+    sessionStorage.setItem(SCROLL_KEY, String(Math.round(y)));
+  } catch {
+    // Private browsing and blocked storage both throw. Losing the
+    // position is not worth failing a page load over.
+  }
+};
+
+/** Where the reader was before this load, if the page knows. */
+export const rememberedScroll = (): number => {
+  if (!canUseDOM()) return 0;
+  try {
+    const v = Number(sessionStorage.getItem(SCROLL_KEY));
+    return Number.isFinite(v) && v > 0 ? v : 0;
+  } catch {
+    return 0;
+  }
+};
+
+/**
+ * A jump with no animation.
+ *
+ * Lenis registers itself here while it is running: moving the window out
+ * from under it leaves its own idea of the position stale, and the next
+ * wheel event snaps back to where it thought it was.
+ */
+let jumpHandler: ((y: number) => void) | null = null;
+
+export const setScrollJump = (fn: ((y: number) => void) | null) => {
+  jumpHandler = fn;
+};
+
+export const jumpScrollTo = (y: number) => {
+  if (!canUseDOM()) return;
+  if (jumpHandler) {
+    jumpHandler(y);
+    return;
+  }
+  window.scrollTo({ top: y, behavior: 'auto' });
+};
+
+/** Record the position as the reader moves, and once more as they leave. */
+export const trackScrollPosition = (): (() => void) => {
+  if (!canUseDOM()) return () => {};
+  const save = () => rememberScroll(window.scrollY);
+  const off = onViewportChange(save);
+  window.addEventListener('pagehide', save);
+  return () => {
+    off();
+    window.removeEventListener('pagehide', save);
+  };
+};
+
 /** Last resort after a render failure. */
 export const reloadPage = () => {
   if (canUseDOM()) window.location.reload();

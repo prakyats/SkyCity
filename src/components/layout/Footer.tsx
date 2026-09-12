@@ -2,6 +2,7 @@
 import React from 'react';
 import { scrollToTarget } from '@/lib/browser';
 import { project, media, legacy, navLinks, socials } from '@/content/project';
+import { Logo } from '@/components/ui/Logo';
 
 export const Footer = () => {
   const go = (href: string) => scrollToTarget(href);
@@ -31,10 +32,11 @@ export const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-12 rule-strong pt-12">
           <div className="sm:col-span-2 lg:col-span-5">
             <div className="flex items-center gap-6">
+              {/* The project, then the developer behind it */}
+              <Logo type="lockup" variant="primary" height={46} label={project.name} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={media.skyMark} alt="Sky City" width={160} height={160} className="h-14 w-auto object-contain" loading="lazy" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={media.yamunaMark} alt="Yamuna Homes" width={240} height={234} className="h-14 w-auto object-contain" loading="lazy" />
+              <img src={media.yamunaMark} alt={project.developer} width={240} height={234}
+                className="h-12 w-auto object-contain" loading="lazy" />
             </div>
             <p className="t-body-sm mt-8" style={{ color: 'var(--text-2)', maxWidth: '34ch' }}>{legacy.footerBody}</p>
             <ul className="flex flex-wrap gap-x-6 gap-y-2 mt-7">

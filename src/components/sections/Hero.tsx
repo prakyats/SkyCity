@@ -7,6 +7,7 @@ import { initHeroAnimations } from '@/lib/animations/heroAnimation';
 import { DUR, EASE, reducedMotion } from '@/lib/motion';
 import { onPreloaderComplete, viewportWidth } from '@/lib/browser';
 import { project, media } from '@/content/project';
+import { Logo } from '@/components/ui/Logo';
 
 /**
  * The opening shot. The film carries its own titles, so nothing is written
@@ -92,7 +93,7 @@ export const Hero = () => {
 
         {/* The light leaving the shot on exit */}
         <div ref={scrimRef} aria-hidden="true" className="absolute inset-0 z-10 pointer-events-none"
-          style={{ background: 'var(--text)', opacity: 0 }} />
+          style={{ background: 'var(--ink)', opacity: 0 }} />
 
         {/* Just enough grade at the edges to hold the marks and the cue */}
         <div aria-hidden="true" className="absolute inset-x-0 top-0 z-10 pointer-events-none"
@@ -103,9 +104,9 @@ export const Hero = () => {
         {/* Who is speaking */}
         <div ref={marksRef} className="wrap absolute inset-x-0 top-0 z-30 flex items-start justify-between"
           style={{ paddingTop: 'clamp(20px, 3vw, 36px)' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={media.skyMark} alt={project.name} width={48} height={48}
-            style={{ height: 'clamp(34px, 3.4vw, 46px)', width: 'auto' }} />
+          {/* White artwork, because this sits on the film */}
+          <Logo type="lockup" variant="dark" cssHeight="clamp(34px, 3.6vw, 52px)"
+            label={project.name} priority />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={media.yamunaMark} alt={project.developer} width={240} height={234}
             style={{ height: 'clamp(46px, 4.8vw, 68px)', width: 'auto' }} />

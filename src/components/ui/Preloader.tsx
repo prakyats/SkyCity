@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { reducedMotion } from '@/lib/browser';
 import { project } from '@/content/project';
+import { Logo } from '@/components/ui/Logo';
 
 /**
  * The title sequence.
@@ -68,8 +69,16 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       <div className="wrap w-full pb-[clamp(28px,5vh,64px)]">
         <div className="flex items-end justify-between gap-8">
           <div className="overflow-hidden">
-            <div ref={nameRef} className="t-display-xl" style={{ willChange: 'transform' }}>
-              {project.name}
+            {/* The identity rises into frame, rather than the name set
+                as display type. It is the first thing anyone sees. */}
+            <div ref={nameRef} style={{ willChange: 'transform' }}>
+              <Logo
+                type="lockup"
+                variant="primary"
+                cssHeight="clamp(56px, 11vw, 150px)"
+                label={project.name}
+                priority
+              />
             </div>
           </div>
 

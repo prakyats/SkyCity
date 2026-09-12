@@ -179,6 +179,11 @@ img, video { display: block; max-width: 100%; }
 
 /* ─── LAYOUT ───────────────────────────────────────────────────────────────── */
 .wrap {
+  /* Explicit, because `margin-inline: auto` alone makes the element
+     shrink to its content inside a flex or grid parent rather than fill
+     the line, which silently collapses any wrap holding a box that has
+     no intrinsic width of its own. */
+  width: 100%;
   max-width: var(--max);
   margin-inline: auto;
   padding-left: calc(var(--gutter) + var(--rail));

@@ -41,3 +41,11 @@ next-env.d.ts
 # Playwright output
 /playwright-report
 /test-results
+
+# Claude Code's local state, including its git worktrees
+/.claude
+
+# Source material, not build input. The reference deck is 128MB, past
+# GitHub's file limit, and the raw model is not loaded by the site.
+/YSC Website static Reference.pdf
+/3d Asset

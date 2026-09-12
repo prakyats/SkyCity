@@ -4,7 +4,8 @@ import {
   scrollToTarget, scrollToTop, onViewportChange, onKeyDown,
   lockScroll, scrollMetrics, viewportHeight, toneUnderHeader,
 } from '@/lib/browser';
-import { navLinks, project, media } from '@/content/project';
+import { navLinks, project } from '@/content/project';
+import { Logo } from '@/components/ui/Logo';
 
 type Tone = 'ink' | 'bone' | 'bone-warm' | 'sea' | 'ember';
 
@@ -77,9 +78,10 @@ export const Header = () => {
             className="flex items-center gap-3"
             aria-label={`${project.name}, back to top`}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={media.skyMark} alt="" width={32} height={32} style={{ height: 28, width: 'auto' }} />
-            <span className="t-ui hidden sm:inline">{project.name}</span>
+            {/* The lockup carries the name, so the name is not also set
+                as type beside it. Its colourway follows the surface the
+                bar is over. */}
+            <Logo type="lockup" variant={dark ? 'dark' : 'primary'} height={30} priority />
           </button>
 
           <nav aria-label="Sections" className="hidden rail:flex items-center gap-8">
