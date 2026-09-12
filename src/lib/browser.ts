@@ -238,6 +238,37 @@ export const onPreloaderComplete = (cb: () => void): (() => void) => {
   return () => window.removeEventListener(PRELOADER_DONE, cb);
 };
 
+/* ── Animations nobody is watching ────────────────────────── */
+
+/**
+ * Park animations on elements that are not on screen.
+ *
+ * An infinite CSS animation keeps the style engine working on every
+ * frame for as long as the page is open, whether or not anyone can see
+ * it. Tracing a scroll anywhere on this page showed two of them, a
+ * thousand pixels away in either direction, accounting for most of the
+ * style recalculation being done. Mark an element `data-autopause` and
+ * it runs only while it is in view.
+ */
+export const pauseOffscreenAnimations = (): (() => void) => {
+  if (!canUseDOM() || !('IntersectionObserver' in window)) return () => {};
+  const els = Array.from(document.querySelectorAll<HTMLElement>('[data-autopause]'));
+  if (!els.length) return () => {};
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) e.target.classList.toggle('is-offscreen', !e.isIntersecting);
+    },
+    // A margin, so a marquee is already moving by the time it is read.
+    { rootMargin: '15% 0px' },
+  );
+  els.forEach((el) => {
+    el.classList.add('is-offscreen');
+    io.observe(el);
+  });
+  return () => io.disconnect();
+};
+
 /* ── Idle work ───────────────────────────────────────────────────────────── */
 
 /** Run when the browser is idle, with a hard timeout fallback. */

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   scrollToTarget, scrollToTop, onViewportChange, onKeyDown,
   lockScroll, scrollMetrics, viewportHeight, toneUnderHeader,
@@ -21,8 +21,17 @@ export const Header = () => {
   const [tone, setTone] = useState<Tone>('ink');
   const [open, setOpen] = useState(false);
 
+  /** Where the tone was last sampled, so it is not sampled per frame. */
+  const probedAt = useRef(-1e9);
+
   useEffect(() => onViewportChange(() => {
-    setShown(scrollMetrics().y > viewportHeight() * 0.85);
+    const { y } = scrollMetrics();
+    setShown(y > viewportHeight() * 0.85);
+    // The hit test forces style and layout. The surface under the bar
+    // only changes at a passage boundary, so a few pixels of travel is
+    // the right granularity to ask at.
+    if (Math.abs(y - probedAt.current) < 12) return;
+    probedAt.current = y;
     setTone(toneUnderHeader(BAR_HEIGHT) as Tone);
   }), []);
 
@@ -130,8 +139,12 @@ export const Header = () => {
         style={{
           background: 'var(--ink)',
           color: 'var(--bone)',
-          opacity: open ? 1 : 0,
-          transition: 'opacity var(--motion-standard) var(--ease-settle)',
+          // Keyframed, not transitioned: the panel arrives from
+          // `display: none`, and a transition has no start frame to run
+          // from. Pointer events are refused outright when closed, so
+          // the overlay can never take a tap meant for the page.
+          animation: open ? 'panelIn var(--motion-standard) var(--ease-settle)' : undefined,
+          pointerEvents: open ? 'auto' : 'none',
         }}
       >
         <nav aria-label="Sections" className="wrap grid gap-1">

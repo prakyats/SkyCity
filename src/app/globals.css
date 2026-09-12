@@ -177,6 +177,13 @@ img, video { display: block; max-width: 100%; }
 .muted { color: var(--text-2); }
 .muted-2 { color: var(--text-3); }
 
+/* The browser hides `[hidden]` with a UA rule, which any author
+   `display` declaration outranks — a single Tailwind `flex` is enough. A
+   full-screen overlay that kept its display then stayed hit-testable at
+   opacity 0 and swallowed every tap on the page beneath it, so the
+   attribute is given the last word here. */
+[hidden] { display: none !important; }
+
 /* ─── LAYOUT ───────────────────────────────────────────────────────────────── */
 .wrap {
   /* Explicit, because `margin-inline: auto` alone makes the element
@@ -242,6 +249,12 @@ img, video { display: block; max-width: 100%; }
 }
 .link-u:hover { color: var(--brand); text-decoration-color: var(--brand); }
 
+/* A finger needs more than a line of 13px text to aim at. Pointer
+   devices keep the tighter setting; touch gets a 24px-plus target. */
+@media (hover: none) {
+  .link-u { display: inline-block; padding-block: 4px; }
+}
+
 /* ─── FORM ─────────────────────────────────────────────────────────────────── */
 .field { display: grid; gap: 0.4rem; }
 .field label { font-family: var(--font-sans), system-ui, sans-serif; font-size: 0.8125rem; color: var(--text-2); }
@@ -284,6 +297,16 @@ img, video { display: block; max-width: 100%; }
 .marquee-fast { animation-duration: 30s; }
 .marquee:hover { animation-play-state: paused; }
 
+/* An animation nobody can see still costs the style engine a pass on
+   every frame, for the whole life of the page. Tracing a scroll anywhere
+   showed the footer's marquee and the hero's scroll cue between them
+   accounting for most of the style recalculation on the page, from
+   thousands of pixels away. Anything marked is parked while off screen. */
+/* `!important` earns its keep here: an element whose animation is set
+   inline carries `animation-play-state: running` inside that shorthand,
+   and an inline declaration outranks any stylesheet rule without it. */
+[data-autopause].is-offscreen { animation-play-state: paused !important; }
+
 /* Grain. One static layer, so the flat surfaces do not read as flat. */
 .grain::after {
   content: '';
@@ -307,4 +330,9 @@ img, video { display: block; max-width: 100%; }
   }
   .marquee { animation: none; transform: none; }
   .btn::before { display: none; }
+}
+
+@keyframes panelIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

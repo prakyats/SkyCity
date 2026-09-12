@@ -144,6 +144,8 @@ export const FloorPlans = () => {
 
     const ctx = gsap.context(() => {
       const lift = { v: 0 };
+      /** The last floor written to the page. */
+      let reported = -1;
       gsap.to(lift, {
         v: 1,
         ease: 'none',
@@ -155,7 +157,13 @@ export const FloorPlans = () => {
         },
         onUpdate: () => {
           const f = floorAtProgress(lift.v);
-          setFloor((cur) => (cur === f ? cur : f));
+          // A scrubbed tween keeps reporting long after the reader has
+          // left, easing towards a value it has already reached. The
+          // floor is a whole number, so an unchanged one has nothing to
+          // say and must not touch the DOM.
+          if (f === reported) return;
+          reported = f;
+          setFloor(f);
           // The marker sits on the floor being reported, so it visibly
           // holds still through a dwell and travels through a glide.
           markerRef.current?.style.setProperty('--at', `${yOf(f) * 100}%`);

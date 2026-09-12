@@ -45,6 +45,23 @@ const toRgb = (hex: string): [number, number, number] => {
   ];
 };
 
+/**
+ * How finely a handover is stepped.
+ *
+ * Setting a custom property on the root invalidates style for the whole
+ * document, and on a page with every passage mounted that measures at
+ * roughly twenty milliseconds a time — past the frame budget on its own.
+ * So a frame with nothing new to say must not write at all: the channels
+ * are already whole numbers, and quantising progress as well means most
+ * frames resolve to the palette already on the page and return.
+ *
+ * Forty-eight steps is the coarsest that still reads as continuous. The
+ * widest handover on the page is ink to bone, about 227 levels, so a step
+ * moves under five levels — invisible as a change over time, and it costs
+ * a full document recalculation each, which is the whole point.
+ */
+const HANDOVER_STEPS = 48;
+
 const mix = (a: [number, number, number], b: [number, number, number], t: number) =>
   `rgb(${Math.round(a[0] + (b[0] - a[0]) * t)}, ${Math.round(a[1] + (b[1] - a[1]) * t)}, ${Math.round(a[2] + (b[2] - a[2]) * t)})`;
 
@@ -108,6 +125,8 @@ export const ScrollStage = () => {
         const bgA = toRgb(from.bg), bgB = toRgb(to.bg);
         const fgA = toRgb(from.fg), fgB = toRgb(to.fg);
         const brA = toRgb(from.brand), brB = toRgb(to.brand);
+        /** The palette this passage last wrote, so it never writes it twice. */
+        let written = '';
 
         ScrollTrigger.create({
           trigger: el,
@@ -124,14 +143,26 @@ export const ScrollStage = () => {
           refreshPriority: -1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            const t = self.progress;
-            root.style.setProperty('--stage-bg', mix(bgA, bgB, t));
-            root.style.setProperty('--text', mix(fgA, fgB, t));
-            root.style.setProperty('--text-2', mixAlpha(fgA, fgB, from.soft[0], to.soft[0], t));
-            root.style.setProperty('--text-3', mixAlpha(fgA, fgB, from.soft[1], to.soft[1], t));
-            root.style.setProperty('--line', mixAlpha(fgA, fgB, from.soft[2], to.soft[2], t));
-            root.style.setProperty('--line-strong', mixAlpha(fgA, fgB, from.soft[3], to.soft[3], t));
-            root.style.setProperty('--brand', mix(brA, brB, t));
+            const t = Math.round(self.progress * HANDOVER_STEPS) / HANDOVER_STEPS;
+            const bg = mix(bgA, bgB, t);
+            const fg = mix(fgA, fgB, t);
+            const soft2 = mixAlpha(fgA, fgB, from.soft[0], to.soft[0], t);
+            const soft3 = mixAlpha(fgA, fgB, from.soft[1], to.soft[1], t);
+            const line = mixAlpha(fgA, fgB, from.soft[2], to.soft[2], t);
+            const lineStrong = mixAlpha(fgA, fgB, from.soft[3], to.soft[3], t);
+            const brand = mix(brA, brB, t);
+
+            const next = `${bg}|${fg}|${soft2}|${soft3}|${line}|${lineStrong}|${brand}`;
+            if (next === written) return;
+            written = next;
+
+            root.style.setProperty('--stage-bg', bg);
+            root.style.setProperty('--text', fg);
+            root.style.setProperty('--text-2', soft2);
+            root.style.setProperty('--text-3', soft3);
+            root.style.setProperty('--line', line);
+            root.style.setProperty('--line-strong', lineStrong);
+            root.style.setProperty('--brand', brand);
           },
         });
       });

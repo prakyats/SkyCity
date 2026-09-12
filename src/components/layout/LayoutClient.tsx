@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import {
   lockScroll, emitPreloaderComplete, onUncaught,
   takeScrollRestoration, rememberedScroll, jumpScrollTo, trackScrollPosition,
+  pauseOffscreenAnimations,
 } from '@/lib/browser';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
@@ -35,7 +36,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   useEffect(() => {
     takeScrollRestoration();
     restoreTo.current = rememberedScroll();
-    return () => stopTracking.current?.();
+    const stopParking = pauseOffscreenAnimations();
+    return () => {
+      stopParking();
+      stopTracking.current?.();
+    };
   }, []);
 
   useEffect(() => { lockScroll(isLoading); }, [isLoading]);

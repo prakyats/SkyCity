@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { onViewportChange, scrollMetrics, toneAtPoint, viewportHeight } from '@/lib/browser';
 import { project } from '@/content/project';
 
@@ -19,8 +19,20 @@ export const FloorRail = () => {
   const [progress, setProgress] = useState(0);
   const [stop, setStop] = useState('ink');
 
+  /** Where the tone was last sampled, so it is not sampled per frame. */
+  const probedAt = useRef(-1e9);
+
   useEffect(() => onViewportChange(() => {
-    setProgress(scrollMetrics().progress);
+    const { y, progress } = scrollMetrics();
+    // Quantised. The readout is a whole floor and the fill moves in
+    // fractions of a percent, so handing React a new float every frame
+    // only buys a re-render nobody can see.
+    setProgress(Math.round(progress * 400) / 400);
+    // A hit test forces style and layout, and the answer only changes at
+    // a passage boundary, so it is worth asking only once the page has
+    // actually moved.
+    if (Math.abs(y - probedAt.current) < 12) return;
+    probedAt.current = y;
     setStop(toneAtPoint(RAIL_X, viewportHeight() / 2));
   }), []);
 

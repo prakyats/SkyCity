@@ -16,7 +16,7 @@ export const Footer = () => {
         style={{ paddingBlock: 'clamp(40px, 6vw, 88px)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}
         aria-hidden="true"
       >
-        <div className="marquee">
+        <div className="marquee" data-autopause>
           {[0, 1].map((k) => (
             <span key={k} className="t-display whitespace-nowrap" style={{ color: 'var(--text-3)' }}>
               {legacy.footerLine}

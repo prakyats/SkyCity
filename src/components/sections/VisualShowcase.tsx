@@ -79,6 +79,49 @@ const ampOf = (i: number) => 95 * (1 - (i / (LINES - 1)) * 0.2);
 const phaseOf = (i: number) => i * 0.62;
 
 /**
+ * The two shapes every contour lies between, and the curve it travels on,
+ * all precomputed.
+ *
+ * Neither endpoint depends on the scroll: the swell is a fixed function
+ * of the point, and the perimeter is a fixed table. Rebuilding them on
+ * every tick cost roughly seventeen hundred sine evaluations and six
+ * hundred `toFixed` calls per frame, which measured as the largest single
+ * piece of scripting on the page. A frame now interpolates between two
+ * arrays and reads its easing out of a table.
+ */
+const XS: number[] = [];
+/** `u * SPREAD`: how far behind the front each point sits. */
+const LAG: number[] = [];
+const WAVE: number[][] = [];
+const BUILT: number[][] = [];
+
+/** easeInOut, sampled once, so the morph costs a lookup and not a `pow`. */
+const EASE_N = 512;
+const EASE: number[] = [];
+
+for (let p = 0; p < PTS; p++) {
+  const u = p / (PTS - 1);
+  XS.push(Math.round(xAt(u) * 10) / 10);
+  LAG.push(u * SPREAD);
+}
+for (let i = 0; i < LINES; i++) {
+  const amp = ampOf(i);
+  const phase = phaseOf(i);
+  const wet = P.meanY + wetOffsetOf(i);
+  const built0 = builtOffsetOf(i);
+  const wave: number[] = [];
+  const built: number[] = [];
+  for (let p = 0; p < PTS; p++) {
+    const u = p / (PTS - 1);
+    wave.push(wet + amp * swell(u, phase));
+    built.push(perimAt(u) + built0);
+  }
+  WAVE.push(wave);
+  BUILT.push(built);
+}
+for (let k = 0; k <= EASE_N; k++) EASE.push(easeInOut(k / EASE_N));
+
+/**
  * One contour, at a given straightness, as an SVG points list.
  *
  * At 0 it is a swell of its own. At 1 it is the building's real balcony
@@ -88,17 +131,16 @@ const phaseOf = (i: number) => i * 0.62;
  * all at once.
  */
 const pointsFor = (i: number, morph: number) => {
-  const amp = ampOf(i);
-  const phase = phaseOf(i);
-  const wet = P.meanY + wetOffsetOf(i);
-  const built0 = builtOffsetOf(i);
+  const wave = WAVE[i] ?? [];
+  const built = BUILT[i] ?? [];
+  const front = morph * (1 + SPREAD);
   let out = '';
   for (let p = 0; p < PTS; p++) {
-    const u = p / (PTS - 1);
-    const wave = wet + amp * swell(u, phase);
-    const built = perimAt(u) + built0;
-    const k = easeInOut(clamp01(morph * (1 + SPREAD) - u * SPREAD));
-    out += `${xAt(u).toFixed(1)},${(wave + (built - wave) * k).toFixed(1)} `;
+    const local = front - (LAG[p] ?? 0);
+    const k = local <= 0 ? 0 : local >= 1 ? 1 : (EASE[(local * EASE_N) | 0] ?? 1);
+    const w = wave[p] ?? 0;
+    const y = w + ((built[p] ?? 0) - w) * k;
+    out += `${XS[p] ?? 0},${Math.round(y * 10) / 10} `;
   }
   return out;
 };
@@ -158,22 +200,38 @@ export const VisualShowcase = () => {
 
       const state = { draw: 0, morph: 0 };
 
-      const render = () => {
-        contours.forEach((el, i) => {
-          el.setAttribute('points', pointsFor(i, state.morph));
-          // Struck on with a stagger down the stack. pathLength is
-          // normalised to 1, so the dash survives the geometry changing
-          // underneath it every frame.
-          const local = clamp01(state.draw * 1.6 - (i / (LINES - 1)) * 0.6);
-          el.style.strokeDashoffset = String(1 - local);
-        });
+      // Scrubbing reports a frame whether or not anything moved, and the
+      // survey holds still for the whole first beat and the whole last
+      // one. Writing geometry that has not changed is the most expensive
+      // way to do nothing, so each value guards its own writes.
+      let drawnAt = -1;
+      let morphedAt = -1;
 
-        const scan = scanRef.current;
-        if (scan) {
-          const x = xAt(frontAt(state.morph));
-          scan.setAttribute('x1', String(x));
-          scan.setAttribute('x2', String(x));
-          scan.style.opacity = String(Math.sin(Math.PI * state.morph) * 0.9);
+      const render = () => {
+        if (state.morph !== morphedAt) {
+          morphedAt = state.morph;
+          for (let i = 0; i < contours.length; i++) {
+            contours[i]?.setAttribute('points', pointsFor(i, state.morph));
+          }
+
+          const scan = scanRef.current;
+          if (scan) {
+            const x = xAt(frontAt(state.morph));
+            scan.setAttribute('x1', String(x));
+            scan.setAttribute('x2', String(x));
+            scan.style.opacity = String(Math.sin(Math.PI * state.morph) * 0.9);
+          }
+        }
+
+        if (state.draw !== drawnAt) {
+          drawnAt = state.draw;
+          contours.forEach((el, i) => {
+            // Struck on with a stagger down the stack. pathLength is
+            // normalised to 1, so the dash survives the geometry
+            // changing underneath it every frame.
+            const local = clamp01(state.draw * 1.6 - (i / (LINES - 1)) * 0.6);
+            el.style.strokeDashoffset = String(1 - local);
+          });
         }
       };
 
@@ -353,7 +411,12 @@ export const VisualShowcase = () => {
         <div className="wrap absolute inset-x-0 bottom-0"
           style={{ paddingBottom: 'clamp(18px, 3vh, 40px)' }}>
           <div className="relative" style={{ height: '1.2em' }}>
-            <p ref={observedRef} className="t-ui-sm absolute left-0 top-0 whitespace-nowrap"
+            {/* The state the plate is leaving. Hidden from assistive tech
+                because it is transient: the resolved caption below is the
+                one that describes the plate as it comes to rest, and with
+                reduced motion it is the only one ever shown. */}
+            <p ref={observedRef} aria-hidden="true"
+              className="t-ui-sm absolute left-0 top-0 whitespace-nowrap"
               style={{ color: 'var(--text-3)', opacity: 0 }}>
               {showcase.states[0]}
             </p>

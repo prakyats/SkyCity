@@ -81,6 +81,13 @@ export const Hero = () => {
         style={{ height: '100dvh' }}
         aria-label={`${project.name} — South India's tallest sea view residential tower`}
       >
+        {/* The film carries its own titles and nothing is written across
+            it, so the document's one heading is set for assistive
+            technology and search rather than for the screen. */}
+        <h1 className="sr-only">
+          {project.name} — South India&apos;s tallest sea view residential tower
+        </h1>
+
         <div ref={videoWrapperRef} className="absolute inset-0 z-0" style={{ willChange: 'transform' }}>
           <VideoBackground
             webmSrc={media.heroWebm}
@@ -117,7 +124,7 @@ export const Hero = () => {
           style={{ paddingBottom: 'clamp(16px, 2.4vh, 28px)' }}>
           <div className="flex flex-col items-center gap-3" aria-hidden="true">
             <span className="relative block overflow-hidden" style={{ width: 1, height: 52, background: 'rgba(247,240,230,0.2)' }}>
-              <span className="absolute inset-x-0 top-0" style={{
+              <span className="absolute inset-x-0 top-0" data-autopause style={{
                 height: '42%',
                 background: 'linear-gradient(to bottom, transparent, rgba(247,240,230,0.85), transparent)',
                 animation: 'cueDrop 2.8s var(--ease-glide) infinite',
