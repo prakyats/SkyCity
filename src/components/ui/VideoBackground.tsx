@@ -1,24 +1,38 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { onPreloaderComplete, whenIdle, viewportWidth } from '@/lib/browser';
+import { onPreloaderComplete, whenIdle } from '@/lib/browser';
 
 interface VideoBackgroundProps {
-  webmSrc: string;
-  mp4Src: string;
+  src: string;
   posterSrc: string;
+  /**
+   * Whether to fetch the film at all. The caller decides: it is several
+   * megabytes, and on a screen that will not be driving it there is
+   * nothing it adds that the poster does not already say.
+   */
+  enabled: boolean;
   className?: string;
-  onReady?: () => void;
-  onPlay?: () => void;
+  /** The film is loaded, buffered and ready to be seeked. */
+  // A parameter name inside a function type reads as unused to the base
+  // rule, which is why `browser.ts` disables it wholesale for the same.
+  // eslint-disable-next-line no-unused-vars
+  onReady?: (el: HTMLVideoElement) => void;
 }
 
 /**
- * The poster is the LCP element and paints immediately; the film is fetched
- * only after the preloader has finished and the browser is idle, and never
- * on a narrow screen where it would cost far more than it adds. Both are
- * anchored to the top edge so the opening frame is never cropped there.
+ * The opening frame, and the film behind it.
+ *
+ * The poster is the LCP element and paints immediately; the film is
+ * fetched only after the title sequence has finished and the browser is
+ * idle, and only when the caller says it is wanted. Both are anchored to
+ * the top edge so the opening frame is never cropped there.
+ *
+ * The film never plays itself. It is paused from the moment it arrives
+ * and the scroll seeks it, so `autoplay` and `loop` would only fight
+ * whoever is driving.
  */
 export const VideoBackground = ({
-  webmSrc, mp4Src, posterSrc, className = '', onReady, onPlay,
+  src, posterSrc, enabled, className = '', onReady,
 }: VideoBackgroundProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoad, setShouldLoad] = useState(false);
@@ -27,19 +41,18 @@ export const VideoBackground = ({
   useEffect(() => onPreloaderComplete(() => setShouldLoad(true)), []);
 
   useEffect(() => {
-    if (!shouldLoad) return;
-    if (viewportWidth() < 768) return;
-    return whenIdle(() => {
-      const v = videoRef.current;
-      if (!v) return;
-      v.load();
-      v.play().catch(() => {});
-    });
-  }, [shouldLoad]);
+    if (!shouldLoad || !enabled) return;
+    return whenIdle(() => videoRef.current?.load());
+  }, [shouldLoad, enabled]);
 
-  const handleLoadedData = () => {
-    onReady?.();
-    setTimeout(() => setFadeIn(true), 80);
+  // `canplaythrough`, not `loadeddata`: a seek into a range that has not
+  // arrived yet stalls, and the whole film is about to be seeked.
+  const handleReady = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.pause();
+    setFadeIn(true);
+    onReady?.(v);
   };
 
   return (
@@ -59,16 +72,14 @@ export const VideoBackground = ({
           willChange: 'opacity',
         }}
       />
-      {shouldLoad && (
+      {shouldLoad && enabled && (
         <video
           ref={videoRef}
           muted
           playsInline
-          loop
           preload="none"
           disablePictureInPicture
-          onLoadedData={handleLoadedData}
-          onPlay={onPlay}
+          onCanPlayThrough={handleReady}
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-top"
           style={{
@@ -77,8 +88,7 @@ export const VideoBackground = ({
             willChange: 'opacity',
           }}
         >
-          <source src={webmSrc} type="video/webm" />
-          <source src={mp4Src} type="video/mp4" />
+          <source src={src} type="video/mp4" />
         </video>
       )}
     </div>

@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   scrollToTarget, scrollToTop, onViewportChange, onKeyDown,
-  lockScroll, scrollMetrics, viewportHeight, toneUnderHeader,
+  lockScroll, scrollMetrics, viewportHeight, toneUnderHeader, openingBottom,
 } from '@/lib/browser';
 import { navLinks, project } from '@/content/project';
 import { Logo } from '@/components/ui/Logo';
@@ -23,10 +23,20 @@ export const Header = () => {
 
   /** Where the tone was last sampled, so it is not sampled per frame. */
   const probedAt = useRef(-1e9);
+  /** Where the bar starts showing, and the page height it was read from. */
+  const revealAt = useRef(Number.POSITIVE_INFINITY);
+  const measuredAgainst = useRef(-1);
 
   useEffect(() => onViewportChange(() => {
-    const { y } = scrollMetrics();
-    setShown(y > viewportHeight() * 0.85);
+    const { y, max } = scrollMetrics();
+    // The opening's height changes when the film arrives, so the
+    // threshold is recomputed when the document's does rather than on
+    // every frame — measuring it per frame would force a layout.
+    if (max !== measuredAgainst.current) {
+      measuredAgainst.current = max;
+      revealAt.current = openingBottom() - viewportHeight() * 0.25;
+    }
+    setShown(y > revealAt.current);
     // The hit test forces style and layout. The surface under the bar
     // only changes at a passage boundary, so a few pixels of travel is
     // the right granularity to ask at.

@@ -23,6 +23,20 @@ export const media = {
   heroPoster: cld('v1777554903/hero-poster_emnfvb.jpg', 1920),
   heroWebm: 'https://res.cloudinary.com/drzbbbncs/video/upload/v1777554895/hero_b0imcd.webm',
   heroMp4: 'https://res.cloudinary.com/drzbbbncs/video/upload/v1777554838/hero_gxnqcd.mp4',
+  /**
+   * The same film, re-encoded for scrubbing.
+   *
+   * The original carries two keyframes in twelve seconds, so seeking to an
+   * arbitrary moment means decoding up to two hundred and fifty frames to
+   * get there: measured at 793ms a seek, with a worst case near two
+   * seconds. Unusable for a film the scroll is driving. `ki_0.2` asks
+   * Cloudinary for a keyframe every fifth of a second — sixty-one of them
+   * — which measures at 67ms a seek, and at 5.8MB it is smaller than
+   * either original.
+   */
+  heroScrub:
+    'https://res.cloudinary.com/drzbbbncs/video/upload'
+    + '/w_1600,q_auto:eco,vc_h264,ki_0.2/v1777554838/hero_gxnqcd.mp4',
   skyMark: cld('v1777699538/skyfavicon_1_tufy14.png', 160),
   yamunaMark: cld('v1777696301/yamuna_homes_z4hnie.png', 240),
   wave: cld('v1777698110/wave-start_lp5h52.png', 1600),

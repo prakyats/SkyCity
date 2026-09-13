@@ -221,6 +221,22 @@ export const stageStops = (): HTMLElement[] => {
     });
 };
 
+/**
+ * Where the opening passage ends, in page coordinates.
+ *
+ * The header hides itself until the reader is past the opening. That used
+ * to be "one viewport", which was the same thing while the opening was
+ * one viewport tall; once the film was given room to be scrolled through
+ * it was not, and the bar arrived over the hero with its own logo landing
+ * on the hero's. Measured, not assumed.
+ */
+export const openingBottom = (): number => {
+  if (!canUseDOM()) return 0;
+  const el = document.querySelector<HTMLElement>('[data-opening]');
+  if (!el) return window.innerHeight * 0.85;
+  return el.getBoundingClientRect().bottom + window.scrollY;
+};
+
 export const toneUnderHeader = (headerHeight: number): string =>
   canUseDOM() ? toneAtPoint(window.innerWidth / 2, headerHeight * 0.8) : 'ink';
 

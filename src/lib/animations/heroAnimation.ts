@@ -9,16 +9,22 @@ import { reducedMotion } from '@/lib/motion';
  *
  * Transform and opacity only. No blur filter — it costs a full-screen
  * repaint every frame for an effect the dimming already implies.
+ *
+ * The range is the last viewport of the passage, wherever that passage
+ * ends. Written as `top top` it would have stretched the whole exit
+ * across the film's scrub once the hero was given room to be scrolled
+ * through; `bottom bottom` is the same moment for a hero one viewport
+ * tall, and the right one for a hero that is taller.
  */
 export const initHeroAnimations = (
-  _overlay: React.RefObject<HTMLDivElement> | null,
-  _content: React.RefObject<HTMLDivElement> | null,
-  videoRef: React.RefObject<HTMLDivElement>,
+  trigger: React.RefObject<HTMLElement>,
+  frameRef: React.RefObject<HTMLDivElement>,
   scrimRef?: React.RefObject<HTMLDivElement>,
 ) => {
   if (reducedMotion()) return null;
-  const frame = videoRef.current;
-  if (!frame) return null;
+  const frame = frameRef.current;
+  const el = trigger.current;
+  if (!frame || !el) return null;
 
   gsap.registerPlugin(ScrollTrigger);
   // Push in from the top edge, so the opening frame is never cropped there.
@@ -26,10 +32,11 @@ export const initHeroAnimations = (
 
   const tl = gsap.timeline({
     scrollTrigger: {
-      trigger: frame.parentElement,
-      start: 'top top',
+      trigger: el,
+      start: 'bottom bottom',
       end: 'bottom top',
       scrub: 1.1,
+      invalidateOnRefresh: true,
     },
   });
 
